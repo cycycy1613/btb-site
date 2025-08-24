@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bayanihan Town Batangas - Project Updates</title>
+    <title>BTB Members Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -472,7 +472,7 @@
                     <h1>Bayanihan Town Batangas</h1>
                 </div>
                 <div class="header-info">
-                    <p>Project Updates Portal</p>
+                    <p>Realtime Updates</p>
                 </div>
             </div>
         </div>
@@ -504,7 +504,7 @@
 
         <!-- Announcement Section -->
         <section class="announcement-section">
-            <h2 class="section-title">Project Announcements</h2>
+            <h2 class="section-title">Announcements</h2>
             <div class="announcement-grid" id="announcementGrid">
                 <!-- Announcement items will be dynamically added here -->
             </div>
@@ -523,7 +523,7 @@
                 </div>
             </div>
             <div class="copyright">
-                &copy; 2023 Bayanihan Town Batangas. All rights reserved.
+                &copy; 2025 BTB Members Portal. All rights reserved.
             </div>
         </div>
     </footer>
@@ -701,6 +701,7 @@
                             spinner.style.display = 'none';
                             showToast('Poster uploaded successfully!');
                             closeUploadModal();
+                            closeModal();
                         } catch (urlError) {
                             spinner.style.display = 'none';
                             showToast('Error getting download URL: ' + urlError.message, false);
