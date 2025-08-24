@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bayanihan Town Batangas - Project Updates</title>
+    <title>BTB Members Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -28,9 +28,13 @@
             background-color: #f5f7f9;
             color: var(--dark);
             line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         
         .container {
+            width: 100%;
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
@@ -42,12 +46,15 @@
             color: white;
             padding: 20px 0;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 10;
         }
         
         .header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .logo {
@@ -65,6 +72,28 @@
             font-weight: 600;
         }
         
+        /* Mobile menu button */
+        .menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: space-around;
+            width: 30px;
+            height: 25px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+        }
+        
+        .menu-toggle span {
+            width: 100%;
+            height: 3px;
+            background-color: white;
+            border-radius: 5px;
+            transition: all 0.3s linear;
+            transform-origin: center;
+        }
+        
         /* Navigation Tabs */
         .tabs-container {
             background-color: white;
@@ -72,12 +101,14 @@
             padding: 10px;
             margin: 30px 0;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            animation: fadeIn 0.8s ease-out;
         }
         
         .tabs {
             display: flex;
             justify-content: center;
             gap: 15px;
+            flex-wrap: wrap;
         }
         
         .tab {
@@ -85,7 +116,9 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            width: 150px;
+            min-width: 120px;
+            width: 100%;
+            max-width: 150px;
             height: 120px;
             background: white;
             border: 2px solid var(--primary);
@@ -94,17 +127,24 @@
             cursor: pointer;
             transition: all 0.3s ease;
             text-decoration: none;
+            animation: slideUp 0.5s ease-out;
         }
         
         .tab:hover {
             background: var(--primary);
             color: white;
             transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
         }
         
         .tab i {
             font-size: 32px;
             margin-bottom: 10px;
+            transition: transform 0.3s ease;
+        }
+        
+        .tab:hover i {
+            transform: scale(1.2);
         }
         
         .tab span {
@@ -116,6 +156,7 @@
         /* Announcement Section */
         .announcement-section {
             margin: 40px 0;
+            animation: fadeIn 1s ease-out;
         }
         
         .section-title {
@@ -142,7 +183,7 @@
         
         .announcement-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
             gap: 20px;
         }
         
@@ -151,17 +192,19 @@
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
+            transition: all 0.3s ease;
             aspect-ratio: 1/1;
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             position: relative;
+            animation: fadeIn 0.8s ease-out;
         }
         
         .announcement-item:hover {
             transform: translateY(-5px);
+            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
         }
         
         .announcement-item.empty {
@@ -182,6 +225,11 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .announcement-item:hover img {
+            transform: scale(1.05);
         }
         
         /* Full-screen Modal Styles */
@@ -211,6 +259,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            animation: zoomIn 0.3s ease-out;
         }
         
         .modal-content img {
@@ -227,6 +276,7 @@
             display: flex;
             gap: 15px;
             z-index: 1001;
+            flex-direction: column;
         }
         
         .modal-btn {
@@ -241,11 +291,13 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             transition: all 0.3s ease;
             font-size: 20px;
+            animation: pulse 2s infinite;
         }
         
         .modal-btn:hover {
             transform: scale(1.1);
             background: white;
+            animation: none;
         }
         
         .modal-btn.exit {
@@ -285,6 +337,7 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
             transform: translateY(20px);
             transition: transform 0.3s ease;
+            animation: modalSlideIn 0.3s ease-out;
         }
         
         .upload-modal.active .upload-content {
@@ -315,6 +368,13 @@
             border: 1px solid var(--gray);
             border-radius: 6px;
             font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .form-group input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(26, 54, 93, 0.2);
+            outline: none;
         }
         
         .form-actions {
@@ -341,6 +401,7 @@
         .btn-primary:hover {
             background: var(--secondary);
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
         .btn-secondary {
@@ -351,6 +412,7 @@
         .btn-secondary:hover {
             background: #718096;
             transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
         
         /* Footer Styles */
@@ -358,18 +420,24 @@
             background: var(--primary);
             color: white;
             padding: 30px 0;
-            margin-top: 60px;
+            margin-top: auto;
         }
         
         .footer-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .footer-logo {
             font-size: 20px;
             font-weight: 700;
+        }
+        
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
         }
         
         .footer-links a {
@@ -388,6 +456,7 @@
             margin-top: 20px;
             padding-top: 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
         }
         
         /* Toast Notification */
@@ -427,9 +496,54 @@
             margin: 0 auto;
         }
         
+        /* Animations */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from { 
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes zoomIn {
+            from { 
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to { 
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes modalSlideIn {
+            from { 
+                opacity: 0;
+                transform: translateY(-50px);
+            }
+            to { 
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
         /* Responsive Design */
@@ -440,6 +554,34 @@
         }
         
         @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo {
+                margin-bottom: 15px;
+                justify-content: center;
+            }
+            
+            .header-info {
+                width: 100%;
+            }
+            
+            .tabs {
+                flex-direction: row;
+                justify-content: center;
+            }
+            
+            .tab {
+                max-width: 130px;
+                height: 100px;
+            }
+            
+            .tab i {
+                font-size: 28px;
+            }
+            
             .modal-actions {
                 top: 10px;
                 right: 10px;
@@ -450,25 +592,6 @@
                 height: 40px;
                 font-size: 16px;
             }
-        }
-        
-        @media (max-width: 576px) {
-            .header-content {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .logo {
-                margin-bottom: 15px;
-            }
-            
-            .tabs {
-                flex-wrap: wrap;
-            }
-            
-            .announcement-grid {
-                grid-template-columns: 1fr;
-            }
             
             .footer-content {
                 flex-direction: column;
@@ -477,10 +600,48 @@
             
             .footer-links {
                 margin-top: 15px;
+                justify-content: center;
             }
             
             .footer-links a {
                 margin: 0 10px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container {
+                padding: 0 15px;
+            }
+            
+            .logo h1 {
+                font-size: 20px;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab {
+                max-width: 100%;
+                height: 80px;
+                flex-direction: row;
+                justify-content: flex-start;
+                padding: 0 20px;
+            }
+            
+            .tab i {
+                margin-right: 15px;
+                margin-bottom: 0;
+                font-size: 24px;
+            }
+            
+            .announcement-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .section-title {
+                font-size: 24px;
             }
             
             .upload-content {
@@ -489,6 +650,32 @@
             
             .upload-content h3 {
                 font-size: 20px;
+            }
+            
+            .form-actions {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .logo h1 {
+                font-size: 18px;
+            }
+            
+            .tab {
+                height: 70px;
+            }
+            
+            .tab i {
+                font-size: 20px;
+            }
+            
+            .tab span {
+                font-size: 13px;
             }
         }
     </style>
@@ -502,7 +689,7 @@
                     <h1>Bayanihan Town Batangas</h1>
                 </div>
                 <div class="header-info">
-                    <p>Project Updates Portal</p>
+                    <p>Realtime Updates</p>
                 </div>
             </div>
         </div>
@@ -534,7 +721,7 @@
 
         <!-- Announcement Section -->
         <section class="announcement-section">
-            <h2 class="section-title">Project Announcements</h2>
+            <h2 class="section-title">Bulletin Board</h2>
             <div class="announcement-grid" id="announcementGrid">
                 <!-- Announcement items will be dynamically added here -->
             </div>
@@ -553,7 +740,7 @@
                 </div>
             </div>
             <div class="copyright">
-                &copy; 2023 Bayanihan Town Batangas. All rights reserved.
+                &copy; 2025 BTB Members Portal. All rights reserved.
             </div>
         </div>
     </footer>
@@ -621,8 +808,8 @@
         const storageRef = storage.ref();
         const database = firebase.database();
 
-        // Default image URL
-        const DEFAULT_IMAGE = "https://cmpanganiban.com/wp-content/uploads/2025/08/Brown-Minimalist-Real-Estate-New-Listing-Instagram-Post.png";
+        // Default image as base64 data
+        const DEFAULT_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZWRmMmY3Ii8+CiAgPHRleHQgeD0iNTAlIiB5PSI0NSUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIyNCIgZmlsbD0iIzY2NjY2NiIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkJheWFuaWhhbiBUb3duPC90ZXh0PgogIDx0ZXh0IHg9IjUwJSIgeT0iNTUlIiBmb250LWZhbWlseT0iQXJpYWwsIHNhbnMtc2VyaWYiIGZvbnQtc2l6ZT0iMTgiIGZpbGw9IiM2NjY2NjYiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5Qcm9qZWN0IFVwZGF0ZXM8L3RleHQ+CiAgPHRleHQgeD0iNTAlIiB5PSI2NSUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzk5OTk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkNsaWNrIHRvIHVwbG9hZCBpbWFnZTwvdGV4dD4KPC9zdmc+";
 
         // Global variables
         let currentImageIndex = null;
@@ -635,13 +822,13 @@
         }
 
         // Function to open modal with image
-        function openModal(imageUrl, index) {
+        function openModal(imageData, index) {
             currentImageIndex = index;
             const modal = document.getElementById('imageModal');
             const modalImage = document.getElementById('modalImage');
             
-            if (imageUrl) {
-                modalImage.src = imageUrl;
+            if (imageData) {
+                modalImage.src = imageData;
             } else {
                 modalImage.src = '';
             }
@@ -650,6 +837,9 @@
             setTimeout(() => {
                 modal.classList.add('active');
             }, 10);
+            
+            // Prevent body from scrolling when modal is open
+            document.body.style.overflow = 'hidden';
         }
 
         // Function to close modal
@@ -659,6 +849,8 @@
             
             setTimeout(() => {
                 modal.style.display = 'none';
+                // Re-enable body scrolling
+                document.body.style.overflow = 'auto';
             }, 300);
         }
 
@@ -700,8 +892,43 @@
             }, 3000);
         }
 
+        // Function to convert image file to base64
+        function convertImageToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        // Function to save image data to Realtime Database
+        function saveImageDataToDatabase(index, imageData) {
+            const updates = {};
+            updates[`/poster_${index}`] = imageData;
+            
+            return database.ref('/announcements').update(updates)
+                .then(() => {
+                    console.log('Image data saved to database successfully');
+                    return true;
+                })
+                .catch((error) => {
+                    console.error('Error saving to database:', error);
+                    showToast('Error saving to database', false);
+                    return false;
+                });
+        }
+
+        // Function to update an announcement item in the grid
+        function updateAnnouncementItem(index, imageData) {
+            const item = announcementItems[index];
+            item.innerHTML = `<img src="${imageData}" alt="Announcement ${index + 1}">`;
+            item.onclick = () => openModal(imageData, index);
+            item.classList.remove('empty');
+        }
+
         // Function to upload poster
-        function uploadPoster() {
+        async function uploadPoster() {
             const adminCode = document.getElementById('adminCode').value;
             const fileInput = document.getElementById('posterImage');
             const file = fileInput.files[0];
@@ -722,58 +949,27 @@
                 return;
             }
             
-            // Create a reference to the image location in Firebase Storage
-            const imageRef = storageRef.child(`announcements/poster_${currentImageIndex}`);
-            
             // Show loading state
             showToast('Uploading image...', true);
             
-            // Upload the file to Firebase Storage
-            const uploadTask = imageRef.put(file);
-            
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    // Progress monitoring can be added here
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    console.log('Upload is ' + progress + '% done');
-                },
-                (error) => {
-                    showToast('Upload failed: ' + error.message, false);
-                },
-                () => {
-                    // Upload completed successfully
-                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        // Save the URL to the Realtime Database
-                        saveImageUrlToDatabase(currentImageIndex, downloadURL);
-                        
-                        showToast('Poster uploaded successfully!');
-                        closeUploadModal();
-                        
-                        // Update the image in the grid
-                        updateAnnouncementItem(currentImageIndex, downloadURL);
-                    });
+            try {
+                // Convert image to base64
+                const imageData = await convertImageToBase64(file);
+                
+                // Save the image data to the Realtime Database
+                const success = await saveImageDataToDatabase(currentImageIndex, imageData);
+                
+                if (success) {
+                    showToast('Poster uploaded successfully!');
+                    closeUploadModal();
+                    
+                    // Update the image in the grid
+                    updateAnnouncementItem(currentImageIndex, imageData);
                 }
-            );
-        }
-
-        // Function to save image URL to Realtime Database
-        function saveImageUrlToDatabase(index, url) {
-            const updates = {};
-            updates[`/poster_${index}`] = url;
-            
-            return database.ref('/announcements').update(updates)
-                .catch((error) => {
-                    console.error('Error saving to database:', error);
-                    showToast('Error saving to database', false);
-                });
-        }
-
-        // Function to update an announcement item in the grid
-        function updateAnnouncementItem(index, url) {
-            const item = announcementItems[index];
-            item.innerHTML = `<img src="${url}" alt="Announcement ${index + 1}">`;
-            item.onclick = () => openModal(url, index);
-            item.classList.remove('empty');
+            } catch (error) {
+                console.error('Error uploading image:', error);
+                showToast('Upload failed: ' + error.message, false);
+            }
         }
 
         // Initialize announcement grid with timeout
@@ -801,11 +997,11 @@
                     for (let i = 0; i < 4; i++) {
                         updateAnnouncementItem(i, DEFAULT_IMAGE);
                     }
-                    showToast("Using cached content", false);
+                    showToast("Using default content", false);
                 }
             }, 3000);
             
-            // Get image URLs from Realtime Database
+            // Get image data from Realtime Database
             database.ref('/announcements').once('value')
                 .then((snapshot) => {
                     clearTimeout(timeout);
@@ -813,19 +1009,19 @@
                     const data = snapshot.val();
                     
                     for (let i = 0; i < 4; i++) {
-                        // Check if we have a URL for this slot
-                        const imageUrl = data ? data[`poster_${i}`] : null;
+                        // Check if we have image data for this slot
+                        const imageData = data ? data[`poster_${i}`] : null;
                         
-                        if (imageUrl && imageUrl !== DEFAULT_IMAGE) {
+                        if (imageData && imageData !== DEFAULT_IMAGE) {
                             // Use the image from database
-                            updateAnnouncementItem(i, imageUrl);
+                            updateAnnouncementItem(i, imageData);
                         } else {
                             // Use default image
                             updateAnnouncementItem(i, DEFAULT_IMAGE);
                             
                             // Also save the default image to database for future reference
                             if (!data || !data[`poster_${i}`]) {
-                                saveImageUrlToDatabase(i, DEFAULT_IMAGE);
+                                saveImageDataToDatabase(i, DEFAULT_IMAGE);
                             }
                         }
                     }
