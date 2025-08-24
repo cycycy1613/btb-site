@@ -599,23 +599,30 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <!-- Firebase Storage -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+    <!-- Firebase Database -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
         // Firebase configuration
         const firebaseConfig = {
-            apiKey: "AIzaSyBOm4XyjvLoe2MR0_bWT_zHS4CkdYXt5M4",
-            authDomain: "btb-inventory.firebaseapp.com",
-            projectId: "btb-inventory",
-            storageBucket: "btb-inventory.firebasestorage.app",
-            messagingSenderId: "635532868561",
-            appId: "1:635532868561:web:b7bee31c83f6f4ceb63ef0",
-            measurementId: "G-C8DV3NBLCP"
+            apiKey: "AIzaSyBdNGSSfPLBORjVvnJM3IVqxFZByw3iJWM",
+  authDomain: "btb-announcement.firebaseapp.com",
+  projectId: "btb-announcement",
+  storageBucket: "btb-announcement.firebasestorage.app",
+  messagingSenderId: "1047737510079",
+  appId: "1:1047737510079:web:9add56a0c7375fa0f4be0a",
+  measurementId: "G-T9EQGE2TWG"
+            databaseURL: "https://btb-announcement-default-rtdb.firebaseio.com"
         };
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const storage = firebase.storage();
         const storageRef = storage.ref();
+        const database = firebase.database();
+
+        // Default image URL
+        const DEFAULT_IMAGE = "https://cmpanganiban.com/wp-content/uploads/2025/08/Brown-Minimalist-Real-Estate-New-Listing-Instagram-Post.png";
 
         // Global variables
         let currentImageIndex = null;
@@ -735,17 +742,37 @@
                 () => {
                     // Upload completed successfully
                     uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        // Save the URL to the Realtime Database
+                        saveImageUrlToDatabase(currentImageIndex, downloadURL);
+                        
                         showToast('Poster uploaded successfully!');
                         closeUploadModal();
                         
                         // Update the image in the grid
-                        const item = announcementItems[currentImageIndex];
-                        item.innerHTML = `<img src="${downloadURL}" alt="Announcement ${currentImageIndex + 1}">`;
-                        item.onclick = () => openModal(downloadURL, currentImageIndex);
-                        item.classList.remove('empty');
+                        updateAnnouncementItem(currentImageIndex, downloadURL);
                     });
                 }
             );
+        }
+
+        // Function to save image URL to Realtime Database
+        function saveImageUrlToDatabase(index, url) {
+            const updates = {};
+            updates[`/poster_${index}`] = url;
+            
+            return database.ref('/announcements').update(updates)
+                .catch((error) => {
+                    console.error('Error saving to database:', error);
+                    showToast('Error saving to database', false);
+                });
+        }
+
+        // Function to update an announcement item in the grid
+        function updateAnnouncementItem(index, url) {
+            const item = announcementItems[index];
+            item.innerHTML = `<img src="${url}" alt="Announcement ${index + 1}">`;
+            item.onclick = () => openModal(url, index);
+            item.classList.remove('empty');
         }
 
         // Initialize announcement grid
@@ -754,34 +781,45 @@
             grid.innerHTML = '';
             announcementItems = [];
             
-            for (let i = 0; i < 4; i++) {
-                const item = document.createElement('div');
-                item.className = 'announcement-item empty';
-                item.innerHTML = `
-                    <i class="fas fa-image"></i>
-                    <span>No Image</span>
-                `;
-                
-                // Store reference to this item
-                announcementItems.push(item);
-                
-                // Check if image exists in Firebase Storage for this slot
-                const imageRef = storageRef.child(`announcements/poster_${i}`);
-                
-                imageRef.getDownloadURL()
-                    .then((url) => {
-                        item.innerHTML = `<img src="${url}" alt="Announcement ${i+1}">`;
-                        item.classList.remove('empty');
-                        item.onclick = () => openModal(url, i);
-                    })
-                    .catch((error) => {
-                        // Image doesn't exist, keep the empty state
-                        console.log(`No image found for slot ${i}, setting empty state`);
-                        item.onclick = () => openModal('', i);
-                    });
-                
-                grid.appendChild(item);
-            }
+            // Get image URLs from Realtime Database
+            database.ref('/announcements').once('value')
+                .then((snapshot) => {
+                    const data = snapshot.val();
+                    
+                    for (let i = 0; i < 4; i++) {
+                        const item = document.createElement('div');
+                        item.className = 'announcement-item';
+                        
+                        // Check if we have a URL for this slot
+                        const imageUrl = data ? data[`poster_${i}`] : null;
+                        
+                        if (imageUrl) {
+                            // Use the image from database
+                            updateAnnouncementItem(i, imageUrl);
+                        } else {
+                            // Use default image
+                            updateAnnouncementItem(i, DEFAULT_IMAGE);
+                            
+                            // Also save the default image to database for future reference
+                            saveImageUrlToDatabase(i, DEFAULT_IMAGE);
+                        }
+                        
+                        announcementItems.push(item);
+                        grid.appendChild(item);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error loading images from database:', error);
+                    
+                    // If database fails, use default images
+                    for (let i = 0; i < 4; i++) {
+                        const item = document.createElement('div');
+                        item.className = 'announcement-item';
+                        updateAnnouncementItem(i, DEFAULT_IMAGE);
+                        announcementItems.push(item);
+                        grid.appendChild(item);
+                    }
+                });
         }
 
         // Initialize the page
