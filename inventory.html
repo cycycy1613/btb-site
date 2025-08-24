@@ -1,0 +1,1083 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTB Inventory/Slot Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2c3e50, #1a2530);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            margin-bottom: 0.5rem;
+            font-size: 1.5rem;
+        }
+        
+        .admin-notice {
+            background-color: #f39c12;
+            color: white;
+            padding: 0.5rem;
+            text-align: center;
+            font-size: 0.9rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 1rem auto;
+            padding: 0 1rem;
+        }
+        
+        .map-container {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            margin-bottom: 1.5rem;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .map-container h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
+        }
+        
+        .map-controls {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .map-controls button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        .map-controls button:hover {
+            background-color: #2980b9;
+        }
+        
+        .image-container {
+            width: 100%;
+            height: 300px;
+            overflow: hidden;
+            position: relative;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+            cursor: grab;
+            touch-action: none;
+        }
+        
+        .image-container img {
+            position: absolute;
+            max-width: none;
+            transform-origin: 0 0;
+            user-select: none;
+            width: 100%;
+            height: auto;
+        }
+        
+        .image-container.dragging {
+            cursor: grabbing;
+        }
+        
+        .instructions {
+            background-color: white;
+            padding: 1rem;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+            margin-bottom: 1.5rem;
+        }
+        
+        .instructions h2 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .color-legend {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+        
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .color-box {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+        
+        .blocks-container {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+        
+        .block {
+            background-color: white;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+        }
+        
+        .block-header {
+            background: linear-gradient(135deg, #3498db, #2980b9);
+            color: white;
+            padding: 0.8rem;
+            text-align: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(50px, 1fr));
+            gap: 0.8rem;
+            padding: 1rem;
+        }
+        
+        .slot {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            font-size: 0.9rem;
+        }
+        
+        .slot:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .slot.corner {
+            border: 2px dashed #f39c12;
+        }
+        
+        .slot.end {
+            border: 2px solid #9b59b6;
+        }
+        
+        .slot-label {
+            font-size: 0.6rem;
+            position: absolute;
+            bottom: -16px;
+            text-align: center;
+            width: 100%;
+            color: #7f8c8d;
+        }
+        
+        .edit-icon {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            font-size: 0.6rem;
+            color: rgba(0, 0, 0, 0.5);
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 50%;
+            width: 14px;
+            height: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+        
+        /* Color states */
+        .default { background-color: white; color: black; }
+        .grey { background-color: #95a5a6; color: white; }
+        .brown { background-color: #a67c52; color: white; }
+        .green { background-color: #2ecc71; color: white; }
+        .red { background-color: #e74c3c; color: white; }
+        
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+        
+        .modal-content {
+            background-color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+            text-align: center;
+            font-size: 1.2rem;
+        }
+        
+        .color-options {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin: 1rem 0;
+        }
+        
+        .color-option {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+        
+        .code-input {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            margin: 1rem 0;
+            text-align: center;
+            font-size: 1.1rem;
+            letter-spacing: 0.2rem;
+        }
+        
+        .btn {
+            padding: 0.7rem 1.2rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.2s;
+            font-size: 0.9rem;
+        }
+        
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+        
+        .btn-cancel {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .btn-cancel:hover {
+            background-color: #c0392b;
+        }
+        
+        .btn-reset {
+            background-color: #9b59b6;
+            color: white;
+        }
+        
+        .btn-reset:hover {
+            background-color: #8e44ad;
+        }
+        
+        .button-group {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            gap: 0.5rem;
+        }
+        
+        .button-group.triple {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 0.5rem;
+        }
+        
+        .status-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 5px;
+            background-color: #2ecc71;
+            color: white;
+            font-size: 14px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+            max-width: calc(100% - 40px);
+        }
+        
+        .status-indicator.error {
+            background-color: #e74c3c;
+        }
+        
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        footer {
+            text-align: center;
+            padding: 1rem;
+            margin-top: 2rem;
+            background-color: #2c3e50;
+            color: white;
+            font-size: 0.9rem;
+        }
+        
+        /* Mobile-specific improvements */
+        @media (max-width: 480px) {
+            header {
+                padding: 0.8rem;
+            }
+            
+            h1 {
+                font-size: 1.3rem;
+            }
+            
+            .container {
+                padding: 0 0.8rem;
+                margin: 0.8rem auto;
+            }
+            
+            .map-container, .instructions {
+                padding: 0.8rem;
+                margin-bottom: 1rem;
+            }
+            
+            .image-container {
+                height: 250px;
+            }
+            
+            .color-legend {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .slots-grid {
+                grid-template-columns: repeat(auto-fill, minmax(40px, 1fr));
+                gap: 0.6rem;
+                padding: 0.8rem;
+            }
+            
+            .slot {
+                font-size: 0.8rem;
+            }
+            
+            .button-group.triple {
+                grid-template-columns: 1fr;
+                gap: 0.5rem;
+            }
+            
+            .modal-content {
+                padding: 1rem;
+            }
+            
+            .color-options {
+                gap: 0.5rem;
+            }
+            
+            .color-option {
+                width: 30px;
+                height: 30px;
+            }
+        }
+        
+        @media (min-width: 768px) {
+            .blocks-container {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .blocks-container {
+                grid-template-columns: repeat(4, 1fr);
+            }
+            
+            .color-legend {
+                grid-template-columns: repeat(4, 1fr);
+            }
+        }
+    </style>
+    <!-- Firebase App (core Firebase SDK) -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <!-- Firebase Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+</head>
+<body>
+    <header>
+        <h1>BTB Inventory/Slot Management</h1>
+        <p>View availability and slot statuses</p>
+    </header>
+    
+    <div class="admin-notice">
+        Admin changes are visible to all visitors in real-time
+    </div>
+    
+    <div class="container">
+        <div class="map-container">
+            <h2>
+                Site Map - Phase 7(a)
+                <div class="map-controls">
+                    <button id="zoomIn"><i class="fas fa-search-plus"></i></button>
+                    <button id="zoomOut"><i class="fas fa-search-minus"></i></button>
+                    <button id="resetView"><i class="fas fa-sync-alt"></i></button>
+                </div>
+            </h2>
+            <div class="image-container" id="imageContainer">
+                <img src="https://cmpanganiban.com/wp-content/uploads/2025/08/screenshot_20250816_2224272017550539534148010.jpg" alt="Block 19 Site Map" id="mapImage">
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h2>Color Coding System</h2>
+            <div class="color-legend">
+                <div class="color-item">
+                    <div class="color-box grey"></div>
+                    <span>Grey - Not Available</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box brown"></div>
+                    <span>Brown - LOI</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box green"></div>
+                    <span>Green - Reserved</span>
+                </div>
+                <div class="color-item">
+                    <div class="color-box red"></div>
+                    <span>Red - Sold</span>
+                </div>
+            </div>
+            
+            <p><strong>Note:</strong> Administrators can edit slot colors by clicking on the edit icon (<i class="fas fa-pen"></i>) on each slot. A security code is required to save changes.</p>
+        </div>
+        
+        <div class="blocks-container" id="blocks-container">
+            <div class="loading">
+                <div class="spinner"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Edit Modal -->
+    <div class="modal" id="editModal">
+        <div class="modal-content">
+            <h3>Edit Slot Status</h3>
+            <p>Select a color for this slot:</p>
+            <div class="color-options">
+                <div class="color-option grey" data-color="grey" title="Not Available"></div>
+                <div class="color-option brown" data-color="brown" title="LOI"></div>
+                <div class="color-option green" data-color="green" title="Reserved"></div>
+                <div class="color-option red" data-color="red" title="Sold"></div>
+            </div>
+            <div class="button-group triple">
+                <button class="btn btn-cancel" id="cancelEdit">Cancel</button>
+                <button class="btn btn-reset" id="resetSlot">Reset</button>
+                <button class="btn btn-primary" id="confirmColor">Next</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Code Verification Modal -->
+    <div class="modal" id="codeModal">
+        <div class="modal-content">
+            <h3>Enter Security Code</h3>
+            <p>To save changes, please enter the security code:</p>
+            <input type="password" class="code-input" id="codeInput" placeholder="Enter code">
+            <div class="button-group">
+                <button class="btn btn-cancel" id="cancelCode">Cancel</button>
+                <button class="btn btn-primary" id="verifyCode">Save Changes</button>
+            </div>
+        </div>
+    </div>
+    
+    <div class="status-indicator" id="statusIndicator">Changes saved to cloud</div>
+    
+    <footer>
+        <p>Realtime Management System &copy; 2025</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Firebase configuration
+            const firebaseConfig = {
+                apiKey: "AIzaSyBOm4XyjvLoe2MR0_bWT_zHS4CkdYXt5M4",
+                authDomain: "btb-inventory.firebaseapp.com",
+                projectId: "btb-inventory",
+                storageBucket: "btb-inventory.firebasestorage.app",
+                messagingSenderId: "635532868561",
+                appId: "1:635532868561:web:b7bee31c83f6f4ceb63ef0",
+                measurementId: "G-C8DV3NBLCP"
+            };
+            
+            // Initialize Firebase
+            let db;
+            try {
+                firebase.initializeApp(firebaseConfig);
+                db = firebase.firestore();
+                showStatus("Connected to cloud storage", false);
+            } catch (e) {
+                console.error("Firebase initialization error", e);
+                showStatus("Using local storage (Firebase not configured)", true);
+            }
+            
+            // Data structure for blocks and slots
+            const blocksData = [
+                {
+                    name: "Block 18",
+                    slots: 55,
+                    corners: [1, 55],
+                    ends: [17, 35, 47]
+                },
+                {
+                    name: "Block 19",
+                    slots: 48,
+                    corners: [1, 42, 48],
+                    ends: [7, 24, 41]
+                },
+                {
+                    name: "Block 20",
+                    slots: 12,
+                    corners: [1, 6, 7, 12],
+                    ends: []
+                },
+                {
+                    name: "Block 21",
+                    slots: 10,
+                    corners: [1, 5, 6, 10],
+                    ends: []
+                }
+            ];
+            
+            // Status indicator function
+            function showStatus(message, isError = false) {
+                const indicator = document.getElementById('statusIndicator');
+                indicator.textContent = message;
+                indicator.classList.toggle('error', isError);
+                indicator.style.display = 'block';
+                
+                setTimeout(() => {
+                    indicator.style.display = 'none';
+                }, 3000);
+            }
+            
+            // Save slot data to cloud
+            async function saveSlotToCloud(block, slot, color) {
+                try {
+                    if (db) {
+                        await db.collection('slots').doc(`${block}_${slot}`).set({
+                            block: block,
+                            slot: slot,
+                            color: color,
+                            updated: firebase.firestore.FieldValue.serverTimestamp()
+                        });
+                        showStatus("Changes saved to cloud", false);
+                    } else {
+                        // Fallback to localStorage if Firebase is not configured
+                        const slotsData = JSON.parse(localStorage.getItem('slotData') || '{}');
+                        slotsData[`${block}_${slot}`] = color;
+                        localStorage.setItem('slotData', JSON.stringify(slotsData));
+                        showStatus("Changes saved locally (Firebase not configured)", false);
+                    }
+                } catch (error) {
+                    console.error("Error saving to cloud:", error);
+                    showStatus("Error saving to cloud", true);
+                }
+            }
+            
+            // Delete slot data from cloud (reset)
+            async function deleteSlotFromCloud(block, slot) {
+                try {
+                    if (db) {
+                        await db.collection('slots').doc(`${block}_${slot}`).delete();
+                        showStatus("Slot reset in cloud", false);
+                    } else {
+                        // Fallback to localStorage if Firebase is not configured
+                        const slotsData = JSON.parse(localStorage.getItem('slotData') || '{}');
+                        delete slotsData[`${block}_${slot}`];
+                        localStorage.setItem('slotData', JSON.stringify(slotsData));
+                        showStatus("Slot reset locally (Firebase not configured)", false);
+                    }
+                } catch (error) {
+                    console.error("Error resetting slot:", error);
+                    showStatus("Error resetting slot", true);
+                }
+            }
+            
+            // Load slot data from cloud
+            async function loadSlotData() {
+                try {
+                    if (db) {
+                        const snapshot = await db.collection('slots').get();
+                        const slotData = {};
+                        snapshot.forEach(doc => {
+                            const data = doc.data();
+                            slotData[`${data.block}_${data.slot}`] = data.color;
+                        });
+                        return slotData;
+                    } else {
+                        // Fallback to localStorage if Firebase is not configured
+                        return JSON.parse(localStorage.getItem('slotData') || '{}');
+                    }
+                } catch (error) {
+                    console.error("Error loading from cloud:", error);
+                    showStatus("Error loading from cloud", true);
+                    return {};
+                }
+            }
+            
+            // Real-time listener for changes
+            function setupRealTimeListener() {
+                if (db) {
+                    db.collection('slots').onSnapshot(snapshot => {
+                        snapshot.docChanges().forEach(change => {
+                            if (change.type === 'modified' || change.type === 'added') {
+                                const data = change.doc.data();
+                                updateSlotUI(data.block, data.slot, data.color);
+                            } else if (change.type === 'removed') {
+                                const data = change.doc.data();
+                                resetSlotUI(data.block, data.slot);
+                            }
+                        });
+                    });
+                }
+            }
+            
+            // Map image functionality
+            const imageContainer = document.getElementById('imageContainer');
+            const mapImage = document.getElementById('mapImage');
+            const zoomInBtn = document.getElementById('zoomIn');
+            const zoomOutBtn = document.getElementById('zoomOut');
+            const resetViewBtn = document.getElementById('resetView');
+            
+            let scale = 1;
+            let posX = 0;
+            let posY = 0;
+            let isDragging = false;
+            let startX, startY;
+            
+            // Initialize map image position
+            function initImage() {
+                scale = 1;
+                posX = 0;
+                posY = 0;
+                applyTransform();
+            }
+            
+            // Apply transform to the image
+            function applyTransform() {
+                mapImage.style.transform = `translate(${posX}px, ${posY}px) scale(${scale})`;
+            }
+            
+            // Zoom in function
+            function zoomIn() {
+                scale += 0.2;
+                applyTransform();
+            }
+            
+            // Zoom out function
+            function zoomOut() {
+                if (scale > 0.4) {
+                    scale -= 0.2;
+                    applyTransform();
+                }
+            }
+            
+            // Reset view function
+            function resetView() {
+                initImage();
+            }
+            
+            // Mouse events for dragging
+            imageContainer.addEventListener('mousedown', function(e) {
+                isDragging = true;
+                startX = e.clientX - posX;
+                startY = e.clientY - posY;
+                imageContainer.classList.add('dragging');
+            });
+            
+            document.addEventListener('mousemove', function(e) {
+                if (isDragging) {
+                    posX = e.clientX - startX;
+                    posY = e.clientY - startY;
+                    applyTransform();
+                }
+            });
+            
+            document.addEventListener('mouseup', function() {
+                isDragging = false;
+                imageContainer.classList.remove('dragging');
+            });
+            
+            // Touch events for mobile
+            imageContainer.addEventListener('touchstart', function(e) {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    startX = e.touches[0].clientX - posX;
+                    startY = e.touches[0].clientY - posY;
+                    imageContainer.classList.add('dragging');
+                } else if (e.touches.length === 2) {
+                    // Handle pinch-to-zoom on mobile
+                    e.preventDefault();
+                    const touch1 = e.touches[0];
+                    const touch2 = e.touches[1];
+                    
+                    const distance = Math.hypot(
+                        touch2.clientX - touch1.clientX,
+                        touch2.clientY - touch1.clientY
+                    );
+                    
+                    imageContainer.dataset.startDistance = distance;
+                    imageContainer.dataset.startScale = scale;
+                }
+            });
+            
+            document.addEventListener('touchmove', function(e) {
+                if (isDragging && e.touches.length === 1) {
+                    e.preventDefault();
+                    posX = e.touches[0].clientX - startX;
+                    posY = e.touches[0].clientY - startY;
+                    applyTransform();
+                } else if (e.touches.length === 2) {
+                    // Handle pinch-to-zoom
+                    e.preventDefault();
+                    const touch1 = e.touches[0];
+                    const touch2 = e.touches[1];
+                    
+                    const distance = Math.hypot(
+                        touch2.clientX - touch1.clientX,
+                        touch2.clientY - touch1.clientY
+                    );
+                    
+                    const startDistance = parseFloat(imageContainer.dataset.startDistance);
+                    const startScale = parseFloat(imageContainer.dataset.startScale);
+                    
+                    scale = startScale * (distance / startDistance);
+                    
+                    // Limit scale
+                    scale = Math.max(0.4, Math.min(scale, 3));
+                    
+                    applyTransform();
+                }
+            });
+            
+            document.addEventListener('touchend', function() {
+                isDragging = false;
+                imageContainer.classList.remove('dragging');
+                delete imageContainer.dataset.startDistance;
+                delete imageContainer.dataset.startScale;
+            });
+            
+            // Button event listeners
+            zoomInBtn.addEventListener('click', zoomIn);
+            zoomOutBtn.addEventListener('click', zoomOut);
+            resetViewBtn.addEventListener('click', resetView);
+            
+            // Initialize the map
+            initImage();
+            
+            // Slot management functionality
+            const blocksContainer = document.getElementById('blocks-container');
+            const editModal = document.getElementById('editModal');
+            const codeModal = document.getElementById('codeModal');
+            const codeInput = document.getElementById('codeInput');
+            const cancelEditBtn = document.getElementById('cancelEdit');
+            const resetSlotBtn = document.getElementById('resetSlot');
+            const confirmColorBtn = document.getElementById('confirmColor');
+            const cancelCodeBtn = document.getElementById('cancelCode');
+            const verifyCodeBtn = document.getElementById('verifyCode');
+            
+            const securityCode = "001122";
+            let currentSlot = null;
+            let selectedColor = null;
+            let isResetting = false;
+            
+            // Update slot UI with saved color
+            function updateSlotUI(block, slot, color) {
+                const slotElement = document.querySelector(`.slot[data-block="${block}"][data-slot="${slot}"]`);
+                if (slotElement) {
+                    slotElement.classList.remove('default', 'grey', 'brown', 'green', 'red');
+                    slotElement.classList.add(color);
+                }
+            }
+            
+            // Reset slot UI to default
+            function resetSlotUI(block, slot) {
+                const slotElement = document.querySelector(`.slot[data-block="${block}"][data-slot="${slot}"]`);
+                if (slotElement) {
+                    slotElement.classList.remove('grey', 'brown', 'green', 'red');
+                    slotElement.classList.add('default');
+                }
+            }
+            
+            // Initialize blocks and slots
+            async function initializeBlocks() {
+                // Load saved slot data
+                const slotData = await loadSlotData();
+                
+                // Clear loading indicator
+                blocksContainer.innerHTML = '';
+                
+                blocksData.forEach(block => {
+                    const blockElement = document.createElement('div');
+                    blockElement.className = 'block';
+                    
+                    const blockHeader = document.createElement('div');
+                    blockHeader.className = 'block-header';
+                    blockHeader.textContent = block.name;
+                    
+                    const slotsGrid = document.createElement('div');
+                    slotsGrid.className = 'slots-grid';
+                    
+                    for (let i = 1; i <= block.slots; i++) {
+                        const slot = document.createElement('div');
+                        const savedColor = slotData[`${block.name}_${i}`] || 'default';
+                        slot.className = `slot ${savedColor}`;
+                        slot.textContent = i;
+                        slot.dataset.slot = i;
+                        slot.dataset.block = block.name;
+                        
+                        // Add special class for corner and end units
+                        if (block.corners.includes(i)) {
+                            slot.classList.add('corner');
+                            const label = document.createElement('span');
+                            label.className = 'slot-label';
+                            label.textContent = 'Corner';
+                            slot.appendChild(label);
+                        } else if (block.ends.includes(i)) {
+                            slot.classList.add('end');
+                            const label = document.createElement('span');
+                            label.className = 'slot-label';
+                            label.textContent = 'End';
+                            slot.appendChild(label);
+                        }
+                        
+                        // Add edit icon
+                        const editIcon = document.createElement('span');
+                        editIcon.className = 'edit-icon';
+                        editIcon.innerHTML = '<i class="fas fa-pen"></i>';
+                        editIcon.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            openEditModal(slot);
+                        });
+                        
+                        slot.appendChild(editIcon);
+                        slotsGrid.appendChild(slot);
+                    }
+                    
+                    blockElement.appendChild(blockHeader);
+                    blockElement.appendChild(slotsGrid);
+                    blocksContainer.appendChild(blockElement);
+                });
+                
+                // Set up real-time listener for changes
+                setupRealTimeListener();
+            }
+            
+            // Open edit modal
+            function openEditModal(slot) {
+                currentSlot = slot;
+                isResetting = false;
+                selectedColor = null;
+                resetSelectionUI();
+                editModal.style.display = 'flex';
+            }
+            
+            // Close edit modal
+            function closeEditModal() {
+                editModal.style.display = 'none';
+                selectedColor = null;
+                isResetting = false;
+                resetSelectionUI();
+            }
+            
+            // Reset selection UI
+            function resetSelectionUI() {
+                document.querySelectorAll('.color-option').forEach(opt => {
+                    opt.style.transform = 'scale(1)';
+                    opt.style.boxShadow = 'none';
+                });
+            }
+            
+            // Open code modal
+            function openCodeModal() {
+                if (!selectedColor && !isResetting) {
+                    alert('Please select a color first');
+                    return;
+                }
+                
+                editModal.style.display = 'none';
+                codeModal.style.display = 'flex';
+                codeInput.value = '';
+            }
+            
+            // Close code modal
+            function closeCodeModal() {
+                codeModal.style.display = 'none';
+            }
+            
+            // Verify code and apply changes
+            async function verifyAndApplyChanges() {
+                if (codeInput.value === securityCode) {
+                    if (isResetting) {
+                        await resetSlotData();
+                    } else {
+                        await applySlotChanges();
+                    }
+                    closeCodeModal();
+                } else {
+                    alert('Incorrect security code. Changes not saved.');
+                }
+            }
+            
+            // Apply changes to the slot
+            async function applySlotChanges() {
+                if (currentSlot && selectedColor) {
+                    const block = currentSlot.dataset.block;
+                    const slot = currentSlot.dataset.slot;
+                    
+                    // Remove all color classes
+                    currentSlot.classList.remove('default', 'grey', 'brown', 'green', 'red');
+                    
+                    // Add the selected color class
+                    currentSlot.classList.add(selectedColor);
+                    
+                    // Save to cloud storage
+                    await saveSlotToCloud(block, slot, selectedColor);
+                }
+            }
+            
+            // Reset slot data
+            async function resetSlotData() {
+                if (currentSlot) {
+                    const block = currentSlot.dataset.block;
+                    const slot = currentSlot.dataset.slot;
+                    
+                    // Reset to default color
+                    currentSlot.classList.remove('grey', 'brown', 'green', 'red');
+                    currentSlot.classList.add('default');
+                    
+                    // Delete from cloud storage
+                    await deleteSlotFromCloud(block, slot);
+                }
+            }
+            
+            // Event listeners for color selection
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    isResetting = false;
+                    selectedColor = this.dataset.color;
+                    
+                    // Visual feedback for selection
+                    resetSelectionUI();
+                    
+                    this.style.transform = 'scale(1.1)';
+                    this.style.boxShadow = '0 0 0 3px #3498db';
+                });
+            });
+            
+            // Event listeners for buttons
+            confirmColorBtn.addEventListener('click', openCodeModal);
+            resetSlotBtn.addEventListener('click', function() {
+                isResetting = true;
+                selectedColor = null;
+                resetSelectionUI();
+                openCodeModal();
+            });
+            cancelEditBtn.addEventListener('click', closeEditModal);
+            cancelCodeBtn.addEventListener('click', closeCodeModal);
+            verifyCodeBtn.addEventListener('click', verifyAndApplyChanges);
+            
+            // Close modals when clicking outside
+            window.addEventListener('click', function(event) {
+                if (event.target === editModal) {
+                    closeEditModal();
+                }
+                if (event.target === codeModal) {
+                    closeCodeModal();
+                }
+            });
+            
+            // Initialize the blocks
+            initializeBlocks();
+        });
+    </script>
+</body>
+</html>
