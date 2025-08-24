@@ -28,12 +28,16 @@
             background-color: #f5f7f9;
             color: var(--dark);
             line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
         }
         
         .container {
             max-width: 1200px;
             margin: 0 auto;
             padding: 0 20px;
+            width: 100%;
         }
         
         /* Header Styles */
@@ -48,6 +52,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .logo {
@@ -73,6 +78,7 @@
             display: flex;
             justify-content: center;
             gap: 15px;
+            flex-wrap: wrap;
         }
         
         .tab {
@@ -111,6 +117,7 @@
         /* Announcement Section */
         .announcement-section {
             margin: 40px 0;
+            flex: 1;
         }
         
         .section-title {
@@ -184,18 +191,23 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
         
         .modal-content {
             position: relative;
-            max-width: 90%;
-            max-height: 90%;
+            max-width: 100%;
+            max-height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
         .modal-content img {
             max-width: 100%;
             max-height: 80vh;
             border-radius: 8px;
+            object-fit: contain;
         }
         
         .modal-actions {
@@ -243,13 +255,14 @@
             z-index: 1000;
             justify-content: center;
             align-items: center;
+            padding: 20px;
         }
         
         .upload-content {
             background: white;
             padding: 30px;
             border-radius: 12px;
-            width: 90%;
+            width: 100%;
             max-width: 500px;
         }
         
@@ -316,13 +329,14 @@
             background: var(--primary);
             color: white;
             padding: 30px 0;
-            margin-top: 60px;
+            margin-top: auto;
         }
         
         .footer-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .footer-logo {
@@ -360,6 +374,28 @@
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             display: none;
             z-index: 1000;
+            max-width: 300px;
+        }
+        
+        .toast.error {
+            background: var(--danger);
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
         
         /* Responsive Design */
@@ -369,10 +405,11 @@
             }
         }
         
-        @media (max-width: 576px) {
+        @media (max-width: 768px) {
             .header-content {
                 flex-direction: column;
                 text-align: center;
+                gap: 15px;
             }
             
             .logo {
@@ -380,24 +417,48 @@
             }
             
             .tabs {
+                gap: 10px;
+            }
+            
+            .tab {
+                width: 130px;
+                height: 100px;
+            }
+            
+            .tab i {
+                font-size: 24px;
+            }
+            
+            .footer-content {
+                flex-direction: column;
+                text-align: center;
+                gap: 15px;
+            }
+            
+            .footer-links {
+                display: flex;
                 flex-wrap: wrap;
+                justify-content: center;
+                gap: 15px;
+            }
+            
+            .footer-links a {
+                margin: 0;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .tab {
+                width: calc(50% - 10px);
+                height: 90px;
             }
             
             .announcement-grid {
                 grid-template-columns: 1fr;
             }
             
-            .footer-content {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .footer-links {
-                margin-top: 15px;
-            }
-            
-            .footer-links a {
-                margin: 0 10px;
+            .upload-content {
+                padding: 20px;
             }
         }
     </style>
@@ -445,10 +506,7 @@
         <section class="announcement-section">
             <h2 class="section-title">Project Announcements</h2>
             <div class="announcement-grid" id="announcementGrid">
-                <div class="announcement-item empty" onclick="openModal('', 0)">no-display</div>
-                <div class="announcement-item empty" onclick="openModal('', 1)">no-display</div>
-                <div class="announcement-item empty" onclick="openModal('', 2)">no-display</div>
-                <div class="announcement-item empty" onclick="openModal('', 3)">no-display</div>
+                <!-- Announcement items will be dynamically added here -->
             </div>
         </section>
     </div>
@@ -497,6 +555,7 @@
                 <label for="posterImage">Select Poster Image</label>
                 <input type="file" id="posterImage" accept="image/*">
             </div>
+            <div class="spinner" id="uploadSpinner"></div>
             <div class="form-actions">
                 <button class="btn btn-secondary" onclick="closeUploadModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="uploadPoster()">Upload</button>
@@ -507,12 +566,30 @@
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
     <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOm4XyjvLoe2MR0_bWT_zHS4CkdYXt5M4",
+            authDomain: "btb-inventory.firebaseapp.com",
+            projectId: "btb-inventory",
+            storageBucket: "btb-inventory.firebasestorage.app",
+            messagingSenderId: "635532868561",
+            appId: "1:635532868561:web:b7bee31c83f6f4ceb63ef0",
+            measurementId: "G-C8DV3NBLCP"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+        const storageRef = storage.ref();
+
         // Global variables
         let currentImageIndex = null;
-        const images = [
-            null, null, null, null
-        ];
+        let existingImageRefs = [null, null, null, null];
 
         // Function to show popup for tabs
         function showPopup(tabName) {
@@ -522,14 +599,8 @@
         // Function to open modal with image
         function openModal(imageUrl, index) {
             currentImageIndex = index;
-            
-            if (images[index]) {
-                document.getElementById('modalImage').src = images[index];
-                document.getElementById('imageModal').style.display = 'flex';
-            } else {
-                // If no image, open upload modal directly
-                openUploadModal();
-            }
+            document.getElementById('modalImage').src = imageUrl;
+            document.getElementById('imageModal').style.display = 'flex';
         }
 
         // Function to close modal
@@ -543,6 +614,7 @@
             // Reset form
             document.getElementById('adminCode').value = '';
             document.getElementById('posterImage').value = '';
+            document.getElementById('uploadSpinner').style.display = 'none';
         }
 
         // Function to close upload modal
@@ -554,7 +626,7 @@
         function showToast(message, isSuccess = true) {
             const toast = document.getElementById('toast');
             toast.textContent = message;
-            toast.style.backgroundColor = isSuccess ? '#38a169' : '#e53e3e';
+            toast.className = isSuccess ? 'toast' : 'toast error';
             toast.style.display = 'block';
             
             setTimeout(() => {
@@ -562,11 +634,12 @@
             }, 3000);
         }
 
-        // Function to upload poster
-        function uploadPoster() {
+        // Function to upload poster to Firebase
+        async function uploadPoster() {
             const adminCode = document.getElementById('adminCode').value;
             const fileInput = document.getElementById('posterImage');
             const file = fileInput.files[0];
+            const spinner = document.getElementById('uploadSpinner');
             
             if (adminCode !== '001122') {
                 showToast('Invalid admin code!', false);
@@ -583,33 +656,101 @@
                 return;
             }
             
-            // Simulate upload process
-            showToast('Uploading image...');
+            // Show loading spinner
+            spinner.style.display = 'block';
             
-            // Create a preview of the image
-            const reader = new FileReader();
+            try {
+                // Delete existing image if it exists
+                if (existingImageRefs[currentImageIndex]) {
+                    try {
+                        await existingImageRefs[currentImageIndex].delete();
+                        console.log('Old image deleted successfully');
+                    } catch (deleteError) {
+                        console.warn('Could not delete old image, proceeding with upload:', deleteError);
+                    }
+                }
+                
+                // Create a reference to the image location in Firebase Storage
+                const imageRef = storageRef.child(`announcements/poster_${currentImageIndex}`);
+                
+                // Upload the file to Firebase Storage
+                const uploadTask = imageRef.put(file);
+                
+                // Monitor upload progress
+                uploadTask.on('state_changed',
+                    (snapshot) => {
+                        // Progress monitoring can be added here
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        console.log('Upload is ' + progress + '% done');
+                    },
+                    (error) => {
+                        spinner.style.display = 'none';
+                        showToast('Upload failed: ' + error.message, false);
+                    },
+                    async () => {
+                        // Upload completed successfully
+                        try {
+                            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                            existingImageRefs[currentImageIndex] = imageRef;
+                            
+                            // Update the image in the grid
+                            const gridItems = document.querySelectorAll('.announcement-item');
+                            gridItems[currentImageIndex].innerHTML = `<img src="${downloadURL}" alt="Announcement ${currentImageIndex + 1}">`;
+                            gridItems[currentImageIndex].classList.remove('empty');
+                            
+                            spinner.style.display = 'none';
+                            showToast('Poster uploaded successfully!');
+                            closeUploadModal();
+                        } catch (urlError) {
+                            spinner.style.display = 'none';
+                            showToast('Error getting download URL: ' + urlError.message, false);
+                        }
+                    }
+                );
+            } catch (error) {
+                spinner.style.display = 'none';
+                showToast('Upload error: ' + error.message, false);
+            }
+        }
+
+        // Initialize announcement grid with images from Firebase
+        async function initAnnouncementGrid() {
+            const grid = document.getElementById('announcementGrid');
+            grid.innerHTML = '';
             
-            reader.onload = function(e) {
-                // Simulate upload delay
-                setTimeout(() => {
-                    // Store the image data
-                    images[currentImageIndex] = e.target.result;
+            for (let i = 0; i < 4; i++) {
+                const item = document.createElement('div');
+                item.className = 'announcement-item empty';
+                item.innerHTML = 'no-display';
+                
+                // Create a reference to the image location in Firebase Storage
+                const imageRef = storageRef.child(`announcements/poster_${i}`);
+                
+                try {
+                    // Check if image exists and get download URL
+                    const downloadURL = await imageRef.getDownloadURL();
+                    item.innerHTML = `<img src="${downloadURL}" alt="Announcement ${i+1}">`;
+                    item.classList.remove('empty');
+                    existingImageRefs[i] = imageRef;
                     
-                    // Update the grid item
-                    const gridItems = document.querySelectorAll('.announcement-item');
-                    gridItems[currentImageIndex].innerHTML = `<img src="${e.target.result}" alt="Announcement ${currentImageIndex + 1}">`;
-                    gridItems[currentImageIndex].classList.remove('empty');
-                    
-                    showToast('Poster uploaded successfully!');
-                    closeUploadModal();
-                }, 1500);
-            };
-            
-            reader.readAsDataURL(file);
+                    // Set click event to open modal with this image
+                    item.onclick = () => openModal(downloadURL, i);
+                } catch (error) {
+                    // Image doesn't exist, set click event to open upload modal
+                    item.onclick = () => {
+                        currentImageIndex = i;
+                        openUploadModal();
+                    };
+                }
+                
+                grid.appendChild(item);
+            }
         }
 
         // Initialize the page
         window.onload = function() {
+            initAnnouncementGrid();
+            
             // Close modals when clicking outside
             window.onclick = function(event) {
                 const imageModal = document.getElementById('imageModal');
