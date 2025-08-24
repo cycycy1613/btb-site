@@ -603,15 +603,15 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
-        // Firebase configuration
+        // Firebase configuration with your new API key
         const firebaseConfig = {
             apiKey: "AIzaSyBdNGSSfPLBORjVvnJM3IVqxFZByw3iJWM",
-  authDomain: "btb-announcement.firebaseapp.com",
-  projectId: "btb-announcement",
-  storageBucket: "btb-announcement.firebasestorage.app",
-  messagingSenderId: "1047737510079",
-  appId: "1:1047737510079:web:9add56a0c7375fa0f4be0a",
-  measurementId: "G-T9EQGE2TWG"
+            authDomain: "btb-announcement.firebaseapp.com",
+            projectId: "btb-announcement",
+            storageBucket: "btb-announcement.firebasestorage.app",
+            messagingSenderId: "1047737510079",
+            appId: "1:1047737510079:web:9add56a0c7375fa0f4be0a",
+            measurementId: "G-T9EQGE2TWG",
             databaseURL: "https://btb-announcement-default-rtdb.firebaseio.com"
         };
 
@@ -627,6 +627,7 @@
         // Global variables
         let currentImageIndex = null;
         let announcementItems = [];
+        let dataLoaded = false;
 
         // Function to show popup for tabs
         function showPopup(tabName) {
@@ -775,25 +776,47 @@
             item.classList.remove('empty');
         }
 
-        // Initialize announcement grid
+        // Initialize announcement grid with timeout
         function initAnnouncementGrid() {
             const grid = document.getElementById('announcementGrid');
             grid.innerHTML = '';
             announcementItems = [];
             
+            // Create empty items first for immediate display
+            for (let i = 0; i < 4; i++) {
+                const item = document.createElement('div');
+                item.className = 'announcement-item empty';
+                item.innerHTML = `
+                    <div class="spinner"></div>
+                    <span>Loading...</span>
+                `;
+                announcementItems.push(item);
+                grid.appendChild(item);
+            }
+            
+            // Set timeout to show default images if Firebase doesn't respond in 3 seconds
+            const timeout = setTimeout(() => {
+                if (!dataLoaded) {
+                    console.log("Firebase response timed out, using default images");
+                    for (let i = 0; i < 4; i++) {
+                        updateAnnouncementItem(i, DEFAULT_IMAGE);
+                    }
+                    showToast("Using cached content", false);
+                }
+            }, 3000);
+            
             // Get image URLs from Realtime Database
             database.ref('/announcements').once('value')
                 .then((snapshot) => {
+                    clearTimeout(timeout);
+                    dataLoaded = true;
                     const data = snapshot.val();
                     
                     for (let i = 0; i < 4; i++) {
-                        const item = document.createElement('div');
-                        item.className = 'announcement-item';
-                        
                         // Check if we have a URL for this slot
                         const imageUrl = data ? data[`poster_${i}`] : null;
                         
-                        if (imageUrl) {
+                        if (imageUrl && imageUrl !== DEFAULT_IMAGE) {
                             // Use the image from database
                             updateAnnouncementItem(i, imageUrl);
                         } else {
@@ -801,23 +824,19 @@
                             updateAnnouncementItem(i, DEFAULT_IMAGE);
                             
                             // Also save the default image to database for future reference
-                            saveImageUrlToDatabase(i, DEFAULT_IMAGE);
+                            if (!data || !data[`poster_${i}`]) {
+                                saveImageUrlToDatabase(i, DEFAULT_IMAGE);
+                            }
                         }
-                        
-                        announcementItems.push(item);
-                        grid.appendChild(item);
                     }
                 })
                 .catch((error) => {
+                    clearTimeout(timeout);
                     console.error('Error loading images from database:', error);
                     
                     // If database fails, use default images
                     for (let i = 0; i < 4; i++) {
-                        const item = document.createElement('div');
-                        item.className = 'announcement-item';
                         updateAnnouncementItem(i, DEFAULT_IMAGE);
-                        announcementItems.push(item);
-                        grid.appendChild(item);
                     }
                 });
         }
