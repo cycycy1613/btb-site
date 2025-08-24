@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTB Portal</title>
+    <title>Bayanihan Town Batangas - Project Updates</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -53,11 +53,6 @@
         .logo {
             display: flex;
             align-items: center;
-        }
-        
-        .logo img {
-            height: 50px;
-            margin-right: 15px;
         }
         
         .logo h1 {
@@ -416,7 +411,7 @@
                     <h1>Bayanihan Town Batangas</h1>
                 </div>
                 <div class="header-info">
-                    <p>Project Member's Portal</p>
+                    <p>Project Updates Portal</p>
                 </div>
             </div>
         </div>
@@ -450,7 +445,10 @@
         <section class="announcement-section">
             <h2 class="section-title">Project Announcements</h2>
             <div class="announcement-grid" id="announcementGrid">
-                <!-- Announcement items will be dynamically added here -->
+                <div class="announcement-item empty" onclick="openModal('', 0)">no-display</div>
+                <div class="announcement-item empty" onclick="openModal('', 1)">no-display</div>
+                <div class="announcement-item empty" onclick="openModal('', 2)">no-display</div>
+                <div class="announcement-item empty" onclick="openModal('', 3)">no-display</div>
             </div>
         </section>
     </div>
@@ -467,7 +465,7 @@
                 </div>
             </div>
             <div class="copyright">
-                &copy; 2025 BTB Portal. All rights reserved.
+                &copy; 2023 Bayanihan Town Batangas. All rights reserved.
             </div>
         </div>
     </footer>
@@ -509,30 +507,12 @@
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 
-    <!-- Firebase App (core Firebase SDK) -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <!-- Firebase Storage -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-
     <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBOm4XyjvLoe2MR0_bWT_zHS4CkdYXt5M4",
-            authDomain: "btb-inventory.firebaseapp.com",
-            projectId: "btb-inventory",
-            storageBucket: "btb-inventory.firebasestorage.app",
-            messagingSenderId: "635532868561",
-            appId: "1:635532868561:web:b7bee31c83f6f4ceb63ef0",
-            measurementId: "G-C8DV3NBLCP"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const storage = firebase.storage();
-        const storageRef = storage.ref();
-
         // Global variables
         let currentImageIndex = null;
+        const images = [
+            null, null, null, null
+        ];
 
         // Function to show popup for tabs
         function showPopup(tabName) {
@@ -542,8 +522,14 @@
         // Function to open modal with image
         function openModal(imageUrl, index) {
             currentImageIndex = index;
-            document.getElementById('modalImage').src = imageUrl;
-            document.getElementById('imageModal').style.display = 'flex';
+            
+            if (images[index]) {
+                document.getElementById('modalImage').src = images[index];
+                document.getElementById('imageModal').style.display = 'flex';
+            } else {
+                // If no image, open upload modal directly
+                openUploadModal();
+            }
         }
 
         // Function to close modal
@@ -554,6 +540,9 @@
         // Function to open upload modal
         function openUploadModal() {
             document.getElementById('uploadModal').style.display = 'flex';
+            // Reset form
+            document.getElementById('adminCode').value = '';
+            document.getElementById('posterImage').value = '';
         }
 
         // Function to close upload modal
@@ -589,65 +578,38 @@
                 return;
             }
             
-            // Create a reference to the image location in Firebase Storage
-            const imageRef = storageRef.child(`announcements/poster_${currentImageIndex}`);
-            
-            // Upload the file to Firebase Storage
-            const uploadTask = imageRef.put(file);
-            
-            uploadTask.on('state_changed',
-                (snapshot) => {
-                    // Progress monitoring can be added here
-                },
-                (error) => {
-                    showToast('Upload failed: ' + error.message, false);
-                },
-                () => {
-                    // Upload completed successfully
-                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        showToast('Poster uploaded successfully!');
-                        closeUploadModal();
-                        // Update the image in the grid
-                        document.querySelectorAll('.announcement-item img')[currentImageIndex].src = downloadURL;
-                        document.querySelectorAll('.announcement-item')[currentImageIndex].classList.remove('empty');
-                    });
-                }
-            );
-        }
-
-        // Initialize announcement grid
-        function initAnnouncementGrid() {
-            const grid = document.getElementById('announcementGrid');
-            grid.innerHTML = '';
-            
-            for (let i = 0; i < 4; i++) {
-                const item = document.createElement('div');
-                item.className = 'announcement-item empty';
-                item.innerHTML = 'no-display';
-                item.onclick = () => openModal('', i);
-                
-                // Check if image exists in Firebase Storage for this slot
-                const imageRef = storageRef.child(`announcements/poster_${i}`);
-                
-                imageRef.getDownloadURL()
-                    .then((url) => {
-                        item.innerHTML = `<img src="${url}" alt="Announcement ${i+1}">`;
-                        item.classList.remove('empty');
-                        item.onclick = () => openModal(url, i);
-                    })
-                    .catch((error) => {
-                        // Image doesn't exist, keep the empty state
-                        console.log(`No image found for slot ${i}`);
-                    });
-                
-                grid.appendChild(item);
+            if (!file.type.match('image.*')) {
+                showToast('Please select an image file!', false);
+                return;
             }
+            
+            // Simulate upload process
+            showToast('Uploading image...');
+            
+            // Create a preview of the image
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                // Simulate upload delay
+                setTimeout(() => {
+                    // Store the image data
+                    images[currentImageIndex] = e.target.result;
+                    
+                    // Update the grid item
+                    const gridItems = document.querySelectorAll('.announcement-item');
+                    gridItems[currentImageIndex].innerHTML = `<img src="${e.target.result}" alt="Announcement ${currentImageIndex + 1}">`;
+                    gridItems[currentImageIndex].classList.remove('empty');
+                    
+                    showToast('Poster uploaded successfully!');
+                    closeUploadModal();
+                }, 1500);
+            };
+            
+            reader.readAsDataURL(file);
         }
 
         // Initialize the page
         window.onload = function() {
-            initAnnouncementGrid();
-            
             // Close modals when clicking outside
             window.onclick = function(event) {
                 const imageModal = document.getElementById('imageModal');
