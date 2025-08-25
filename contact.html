@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BTB Information Portal</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .contacts-container {
+            width: 100%;
+            max-width: 900px;
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+        }
+
+        .contact-card {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+            display: flex;
+            flex-direction: column;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card-header {
+            background: linear-gradient(to right, #2c3e50, #4a6580);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            position: relative;
+        }
+
+        .profile-img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            margin: 0 auto 20px;
+            display: block;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .profile-img:hover {
+            transform: scale(1.05);
+        }
+
+        .name {
+            font-size: 28px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .credentials {
+            font-size: 16px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+
+        .position {
+            font-size: 18px;
+            background: rgba(255, 255, 255, 0.2);
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 50px;
+            margin-top: 10px;
+        }
+
+        .card-content {
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .contact-info {
+            margin-bottom: 25px;
+        }
+
+        .info-title {
+            font-size: 18px;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f1f1;
+        }
+
+        .contact-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 12px 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .contact-item:hover {
+            background: #f1f7ff;
+            transform: translateX(5px);
+        }
+
+        .icon {
+            width: 40px;
+            height: 40px;
+            background: #4a6580;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-right: 15px;
+            color: white;
+            font-size: 18px;
+        }
+
+        .contact-text {
+            flex: 1;
+            font-size: 16px;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
+            border-radius: 5px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-copy {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .btn-call {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 12px 25px;
+            border-radius: 50px;
+            font-size: 16px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+        }
+
+        @media (min-width: 768px) {
+            .contact-card {
+                flex-direction: row;
+            }
+            
+            .card-header {
+                width: 40%;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                padding: 40px 30px;
+            }
+            
+            .card-content {
+                width: 60%;
+                padding: 40px;
+            }
+        }
+
+        @media (max-width: 767px) {
+            .name {
+                font-size: 24px;
+            }
+            
+            .profile-img {
+                width: 120px;
+                height: 120px;
+            }
+            
+            .contact-item {
+                flex-direction: column;
+                text-align: center;
+                padding: 15px;
+            }
+            
+            .icon {
+                margin-right: 0;
+                margin-bottom: 10px;
+            }
+            
+            .action-buttons {
+                margin-top: 10px;
+                width: 100%;
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="contacts-container">
+        <!-- Czarina Mae Reyes Card -->
+        <div class="contact-card">
+            <div class="card-header">
+                <img src="https://cmpanganiban.com/wp-content/uploads/2025/08/img_20250825_213952_8126477424729226406827.jpg" alt="Czarina Mae Reyes" class="profile-img">
+                <h1 class="name">Czarina Mae Reyes</h1>
+                <div class="credentials">REB</div>
+                <div class="position">Project Sales Manager</div>
+            </div>
+            
+            <div class="card-content">
+                <div class="contact-info">
+                    <h2 class="info-title">Contact Information</h2>
+                    
+                    <div class="contact-item">
+                        <div class="icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="contact-text">09957558015</div>
+                        <div class="action-buttons">
+                            <button class="btn btn-copy" onclick="copyNumber('09957558015')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="btn btn-call" onclick="callNumber('09957558015')">
+                                <i class="fas fa-phone"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="icon">
+                            <i class="fab fa-viber"></i>
+                        </div>
+                        <div class="contact-text">Message via Viber</div>
+                        <div class="action-buttons">
+                            <button class="btn viber" onclick="openViber('09957558015')">
+                                <i class="fas fa-comment"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="icon">
+                            <i class="fab fa-facebook-f"></i>
+                        </div>
+                        <div class="contact-text">Connect on Facebook</div>
+                        <div class="action-buttons">
+                            <button class="btn facebook" onclick="openFacebook('#')">
+                                <i class="fas fa-external-link-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Jhovie B. Laher Card -->
+        <div class="contact-card">
+            <div class="card-header">
+                <img src="https://cmpanganiban.com/wp-content/uploads/2025/08/img_20250825_213952_8126477424729226406827.jpg" alt="Jhovie B. Laher" class="profile-img">
+                <h1 class="name">Jhovie B. Laher</h1>
+                <div class="credentials">REB, REA</div>
+                <div class="position">Broker's Coordinator</div>
+            </div>
+            
+            <div class="card-content">
+                <div class="contact-info">
+                    <h2 class="info-title">Contact Information</h2>
+                    
+                    <div class="contact-item">
+                        <div class="icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="contact-text">09361211607</div>
+                        <div class="action-buttons">
+                            <button class="btn btn-copy" onclick="copyNumber('09361211607')">
+                                <i class="fas fa-copy"></i>
+                            </button>
+                            <button class="btn btn-call" onclick="callNumber('09361211607')">
+                                <i class="fas fa-phone"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="icon">
+                            <i class="fab fa-viber"></i>
+                        </div>
+                        <div class="contact-text">Message via Viber</div>
+                        <div class="action-buttons">
+                            <button class="btn viber" onclick="openViber('09361211607')">
+                                <i class="fas fa-comment"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="icon">
+                            <i class="fab fa-facebook-f"></i>
+                        </div>
+                        <div class="contact-text">Connect on Facebook</div>
+                        <div class="action-buttons">
+                            <button class="btn facebook" onclick="openFacebook('#')">
+                                <i class="fas fa-external-link-alt"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="toast" id="toast">Number copied to clipboard!</div>
+
+    <script>
+        function copyNumber(number) {
+            navigator.clipboard.writeText(number);
+            showToast();
+        }
+        
+        function callNumber(number) {
+            window.location.href = "tel:" + number;
+        }
+        
+        function openViber(number) {
+            window.location.href = "viber://contact?number=" + number;
+        }
+        
+        function openFacebook(url) {
+            window.location.href = url;
+        }
+        
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 2000);
+        }
+        
+        // Add animation to elements on scroll
+        document.addEventListener('DOMContentLoaded', function() {
+            const contactItems = document.querySelectorAll('.contact-item');
+            
+            contactItems.forEach((item, index) => {
+                item.style.opacity = "0";
+                item.style.transform = "translateX(-20px)";
+                item.style.transition = "opacity 0.5s ease, transform 0.5s ease";
+                
+                setTimeout(() => {
+                    item.style.opacity = "1";
+                    item.style.transform = "translateX(0)";
+                }, 300 + (index * 200));
+            });
+        });
+    </script>
+</body>
+</html>
