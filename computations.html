@@ -303,6 +303,37 @@
             background: #f44336;
         }
         
+        .progress-bar {
+            height: 5px;
+            background: #ddd;
+            border-radius: 10px;
+            margin-top: 10px;
+            overflow: hidden;
+            display: none;
+        }
+        
+        .progress {
+            height: 100%;
+            background: #2a5298;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+        
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 10px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         @media (max-width: 768px) {
             .financing-sections {
                 flex-direction: column;
@@ -330,7 +361,10 @@
                     </div>
                 </div>
                 <div id="pagibig-gallery" class="gallery">
-                    <div class="empty-gallery">No images uploaded yet</div>
+                    <div class="empty-gallery">
+                        <div class="spinner"></div>
+                        <div>Loading images...</div>
+                    </div>
                 </div>
             </div>
             
@@ -342,7 +376,10 @@
                     </div>
                 </div>
                 <div id="bank-gallery" class="gallery">
-                    <div class="empty-gallery">No images uploaded yet</div>
+                    <div class="empty-gallery">
+                        <div class="spinner"></div>
+                        <div>Loading images...</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -368,9 +405,12 @@
                 <label for="adminCode">Admin Code</label>
                 <input type="password" id="adminCode" placeholder="Enter admin code">
             </div>
+            <div class="progress-bar">
+                <div class="progress" id="uploadProgress"></div>
+            </div>
             <div class="form-actions">
                 <button class="btn btn-secondary" onclick="closeUploadModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="uploadImage()">Upload</button>
+                <button class="btn btn-primary" id="uploadButton" onclick="uploadImage()">Upload</button>
             </div>
         </div>
     </div>
@@ -430,6 +470,13 @@
         let currentSection = '';
         let currentImageKey = '';
         let currentImageUrl = '';
+        let currentImagePath = '';
+        let uploadTask = null;
+        let uploadTimeout = null;
+        let dataLoaded = false;
+        
+        // Default placeholder image
+        const DEFAULT_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmN2ZhIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzhjOGM4YyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIGltYWdlIGF2YWlsYWJsZTwvdGV4dD4KICA8dGV4dCB4PSI1MCUiIHk9IjY1JSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiBmaWxsPSIjYzBjMGMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Q2xpY2sgdG8gdXBsb2FkPC90ZXh0Pgo8L3N2Zz4=";
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -455,15 +502,34 @@
         }
         
         function closeUploadModal() {
+            // Cancel any ongoing upload
+            if (uploadTask) {
+                uploadTask.cancel();
+                uploadTask = null;
+            }
+            
+            // Clear any timeout
+            if (uploadTimeout) {
+                clearTimeout(uploadTimeout);
+                uploadTimeout = null;
+            }
+            
             document.getElementById('uploadModal').style.display = 'none';
             document.getElementById('fileName').value = '';
             document.getElementById('imageFile').value = '';
             document.getElementById('adminCode').value = '';
+            document.querySelector('.progress-bar').style.display = 'none';
+            document.getElementById('uploadProgress').style.width = '0%';
+            
+            // Re-enable upload button
+            document.getElementById('uploadButton').disabled = false;
+            document.getElementById('uploadButton').textContent = 'Upload';
         }
         
-        function openDeleteModal(imageKey, imageUrl) {
+        function openDeleteModal(imageKey, imageUrl, imagePath) {
             currentImageKey = imageKey;
             currentImageUrl = imageUrl;
+            currentImagePath = imagePath;
             document.getElementById('deleteModal').style.display = 'flex';
         }
         
@@ -481,8 +547,18 @@
             document.getElementById('imageModal').style.display = 'none';
         }
         
+        // Convert image to Base64
+        function convertImageToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+        
         // Upload image to Firebase
-        function uploadImage() {
+        async function uploadImage() {
             const fileName = document.getElementById('fileName').value;
             const imageFile = document.getElementById('imageFile').files[0];
             const adminCode = document.getElementById('adminCode').value;
@@ -497,51 +573,62 @@
                 return;
             }
             
-            // Upload to Firebase Storage
-            const storageRef = storage.ref().child(`${currentSection}/${Date.now()}_${imageFile.name}`);
-            const uploadTask = storageRef.put(imageFile);
+            // Disable upload button to prevent multiple clicks
+            const uploadButton = document.getElementById('uploadButton');
+            uploadButton.disabled = true;
+            uploadButton.textContent = 'Uploading...';
             
-            uploadTask.on('state_changed', 
-                (snapshot) => {
-                    // Progress monitoring can be added here
-                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                    console.log('Upload is ' + progress + '% done');
-                }, 
-                (error) => {
-                    console.error('Upload failed:', error);
-                    showNotification('Upload failed. Please try again.', true);
-                }, 
-                () => {
-                    // Upload completed successfully
-                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
-                        // Save to Realtime Database
-                        const newImageKey = database.ref().child('images').child(currentSection).push().key;
-                        const imageData = {
-                            name: fileName,
-                            url: downloadURL,
-                            timestamp: Date.now()
-                        };
-                        
-                        const updates = {};
-                        updates[`/images/${currentSection}/${newImageKey}`] = imageData;
-                        
-                        database.ref().update(updates).then(() => {
-                            showNotification('Image uploaded successfully!');
-                            closeUploadModal();
-                            loadImages();
-                        }).catch((error) => {
-                            console.error('Database update failed:', error);
-                            showNotification('Upload failed. Please try again.', true);
-                        });
-                    });
-                }
-            );
+            // Show progress bar
+            const progressBar = document.querySelector('.progress-bar');
+            progressBar.style.display = 'block';
+            
+            try {
+                // Convert image to base64
+                const imageData = await convertImageToBase64(imageFile);
+                
+                // Save to Realtime Database
+                const timestamp = Date.now();
+                const imageRef = {
+                    name: fileName,
+                    url: imageData,
+                    path: `${currentSection}/${timestamp}_${imageFile.name}`,
+                    timestamp: timestamp,
+                    section: currentSection
+                };
+                
+                // Push data to database
+                const newImageRef = database.ref('images').push();
+                await newImageRef.set(imageRef);
+                
+                showNotification('Image uploaded successfully!');
+                closeUploadModal();
+                loadImages();
+                
+            } catch (error) {
+                console.error('Upload failed:', error);
+                showNotification('Upload failed. Please try again.', true);
+                progressBar.style.display = 'none';
+                uploadButton.disabled = false;
+                uploadButton.textContent = 'Upload';
+            }
         }
         
         // Delete image from Firebase
         function deleteImage() {
             closeModal();
-            openDeleteModal(currentImageKey, currentImageUrl);
+            // We need to get the image path from the database
+            database.ref('images').orderByChild('url').equalTo(currentImageUrl).once('value')
+                .then((snapshot) => {
+                    if (snapshot.exists()) {
+                        const imageData = Object.values(snapshot.val())[0];
+                        const imageKey = Object.keys(snapshot.val())[0];
+                        openDeleteModal(imageKey, currentImageUrl, imageData.path);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error finding image in database:', error);
+                    showNotification('Error preparing for deletion', true);
+                });
         }
         
         function confirmDelete() {
@@ -557,73 +644,57 @@
                 return;
             }
             
-            // Extract the storage path from the URL
-            const storageRef = storage.refFromURL(currentImageUrl);
-            
-            // Delete from Storage
-            storageRef.delete().then(() => {
-                // Delete from Database
-                database.ref(`/images/${currentSection}/${currentImageKey}`).remove().then(() => {
+            // Delete from Database
+            database.ref(`images/${currentImageKey}`).remove()
+                .then(() => {
                     showNotification('Image deleted successfully!');
                     closeDeleteModal();
                     loadImages();
-                }).catch((error) => {
+                })
+                .catch((error) => {
                     console.error('Database delete failed:', error);
-                    showNotification('Delete failed. Please try again.', true);
+                    showNotification('Delete from database failed.', true);
                 });
-            }).catch((error) => {
-                console.error('Storage delete failed:', error);
-                showNotification('Delete failed. Please try again.', true);
-            });
         }
         
         // Load images from Firebase
         function loadImages() {
-            // Load Pag-IBIG images
-            database.ref('/images/pagibig').once('value').then((snapshot) => {
-                const galleryDiv = document.getElementById('pagibig-gallery');
-                galleryDiv.innerHTML = '';
-                
-                if (!snapshot.exists()) {
-                    galleryDiv.innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
-                    return;
-                }
-                
-                const images = [];
-                snapshot.forEach((childSnapshot) => {
-                    images.push({
-                        key: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
-                });
-                
-                // Sort by timestamp (newest first)
-                images.sort((a, b) => b.timestamp - a.timestamp);
-                
-                images.forEach((image) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'gallery-item';
-                    itemDiv.innerHTML = `
-                        <img src="${image.url}" alt="${image.name}">
-                        <p>${image.name}</p>
-                    `;
-                    itemDiv.addEventListener('click', () => {
-                        currentSection = 'pagibig';
-                        currentImageKey = image.key;
-                        currentImageUrl = image.url;
-                        openModal(image.url);
-                    });
-                    galleryDiv.appendChild(itemDiv);
-                });
-            });
+            // Set loading state
+            document.getElementById('pagibig-gallery').innerHTML = `
+                <div class="empty-gallery">
+                    <div class="spinner"></div>
+                    <div>Loading images...</div>
+                </div>
+            `;
+            document.getElementById('bank-gallery').innerHTML = `
+                <div class="empty-gallery">
+                    <div class="spinner"></div>
+                    <div>Loading images...</div>
+                </div>
+            `;
             
-            // Load Bank images
-            database.ref('/images/bank').once('value').then((snapshot) => {
-                const galleryDiv = document.getElementById('bank-gallery');
-                galleryDiv.innerHTML = '';
+            // Set timeout to show default images if Firebase doesn't respond in 3 seconds
+            const timeout = setTimeout(() => {
+                if (!dataLoaded) {
+                    console.log("Firebase response timed out, using default images");
+                    document.getElementById('pagibig-gallery').innerHTML = `
+                        <div class="empty-gallery">No images uploaded yet</div>
+                    `;
+                    document.getElementById('bank-gallery').innerHTML = `
+                        <div class="empty-gallery">No images uploaded yet</div>
+                    `;
+                    showNotification("Connection timeout. Using cached data.", false);
+                }
+            }, 3000);
+            
+            // Load all images from database
+            database.ref('images').once('value').then((snapshot) => {
+                clearTimeout(timeout);
+                dataLoaded = true;
                 
                 if (!snapshot.exists()) {
-                    galleryDiv.innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
+                    document.getElementById('pagibig-gallery').innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
+                    document.getElementById('bank-gallery').innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
                     return;
                 }
                 
@@ -638,38 +709,84 @@
                 // Sort by timestamp (newest first)
                 images.sort((a, b) => b.timestamp - a.timestamp);
                 
-                images.forEach((image) => {
-                    const itemDiv = document.createElement('div');
-                    itemDiv.className = 'gallery-item';
-                    itemDiv.innerHTML = `
-                        <img src="${image.url}" alt="${image.name}">
-                        <p>${image.name}</p>
-                    `;
-                    itemDiv.addEventListener('click', () => {
-                        currentSection = 'bank';
-                        currentImageKey = image.key;
-                        currentImageUrl = image.url;
-                        openModal(image.url);
+                // Separate images by section
+                const pagibigImages = images.filter(img => img.section === 'pagibig');
+                const bankImages = images.filter(img => img.section === 'bank');
+                
+                // Display Pag-IBIG images
+                const pagibigGallery = document.getElementById('pagibig-gallery');
+                if (pagibigImages.length === 0) {
+                    pagibigGallery.innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
+                } else {
+                    pagibigGallery.innerHTML = '';
+                    pagibigImages.forEach((image) => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'gallery-item';
+                        itemDiv.innerHTML = `
+                            <img src="${image.url}" alt="${image.name}">
+                            <p>${image.name}</p>
+                        `;
+                        itemDiv.addEventListener('click', () => {
+                            currentSection = image.section;
+                            currentImageKey = image.key;
+                            currentImageUrl = image.url;
+                            currentImagePath = image.path;
+                            openModal(image.url);
+                        });
+                        pagibigGallery.appendChild(itemDiv);
                     });
-                    galleryDiv.appendChild(itemDiv);
-                });
+                }
+                
+                // Display Bank images
+                const bankGallery = document.getElementById('bank-gallery');
+                if (bankImages.length === 0) {
+                    bankGallery.innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
+                } else {
+                    bankGallery.innerHTML = '';
+                    bankImages.forEach((image) => {
+                        const itemDiv = document.createElement('div');
+                        itemDiv.className = 'gallery-item';
+                        itemDiv.innerHTML = `
+                            <img src="${image.url}" alt="${image.name}">
+                            <p>${image.name}</p>
+                        `;
+                        itemDiv.addEventListener('click', () => {
+                            currentSection = image.section;
+                            currentImageKey = image.key;
+                            currentImageUrl = image.url;
+                            currentImagePath = image.path;
+                            openModal(image.url);
+                        });
+                        bankGallery.appendChild(itemDiv);
+                    });
+                }
+            }).catch((error) => {
+                clearTimeout(timeout);
+                console.error('Error loading images:', error);
+                showNotification('Error loading images', true);
+                
+                // Show empty state on error
+                document.getElementById('pagibig-gallery').innerHTML = '<div class="empty-gallery">Error loading images</div>';
+                document.getElementById('bank-gallery').innerHTML = '<div class="empty-gallery">Error loading images</div>';
             });
         }
         
         // Initial load
-        window.onload = loadImages;
-        
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            if (event.target === document.getElementById('uploadModal')) {
-                closeUploadModal();
-            }
-            if (event.target === document.getElementById('deleteModal')) {
-                closeDeleteModal();
-            }
-            if (event.target === document.getElementById('imageModal')) {
-                closeModal();
-            }
+        window.onload = function() {
+            loadImages();
+            
+            // Close modals when clicking outside
+            window.onclick = function(event) {
+                if (event.target === document.getElementById('uploadModal')) {
+                    closeUploadModal();
+                }
+                if (event.target === document.getElementById('deleteModal')) {
+                    closeDeleteModal();
+                }
+                if (event.target === document.getElementById('imageModal')) {
+                    closeModal();
+                }
+            };
         };
     </script>
 </body>
