@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bayanihan Town Financing Gallery</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: linear-gradient(to right, #1a3a6c, #2a5298);
+            color: white;
+            padding: 20px 0;
+            text-align: center;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .financing-sections {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eaeaea;
+        }
+        
+        .section-title {
+            font-size: 1.8rem;
+            color: #2a5298;
+        }
+        
+        .upload-icon {
+            width: 50px;
+            height: 50px;
+            background: #2a5298;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .upload-icon:hover {
+            background: #1a3a6c;
+            transform: scale(1.05);
+        }
+        
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .gallery-item {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .gallery-item:hover {
+            transform: translateY(-5px);
+        }
+        
+        .gallery-item img {
+            width: 100%;
+            height: 120px;
+            object-fit: cover;
+            display: block;
+        }
+        
+        .gallery-item p {
+            padding: 8px;
+            font-size: 0.85rem;
+            background: white;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-content {
+            position: relative;
+            max-width: 90%;
+            max-height: 90%;
+        }
+        
+        .modal-content img {
+            max-width: 100%;
+            max-height: 80vh;
+            border-radius: 8px;
+        }
+        
+        .modal-controls {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .modal-control {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-control:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+        
+        .upload-modal, .delete-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .modal-box {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .modal-box h2 {
+            margin-bottom: 20px;
+            color: #2a5298;
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: #2a5298;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1a3a6c;
+        }
+        
+        .btn-secondary {
+            background: #eaeaea;
+            color: #333;
+        }
+        
+        .btn-secondary:hover {
+            background: #d4d4d4;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            margin-top: 40px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .empty-gallery {
+            text-align: center;
+            padding: 30px;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 8px;
+            background: #4caf50;
+            color: white;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            z-index: 1100;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.error {
+            background: #f44336;
+        }
+        
+        @media (max-width: 768px) {
+            .financing-sections {
+                flex-direction: column;
+            }
+            
+            .gallery {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Bayanihan Town Financing Gallery</h1>
+            <p>Computation references for Pag-IBIG and Bank Financing</p>
+        </header>
+        
+        <div class="financing-sections">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Pag-IBIG Financing</h2>
+                    <div class="upload-icon" onclick="openUploadModal('pagibig')">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                </div>
+                <div id="pagibig-gallery" class="gallery">
+                    <div class="empty-gallery">No images uploaded yet</div>
+                </div>
+            </div>
+            
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Bank Financing</h2>
+                    <div class="upload-icon" onclick="openUploadModal('bank')">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                </div>
+                <div id="bank-gallery" class="gallery">
+                    <div class="empty-gallery">No images uploaded yet</div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>Bayanihan Town Batangas - Financing Computation Gallery</p>
+        </footer>
+    </div>
+    
+    <!-- Upload Modal -->
+    <div id="uploadModal" class="upload-modal">
+        <div class="modal-box">
+            <h2>Upload Image</h2>
+            <div class="form-group">
+                <label for="fileName">File Name</label>
+                <input type="text" id="fileName" placeholder="Enter file name">
+            </div>
+            <div class="form-group">
+                <label for="imageFile">Select Image</label>
+                <input type="file" id="imageFile" accept="image/*">
+            </div>
+            <div class="form-group">
+                <label for="adminCode">Admin Code</label>
+                <input type="password" id="adminCode" placeholder="Enter admin code">
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeUploadModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="uploadImage()">Upload</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteModal" class="delete-modal">
+        <div class="modal-box">
+            <h2>Confirm Deletion</h2>
+            <div class="form-group">
+                <label for="deleteAdminCode">Admin Code</label>
+                <input type="password" id="deleteAdminCode" placeholder="Enter admin code to confirm">
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Image View Modal -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content">
+            <img id="modalImage" src="" alt="">
+            <div class="modal-controls">
+                <div class="modal-control" onclick="deleteImage()">
+                    <i class="fas fa-trash"></i>
+                </div>
+                <div class="modal-control" onclick="closeModal()">
+                    <i class="fas fa-times"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div id="notification" class="notification"></div>
+    
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBdNGSSfPLBORjVvnJM3IVqxFZByw3iJWM",
+            authDomain: "btb-announcement.firebaseapp.com",
+            projectId: "btb-announcement",
+            storageBucket: "btb-announcement.firebasestorage.app",
+            messagingSenderId: "1047737510079",
+            appId: "1:1047737510079:web:9add56a0c7375fa0f4be0a",
+            measurementId: "G-T9EQGE2TWG",
+            databaseURL: "https://btb-announcement-default-rtdb.firebaseio.com"
+        };
+        
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const storage = firebase.storage();
+        const database = firebase.database();
+        
+        // Global variables
+        let currentSection = '';
+        let currentImageKey = '';
+        let currentImageUrl = '';
+        
+        // Show notification
+        function showNotification(message, isError = false) {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.classList.remove('error');
+            
+            if (isError) {
+                notification.classList.add('error');
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Modal functions
+        function openUploadModal(section) {
+            currentSection = section;
+            document.getElementById('uploadModal').style.display = 'flex';
+        }
+        
+        function closeUploadModal() {
+            document.getElementById('uploadModal').style.display = 'none';
+            document.getElementById('fileName').value = '';
+            document.getElementById('imageFile').value = '';
+            document.getElementById('adminCode').value = '';
+        }
+        
+        function openDeleteModal(imageKey, imageUrl) {
+            currentImageKey = imageKey;
+            currentImageUrl = imageUrl;
+            document.getElementById('deleteModal').style.display = 'flex';
+        }
+        
+        function closeDeleteModal() {
+            document.getElementById('deleteModal').style.display = 'none';
+            document.getElementById('deleteAdminCode').value = '';
+        }
+        
+        function openModal(imageUrl) {
+            document.getElementById('modalImage').src = imageUrl;
+            document.getElementById('imageModal').style.display = 'flex';
+        }
+        
+        function closeModal() {
+            document.getElementById('imageModal').style.display = 'none';
+        }
+        
+        // Upload image to Firebase
+        function uploadImage() {
+            const fileName = document.getElementById('fileName').value;
+            const imageFile = document.getElementById('imageFile').files[0];
+            const adminCode = document.getElementById('adminCode').value;
+            
+            if (!fileName || !imageFile || !adminCode) {
+                showNotification('Please fill all fields', true);
+                return;
+            }
+            
+            if (adminCode !== '001122') {
+                showNotification('Invalid admin code', true);
+                return;
+            }
+            
+            // Upload to Firebase Storage
+            const storageRef = storage.ref().child(`${currentSection}/${Date.now()}_${imageFile.name}`);
+            const uploadTask = storageRef.put(imageFile);
+            
+            uploadTask.on('state_changed', 
+                (snapshot) => {
+                    // Progress monitoring can be added here
+                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload is ' + progress + '% done');
+                }, 
+                (error) => {
+                    console.error('Upload failed:', error);
+                    showNotification('Upload failed. Please try again.', true);
+                }, 
+                () => {
+                    // Upload completed successfully
+                    uploadTask.snapshot.ref.getDownloadURL().then((downloadURL) => {
+                        // Save to Realtime Database
+                        const newImageKey = database.ref().child('images').child(currentSection).push().key;
+                        const imageData = {
+                            name: fileName,
+                            url: downloadURL,
+                            timestamp: Date.now()
+                        };
+                        
+                        const updates = {};
+                        updates[`/images/${currentSection}/${newImageKey}`] = imageData;
+                        
+                        database.ref().update(updates).then(() => {
+                            showNotification('Image uploaded successfully!');
+                            closeUploadModal();
+                            loadImages();
+                        }).catch((error) => {
+                            console.error('Database update failed:', error);
+                            showNotification('Upload failed. Please try again.', true);
+                        });
+                    });
+                }
+            );
+        }
+        
+        // Delete image from Firebase
+        function deleteImage() {
+            closeModal();
+            openDeleteModal(currentImageKey, currentImageUrl);
+        }
+        
+        function confirmDelete() {
+            const adminCode = document.getElementById('deleteAdminCode').value;
+            
+            if (!adminCode) {
+                showNotification('Please enter admin code', true);
+                return;
+            }
+            
+            if (adminCode !== '001122') {
+                showNotification('Invalid admin code', true);
+                return;
+            }
+            
+            // Extract the storage path from the URL
+            const storageRef = storage.refFromURL(currentImageUrl);
+            
+            // Delete from Storage
+            storageRef.delete().then(() => {
+                // Delete from Database
+                database.ref(`/images/${currentSection}/${currentImageKey}`).remove().then(() => {
+                    showNotification('Image deleted successfully!');
+                    closeDeleteModal();
+                    loadImages();
+                }).catch((error) => {
+                    console.error('Database delete failed:', error);
+                    showNotification('Delete failed. Please try again.', true);
+                });
+            }).catch((error) => {
+                console.error('Storage delete failed:', error);
+                showNotification('Delete failed. Please try again.', true);
+            });
+        }
+        
+        // Load images from Firebase
+        function loadImages() {
+            // Load Pag-IBIG images
+            database.ref('/images/pagibig').once('value').then((snapshot) => {
+                const galleryDiv = document.getElementById('pagibig-gallery');
+                galleryDiv.innerHTML = '';
+                
+                if (!snapshot.exists()) {
+                    galleryDiv.innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
+                    return;
+                }
+                
+                const images = [];
+                snapshot.forEach((childSnapshot) => {
+                    images.push({
+                        key: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+                
+                // Sort by timestamp (newest first)
+                images.sort((a, b) => b.timestamp - a.timestamp);
+                
+                images.forEach((image) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'gallery-item';
+                    itemDiv.innerHTML = `
+                        <img src="${image.url}" alt="${image.name}">
+                        <p>${image.name}</p>
+                    `;
+                    itemDiv.addEventListener('click', () => {
+                        currentSection = 'pagibig';
+                        currentImageKey = image.key;
+                        currentImageUrl = image.url;
+                        openModal(image.url);
+                    });
+                    galleryDiv.appendChild(itemDiv);
+                });
+            });
+            
+            // Load Bank images
+            database.ref('/images/bank').once('value').then((snapshot) => {
+                const galleryDiv = document.getElementById('bank-gallery');
+                galleryDiv.innerHTML = '';
+                
+                if (!snapshot.exists()) {
+                    galleryDiv.innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
+                    return;
+                }
+                
+                const images = [];
+                snapshot.forEach((childSnapshot) => {
+                    images.push({
+                        key: childSnapshot.key,
+                        ...childSnapshot.val()
+                    });
+                });
+                
+                // Sort by timestamp (newest first)
+                images.sort((a, b) => b.timestamp - a.timestamp);
+                
+                images.forEach((image) => {
+                    const itemDiv = document.createElement('div');
+                    itemDiv.className = 'gallery-item';
+                    itemDiv.innerHTML = `
+                        <img src="${image.url}" alt="${image.name}">
+                        <p>${image.name}</p>
+                    `;
+                    itemDiv.addEventListener('click', () => {
+                        currentSection = 'bank';
+                        currentImageKey = image.key;
+                        currentImageUrl = image.url;
+                        openModal(image.url);
+                    });
+                    galleryDiv.appendChild(itemDiv);
+                });
+            });
+        }
+        
+        // Initial load
+        window.onload = loadImages;
+        
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('uploadModal')) {
+                closeUploadModal();
+            }
+            if (event.target === document.getElementById('deleteModal')) {
+                closeDeleteModal();
+            }
+            if (event.target === document.getElementById('imageModal')) {
+                closeModal();
+            }
+        };
+    </script>
+</body>
+</html>
