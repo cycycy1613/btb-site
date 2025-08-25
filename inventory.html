@@ -25,7 +25,6 @@
             padding: 1rem;
             text-align: center;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            position: relative;
         }
         
         h1 {
@@ -173,6 +172,27 @@
             text-align: center;
             font-size: 1.1rem;
             font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .block-title {
+            flex-grow: 1;
+        }
+        
+        .block-modify {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+        
+        .block-modify:hover {
+            background: rgba(255, 255, 255, 0.2);
         }
         
         .slots-grid {
@@ -407,32 +427,6 @@
             font-size: 0.9rem;
         }
         
-        /* Modify Button */
-        .modify-toggle {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
-            background-color: #9b59b6;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 0.5rem 1rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            font-weight: bold;
-            transition: background-color 0.2s;
-        }
-        
-        .modify-toggle:hover {
-            background-color: #8e44ad;
-        }
-        
-        .modify-toggle.active {
-            background-color: #2ecc71;
-        }
-        
         /* Mobile-specific improvements */
         @media (max-width: 480px) {
             header {
@@ -489,15 +483,6 @@
                 width: 30px;
                 height: 30px;
             }
-            
-            .modify-toggle {
-                position: relative;
-                top: 0;
-                right: 0;
-                margin: 0.5rem auto;
-                display: block;
-                width: fit-content;
-            }
         }
         
         @media (min-width: 768px) {
@@ -525,9 +510,6 @@
     <header>
         <h1>Inventory & Slot Management</h1>
         <p>availability and slot statuses</p>
-        <button class="modify-toggle" id="modifyToggle">
-            <i class="fas fa-edit"></i> Modify
-        </button>
     </header>
     
     <div class="admin-notice">
@@ -570,7 +552,7 @@
                 </div>
             </div>
             
-            <p><strong>Note:</strong> Administrators can edit slot colors by clicking on the edit icon (<i class="fas fa-pen"></i>) on each slot. A security code is required to save changes.</p>
+            <p><strong>Note:</strong> Admin can edit slot colors by clicking on the edit icon (<i class="fas fa-pen"></i>) on each block. A admin code is required to save changes.</p>
         </div>
         
         <div class="blocks-container" id="blocks-container">
@@ -907,26 +889,33 @@
             const confirmColorBtn = document.getElementById('confirmColor');
             const cancelCodeBtn = document.getElementById('cancelCode');
             const verifyCodeBtn = document.getElementById('verifyCode');
-            const modifyToggle = document.getElementById('modifyToggle');
             
             const securityCode = "001122";
             let currentSlot = null;
             let selectedColor = null;
             let isResetting = false;
-            let isEditMode = false;
+            let editModes = {}; // Track edit mode for each block
             
-            // Toggle edit mode
-            function toggleEditMode() {
-                isEditMode = !isEditMode;
-                document.body.classList.toggle('edit-mode', isEditMode);
-                modifyToggle.classList.toggle('active', isEditMode);
+            // Toggle edit mode for a specific block
+            function toggleEditMode(blockName) {
+                editModes[blockName] = !editModes[blockName];
                 
-                if (isEditMode) {
-                    modifyToggle.innerHTML = '<i class="fas fa-times"></i> Exit Modify';
-                    showStatus("Edit mode enabled", false);
-                } else {
-                    modifyToggle.innerHTML = '<i class="fas fa-edit"></i> Modify';
-                    showStatus("Edit mode disabled", false);
+                // Update UI for the specific block
+                const blockElement = document.querySelector(`.block[data-block="${blockName}"]`);
+                if (blockElement) {
+                    blockElement.classList.toggle('edit-mode', editModes[blockName]);
+                    
+                    // Update the modify button icon
+                    const modifyBtn = blockElement.querySelector('.block-modify');
+                    if (modifyBtn) {
+                        if (editModes[blockName]) {
+                            modifyBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            showStatus(`Edit mode enabled for ${blockName}`, false);
+                        } else {
+                            modifyBtn.innerHTML = '<i class="fas fa-pen"></i>';
+                            showStatus(`Edit mode disabled for ${blockName}`, false);
+                        }
+                    }
                 }
             }
             
@@ -957,12 +946,30 @@
                 blocksContainer.innerHTML = '';
                 
                 blocksData.forEach(block => {
+                    // Initialize edit mode state for this block
+                    editModes[block.name] = false;
+                    
                     const blockElement = document.createElement('div');
                     blockElement.className = 'block';
+                    blockElement.dataset.block = block.name;
                     
                     const blockHeader = document.createElement('div');
                     blockHeader.className = 'block-header';
-                    blockHeader.textContent = block.name;
+                    
+                    const blockTitle = document.createElement('div');
+                    blockTitle.className = 'block-title';
+                    blockTitle.textContent = block.name;
+                    
+                    const blockModify = document.createElement('button');
+                    blockModify.className = 'block-modify';
+                    blockModify.innerHTML = '<i class="fas fa-pen"></i>';
+                    blockModify.title = 'Toggle Edit Mode';
+                    blockModify.addEventListener('click', () => {
+                        toggleEditMode(block.name);
+                    });
+                    
+                    blockHeader.appendChild(blockTitle);
+                    blockHeader.appendChild(blockModify);
                     
                     const slotsGrid = document.createElement('div');
                     slotsGrid.className = 'slots-grid';
@@ -1014,7 +1021,8 @@
             
             // Open edit modal
             function openEditModal(slot) {
-                if (!isEditMode) return;
+                const blockName = slot.dataset.block;
+                if (!editModes[blockName]) return;
                 
                 currentSlot = slot;
                 isResetting = false;
@@ -1127,7 +1135,6 @@
             cancelEditBtn.addEventListener('click', closeEditModal);
             cancelCodeBtn.addEventListener('click', closeCodeModal);
             verifyCodeBtn.addEventListener('click', verifyAndApplyChanges);
-            modifyToggle.addEventListener('click', toggleEditMode);
             
             // Close modals when clicking outside
             window.addEventListener('click', function(event) {
