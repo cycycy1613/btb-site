@@ -133,11 +133,24 @@
             background-color: #f9f9f9;
         }
         
+        .file-info-container {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .file-icon {
+            margin-right: 15px;
+            font-size: 1.8rem;
+            width: 40px;
+            text-align: center;
+            color: #2a5298;
+        }
+        
         .file-info {
             display: flex;
             flex-direction: column;
             flex: 1;
-            cursor: pointer;
         }
         
         .file-name {
@@ -146,17 +159,16 @@
             color: #2a5298;
         }
         
-        .file-date {
+        .file-details {
+            display: flex;
+            gap: 15px;
             font-size: 0.85rem;
             color: #888;
         }
         
-        .file-icon {
-            margin-right: 15px;
-            font-size: 1.5rem;
-            color: #2a5298;
-            width: 40px;
-            text-align: center;
+        .file-date, .file-size {
+            display: flex;
+            align-items: center;
         }
         
         .file-actions {
@@ -671,6 +683,11 @@
                 height: 32px;
                 font-size: 0.9rem;
             }
+            
+            .file-details {
+                flex-direction: column;
+                gap: 5px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -847,7 +864,7 @@
         </div>
     </div>
     
-    <!-- File Preview Modal -->
+    <!-- File Preview Modal (Removed functionality but keeping structure) -->
     <div id="filePreviewModal" class="modal">
         <div class="modal-content">
             <div class="file-preview-container">
@@ -927,6 +944,15 @@
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
+        }
+        
+        // Format file size to human readable format
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
         }
         
         // Modal functions
@@ -1022,30 +1048,11 @@
         }
         
         function openFilePreview(url) {
-            const modal = document.getElementById('filePreviewModal');
-            const iframe = document.getElementById('filePreview');
-            iframe.src = url;
-            modal.style.display = 'flex';
-            
-            setTimeout(() => {
-                modal.classList.add('active');
-            }, 10);
-            
-            // Prevent body from scrolling when modal is open
-            document.body.style.overflow = 'hidden';
+            // Functionality removed as requested
         }
         
         function closeFilePreview() {
-            const modal = document.getElementById('filePreviewModal');
-            const iframe = document.getElementById('filePreview');
-            iframe.src = '';
-            modal.classList.remove('active');
-            
-            setTimeout(() => {
-                modal.style.display = 'none';
-                // Re-enable body scrolling
-                document.body.style.overflow = 'auto';
-            }, 300);
+            // Functionality removed as requested
         }
         
         // Get file icon based on extension
@@ -1276,18 +1283,26 @@
                         fileItem.className = 'file-item';
                         
                         const fileExtension = file.filename.split('.').pop().toLowerCase();
-                        const fileIcon = getFileIcon(file.filename);
+                        const fileIconClass = getFileIcon(file.filename);
                         
                         fileItem.innerHTML = `
-                            <div class="file-info" onclick="openFilePreview('${file.downloadURL}')">
-                                <div class="file-name">${file.name}</div>
-                                <div class="file-date">${formatDate(file.timestamp)}</div>
+                            <div class="file-info-container">
+                                <div class="file-icon">
+                                    <i class="fas ${fileIconClass}"></i>
+                                </div>
+                                <div class="file-info">
+                                    <div class="file-name">${file.name}</div>
+                                    <div class="file-details">
+                                        <span class="file-date">${formatDate(file.timestamp)}</span>
+                                        <span class="file-size">${formatFileSize(file.size)}</span>
+                                    </div>
+                                </div>
                             </div>
                             <div class="file-actions">
-                                <div class="action-icon download-icon" onclick="downloadFile('${file.downloadURL}', '${file.filename}')">
+                                <div class="action-icon download-icon" onclick="event.stopPropagation(); downloadFile('${file.downloadURL}', '${file.filename}')">
                                     <i class="fas fa-download"></i>
                                 </div>
-                                <div class="action-icon delete-icon" onclick="requestDeleteFile('${file.key}', '${file.filename}')">
+                                <div class="action-icon delete-icon" onclick="event.stopPropagation(); requestDeleteFile('${file.key}', '${file.filename}')">
                                     <i class="fas fa-trash"></i>
                                 </div>
                             </div>
