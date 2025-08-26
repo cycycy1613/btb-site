@@ -127,7 +127,6 @@
             padding: 12px 15px;
             border-bottom: 1px solid #f0f0f0;
             transition: background-color 0.2s;
-            cursor: pointer;
         }
         
         .file-item:hover {
@@ -138,6 +137,7 @@
             display: flex;
             flex-direction: column;
             flex: 1;
+            cursor: pointer;
         }
         
         .file-name {
@@ -198,6 +198,38 @@
         
         .btn-delete:hover {
             background-color: #d32f2f;
+        }
+        
+        /* Action icons for files */
+        .action-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            color: white;
+        }
+        
+        .download-icon {
+            background-color: #4caf50;
+        }
+        
+        .download-icon:hover {
+            background-color: #3d8b40;
+            transform: scale(1.1);
+        }
+        
+        .delete-icon {
+            background-color: #f44336;
+        }
+        
+        .delete-icon:hover {
+            background-color: #d32f2f;
+            transform: scale(1.1);
         }
         
         /* Gallery Styles */
@@ -312,7 +344,7 @@
             background: rgba(0, 0, 0, 0.9);
         }
         
-        .upload-modal, .delete-modal, .file-actions-modal {
+        .upload-modal, .delete-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -327,7 +359,7 @@
             transition: opacity 0.3s ease;
         }
         
-        .upload-modal.active, .delete-modal.active, .file-actions-modal.active {
+        .upload-modal.active, .delete-modal.active {
             opacity: 1;
         }
         
@@ -343,7 +375,7 @@
             animation: modalSlideIn 0.3s ease-out;
         }
         
-        .upload-modal.active .modal-box, .delete-modal.active .modal-box, .file-actions-modal.active .modal-box {
+        .upload-modal.active .modal-box, .delete-modal.active .modal-box {
             transform: translateY(0);
         }
         
@@ -633,6 +665,12 @@
             .file-actions {
                 align-self: flex-end;
             }
+            
+            .action-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
         }
         
         @media (max-width: 480px) {
@@ -679,12 +717,14 @@
             }
             
             .file-actions {
-                flex-direction: column;
+                flex-direction: row;
                 width: 100%;
+                justify-content: flex-end;
             }
             
-            .file-action-btn {
-                width: 100%;
+            .action-icon {
+                width: 36px;
+                height: 36px;
             }
         }
     </style>
@@ -788,21 +828,6 @@
             <div class="form-actions">
                 <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="confirmDelete()">Delete</button>
-            </div>
-        </div>
-    </div>
-    
-    <!-- File Actions Modal -->
-    <div id="fileActionsModal" class="file-actions-modal">
-        <div class="modal-box">
-            <h2 id="fileActionsTitle">File Actions</h2>
-            <div class="form-actions" style="justify-content: center;">
-                <button class="btn btn-primary" onclick="openFile()">Open</button>
-                <button class="btn" style="background: #4caf50; color: white;" onclick="downloadFile()">Download</button>
-                <button class="btn" style="background: #f44336; color: white;" onclick="requestDeleteFile()">Delete</button>
-            </div>
-            <div class="form-actions">
-                <button class="btn btn-secondary" onclick="closeFileActionsModal()">Cancel</button>
             </div>
         </div>
     </div>
@@ -969,24 +994,6 @@
             setTimeout(() => {
                 modal.style.display = 'none';
                 document.getElementById('deleteAdminCode').value = '';
-            }, 300);
-        }
-        
-        function openFileActionsModal() {
-            const modal = document.getElementById('fileActionsModal');
-            modal.style.display = 'flex';
-            
-            setTimeout(() => {
-                modal.classList.add('active');
-            }, 10);
-        }
-        
-        function closeFileActionsModal() {
-            const modal = document.getElementById('fileActionsModal');
-            modal.classList.remove('active');
-            
-            setTimeout(() => {
-                modal.style.display = 'none';
             }, 300);
         }
         
@@ -1178,11 +1185,6 @@
             openDeleteModal();
         }
         
-        function requestDeleteFile() {
-            closeFileActionsModal();
-            openDeleteModal();
-        }
-        
         async function confirmDelete() {
             const adminCode = document.getElementById('deleteAdminCode').value;
             
@@ -1212,249 +1214,156 @@
                     
                     await fileRef.remove();
                     showNotification('Image deleted successfully!');
-                } else if (currentFileKey) {
-                    // Delete file from list
-                    const fileRef = database.ref(`files/${currentFileKey}`);
-                    const snapshot = await fileRef.once('value');
-                    const fileData = snapshot.val();
-                    
-                    // Delete from storage if it has a downloadURL
-                    if (fileData.downloadURL) {
-                        const storageRef = storage.refFromURL(fileData.downloadURL);
-                        await storageRef.delete();
-                    }
-                    
-                    await fileRef.remove();
-                    showNotification('File deleted successfully!');
+                    loadFiles();
                 }
                 
                 closeDeleteModal();
-                loadFiles();
-                
             } catch (error) {
                 console.error('Delete failed:', error);
                 showNotification('Delete failed. Please try again.', true);
             }
-            
-            // Reset current keys
-            currentImageKey = '';
-            currentFileKey = '';
-        }
-        
-        // File actions - FIXED FUNCTION
-        function openFile() {
-            closeFileActionsModal();
-            
-            if (!currentFileData) {
-                showNotification('No file data available', true);
-                return;
-            }
-            
-            // Check if it's an image (from gallery)
-            if (currentFileData.type && currentFileData.type.startsWith('image/')) {
-                if (currentFileData.downloadURL) {
-                    // Image from storage
-                    openModal(currentFileData.downloadURL);
-                } else if (currentFileData.data) {
-                    // Image from base64 data
-                    openModal(currentFileData.data);
-                } else {
-                    showNotification('Cannot open this image', true);
-                }
-                return;
-            }
-            
-            // Check if it's a PDF
-            if (currentFileData.type === 'application/pdf' && currentFileData.downloadURL) {
-                openFilePreview(currentFileData.downloadURL);
-                return;
-            }
-            
-            // For other file types that can be previewed in browser
-            const previewableTypes = [
-                'text/plain',
-                'text/html',
-                'text/css',
-                'application/json'
-            ];
-            
-            if (previewableTypes.includes(currentFileData.type) && currentFileData.downloadURL) {
-                openFilePreview(currentFileData.downloadURL);
-                return;
-            }
-            
-            // For files that can't be previewed, show a message
-            showNotification('This file type cannot be previewed. Please download it instead.', true);
-        }
-        
-        function downloadFile() {
-            closeFileActionsModal();
-            
-            let downloadUrl;
-            if (currentFileData.downloadURL) {
-                // File from storage
-                downloadUrl = currentFileData.downloadURL;
-            } else if (currentFileData.data) {
-                // File from base64 (legacy)
-                downloadUrl = currentFileData.data;
-            } else {
-                showNotification('Cannot download this file', true);
-                return;
-            }
-            
-            // Create a temporary link for downloading
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            
-            // Set download attribute with the original filename
-            link.download = currentFileData.filename || 'download';
-            
-            // For base64 data, we need to add a target to open in new tab
-            if (downloadUrl.startsWith('data:')) {
-                link.target = '_blank';
-            }
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            
-            showNotification('Download started!');
         }
         
         // Load files from Firebase
-        function loadFiles() {
-            if (!dataLoaded) {
-                document.querySelectorAll('.spinner').forEach(spinner => {
-                    spinner.style.display = 'block';
-                });
-            }
-            
-            database.ref('files').once('value')
-                .then((snapshot) => {
-                    const files = [];
-                    snapshot.forEach((childSnapshot) => {
-                        const file = childSnapshot.val();
-                        file.key = childSnapshot.key;
+        async function loadFiles() {
+            try {
+                const filesRef = database.ref('files');
+                const snapshot = await filesRef.once('value');
+                const filesData = snapshot.val();
+                
+                // Clear existing content
+                document.getElementById('files-list').innerHTML = '';
+                document.getElementById('marketing-gallery').innerHTML = '';
+                document.getElementById('requirements-gallery').innerHTML = '';
+                
+                if (!filesData) {
+                    // No files found
+                    document.getElementById('files-list').innerHTML = '<div class="empty-files">No files found</div>';
+                    document.getElementById('marketing-gallery').innerHTML = '<div class="empty-gallery">No images found</div>';
+                    document.getElementById('requirements-gallery').innerHTML = '<div class="empty-gallery">No images found</div>';
+                    return;
+                }
+                
+                // Process files
+                const files = [];
+                const marketingImages = [];
+                const requirementsImages = [];
+                
+                Object.keys(filesData).forEach(key => {
+                    const file = filesData[key];
+                    file.key = key;
+                    
+                    if (file.section === 'files') {
                         files.push(file);
+                    } else if (file.section === 'marketing') {
+                        marketingImages.push(file);
+                    } else if (file.section === 'requirements') {
+                        requirementsImages.push(file);
+                    }
+                });
+                
+                // Sort files by timestamp (newest first)
+                files.sort((a, b) => b.timestamp - a.timestamp);
+                marketingImages.sort((a, b) => b.timestamp - a.timestamp);
+                requirementsImages.sort((a, b) => b.timestamp - a.timestamp);
+                
+                // Render files
+                if (files.length === 0) {
+                    document.getElementById('files-list').innerHTML = '<div class="empty-files">No files found</div>';
+                } else {
+                    files.forEach(file => {
+                        const fileItem = document.createElement('div');
+                        fileItem.className = 'file-item';
+                        
+                        const fileExtension = file.filename.split('.').pop().toLowerCase();
+                        const fileIcon = getFileIcon(file.filename);
+                        
+                        fileItem.innerHTML = `
+                            <div class="file-info" onclick="openFilePreview('${file.downloadURL}')">
+                                <div class="file-name">${file.name}</div>
+                                <div class="file-date">${formatDate(file.timestamp)}</div>
+                            </div>
+                            <div class="file-actions">
+                                <div class="action-icon download-icon" onclick="downloadFile('${file.downloadURL}', '${file.filename}')">
+                                    <i class="fas fa-download"></i>
+                                </div>
+                                <div class="action-icon delete-icon" onclick="requestDeleteFile('${file.key}', '${file.filename}')">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                            </div>
+                        `;
+                        
+                        document.getElementById('files-list').appendChild(fileItem);
                     });
-                    
-                    renderFiles(files);
-                    renderGallery(files, 'marketing');
-                    renderGallery(files, 'requirements');
-                    
-                    dataLoaded = true;
-                })
-                .catch((error) => {
-                    console.error('Error loading files:', error);
-                    showNotification('Error loading files. Please refresh the page.', true);
-                });
+                }
+                
+                // Render marketing images
+                if (marketingImages.length === 0) {
+                    document.getElementById('marketing-gallery').innerHTML = '<div class="empty-gallery">No images found</div>';
+                } else {
+                    marketingImages.forEach(image => {
+                        const galleryItem = document.createElement('div');
+                        galleryItem.className = 'gallery-item';
+                        galleryItem.innerHTML = `
+                            <img src="${image.data}" alt="${image.name}" onclick="openModal('${image.data}')">
+                            <p>${image.name}</p>
+                        `;
+                        document.getElementById('marketing-gallery').appendChild(galleryItem);
+                    });
+                }
+                
+                // Render requirements images
+                if (requirementsImages.length === 0) {
+                    document.getElementById('requirements-gallery').innerHTML = '<div class="empty-gallery">No images found</div>';
+                } else {
+                    requirementsImages.forEach(image => {
+                        const galleryItem = document.createElement('div');
+                        galleryItem.className = 'gallery-item';
+                        galleryItem.innerHTML = `
+                            <img src="${image.data}" alt="${image.name}" onclick="openModal('${image.data}')">
+                            <p>${image.name}</p>
+                        `;
+                        document.getElementById('requirements-gallery').appendChild(galleryItem);
+                    });
+                }
+                
+                dataLoaded = true;
+                
+            } catch (error) {
+                console.error('Error loading files:', error);
+                showNotification('Error loading files. Please try again.', true);
+            }
         }
         
-        // Render files list
-        function renderFiles(files) {
-            const filesList = document.getElementById('files-list');
-            const filesData = files.filter(file => file.section === 'files');
-            
-            if (filesData.length === 0) {
-                filesList.innerHTML = '<div class="empty-files">No files uploaded yet</div>';
-                return;
-            }
-            
-            // Sort files by timestamp (newest first)
-            filesData.sort((a, b) => b.timestamp - a.timestamp);
-            
-            filesList.innerHTML = '';
-            
-            filesData.forEach(file => {
-                const fileItem = document.createElement('div');
-                fileItem.className = 'file-item';
-                
-                const iconClass = getFileIcon(file.filename);
-                
-                fileItem.innerHTML = `
-                    <div style="display: flex; align-items: center; width: 100%;">
-                        <div class="file-icon">
-                            <i class="fas ${iconClass}"></i>
-                        </div>
-                        <div class="file-info">
-                            <div class="file-name">${file.name}</div>
-                            <div class="file-date">${formatDate(file.timestamp)}</div>
-                        </div>
-                    </div>
-                `;
-                
-                // Add click event to show file actions
-                fileItem.addEventListener('click', () => {
-                    currentFileKey = file.key;
-                    currentFileData = file;
-                    openFileActionsModal();
-                });
-                
-                filesList.appendChild(fileItem);
-            });
+        // Request to delete a file
+        function requestDeleteFile(key, filename) {
+            currentFileKey = key;
+            currentFileData = { key, filename };
+            openDeleteModal();
         }
         
-        // Render gallery
-        function renderGallery(files, section) {
-            const gallery = document.getElementById(`${section}-gallery`);
-            const galleryData = files.filter(file => file.section === section);
-            
-            if (galleryData.length === 0) {
-                gallery.innerHTML = `<div class="empty-gallery">No images uploaded yet</div>`;
-                return;
-            }
-            
-            // Sort images by timestamp (newest first)
-            galleryData.sort((a, b) => b.timestamp - a.timestamp);
-            
-            gallery.innerHTML = '';
-            
-            galleryData.forEach(file => {
-                const galleryItem = document.createElement('div');
-                galleryItem.className = 'gallery-item';
-                
-                // Use downloadURL if available, otherwise use base64 data
-                const imageSrc = file.downloadURL || file.data;
-                
-                galleryItem.innerHTML = `
-                    <img src="${imageSrc}" alt="${file.name}">
-                    <p>${file.name}</p>
-                `;
-                
-                galleryItem.addEventListener('click', () => {
-                    currentImageKey = file.key;
-                    currentImageUrl = imageSrc;
-                    currentImagePath = file.path;
-                    openModal(currentImageUrl);
-                });
-                
-                gallery.appendChild(galleryItem);
-            });
+        // Download file
+        function downloadFile(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
         }
         
         // Initialize the app
-        function initApp() {
+        document.addEventListener('DOMContentLoaded', function() {
+            // Load files from Firebase
             loadFiles();
             
-            // Set up real-time updates
-            database.ref('files').on('value', (snapshot) => {
+            // Set up real-time listener for file changes
+            database.ref('files').on('value', function(snapshot) {
                 if (dataLoaded) {
-                    const files = [];
-                    snapshot.forEach((childSnapshot) => {
-                        const file = childSnapshot.val();
-                        file.key = childSnapshot.key;
-                        files.push(file);
-                    });
-                    
-                    renderFiles(files);
-                    renderGallery(files, 'marketing');
-                    renderGallery(files, 'requirements');
+                    loadFiles();
                 }
             });
-        }
-        
-        // Start the app when the page loads
-        window.onload = initApp;
+        });
     </script>
 </body>
 </html>
