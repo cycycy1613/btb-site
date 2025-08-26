@@ -1241,35 +1241,50 @@
             currentFileKey = '';
         }
         
-        // File actions
+        // File actions - FIXED FUNCTION
         function openFile() {
             closeFileActionsModal();
             
-            if (currentFileData.type.startsWith('image/') && currentFileData.data) {
-                // Gallery image (base64)
-                openModal(currentFileData.data);
-            } else if (currentFileData.downloadURL) {
-                // File from storage
-                if (currentFileData.type === 'application/pdf') {
-                    openFilePreview(currentFileData.downloadURL);
-                } else if (currentFileData.type.startsWith('image/')) {
-                    openModal(currentFileData.downloadURL);
-                } else {
-                    // For non-PDF files, download instead of trying to preview
-                    downloadFile();
-                }
-            } else if (currentFileData.data) {
-                // Fallback for old data format
-                if (currentFileData.type.startsWith('image/')) {
-                    openModal(currentFileData.data);
-                } else if (currentFileData.type === 'application/pdf') {
-                    openFilePreview(currentFileData.data);
-                } else {
-                    downloadFile();
-                }
-            } else {
-                showNotification('Cannot open this file type', true);
+            if (!currentFileData) {
+                showNotification('No file data available', true);
+                return;
             }
+            
+            // Check if it's an image (from gallery)
+            if (currentFileData.type && currentFileData.type.startsWith('image/')) {
+                if (currentFileData.downloadURL) {
+                    // Image from storage
+                    openModal(currentFileData.downloadURL);
+                } else if (currentFileData.data) {
+                    // Image from base64 data
+                    openModal(currentFileData.data);
+                } else {
+                    showNotification('Cannot open this image', true);
+                }
+                return;
+            }
+            
+            // Check if it's a PDF
+            if (currentFileData.type === 'application/pdf' && currentFileData.downloadURL) {
+                openFilePreview(currentFileData.downloadURL);
+                return;
+            }
+            
+            // For other file types that can be previewed in browser
+            const previewableTypes = [
+                'text/plain',
+                'text/html',
+                'text/css',
+                'application/json'
+            ];
+            
+            if (previewableTypes.includes(currentFileData.type) && currentFileData.downloadURL) {
+                openFilePreview(currentFileData.downloadURL);
+                return;
+            }
+            
+            // For files that can't be previewed, show a message
+            showNotification('This file type cannot be previewed. Please download it instead.', true);
         }
         
         function downloadFile() {
