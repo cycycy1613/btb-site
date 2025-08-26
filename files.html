@@ -1079,35 +1079,68 @@
             progressBar.style.display = 'block';
             
             try {
-                // Convert file to base64 if it's an image for gallery sections
-                let fileData = null;
-                if (currentSection !== 'files' && fileInput.type.startsWith('image/')) {
-                    fileData = await convertFileToBase64(fileInput);
-                }
-                
-                // Save to Realtime Database
+                // Create a storage reference
                 const timestamp = Date.now();
-                const fileRef = {
-                    name: fileName,
-                    filename: fileInput.name,
-                    type: fileInput.type,
-                    size: fileInput.size,
-                    timestamp: timestamp,
-                    section: currentSection
-                };
+                const fileExtension = fileInput.name.split('.').pop();
+                const storageRef = storage.ref(`${currentSection}/${timestamp}_${fileName}.${fileExtension}`);
                 
-                // Add base64 data if it's an image for gallery
-                if (fileData) {
-                    fileRef.data = fileData;
-                }
+                // Upload file to Firebase Storage
+                uploadTask = storageRef.put(fileInput);
                 
-                // Push data to database
-                const newFileRef = database.ref('files').push();
-                await newFileRef.set(fileRef);
-                
-                showNotification('File uploaded successfully!');
-                closeUploadModal();
-                loadFiles();
+                // Monitor upload progress
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        // Progress monitoring
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        document.getElementById('uploadProgress').style.width = progress + '%';
+                    },
+                    (error) => {
+                        // Handle unsuccessful uploads
+                        console.error('Upload failed:', error);
+                        showNotification('Upload failed. Please try again.', true);
+                        progressBar.style.display = 'none';
+                        uploadButton.disabled = false;
+                        uploadButton.textContent = 'Upload';
+                    },
+                    async () => {
+                        // Handle successful uploads
+                        try {
+                            // Get download URL
+                            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                            
+                            // Save file metadata to Realtime Database
+                            const fileRef = {
+                                name: fileName,
+                                filename: fileInput.name,
+                                type: fileInput.type,
+                                size: fileInput.size,
+                                timestamp: timestamp,
+                                section: currentSection,
+                                url: downloadURL,
+                                storagePath: uploadTask.snapshot.ref.fullPath
+                            };
+                            
+                            // For gallery sections, also create a thumbnail if it's an image
+                            if (currentSection !== 'files' && fileInput.type.startsWith('image/')) {
+                                fileRef.thumbnail = downloadURL; // Use the same URL for thumbnail
+                            }
+                            
+                            // Push data to database
+                            const newFileRef = database.ref('files').push();
+                            await newFileRef.set(fileRef);
+                            
+                            showNotification('File uploaded successfully!');
+                            closeUploadModal();
+                            loadFiles();
+                        } catch (error) {
+                            console.error('Error saving file metadata:', error);
+                            showNotification('Error saving file information.', true);
+                            progressBar.style.display = 'none';
+                            uploadButton.disabled = false;
+                            uploadButton.textContent = 'Upload';
+                        }
+                    }
+                );
                 
             } catch (error) {
                 console.error('Upload failed:', error);
@@ -1116,16 +1149,6 @@
                 uploadButton.disabled = false;
                 uploadButton.textContent = 'Upload';
             }
-        }
-        
-        // Convert file to Base64
-        function convertFileToBase64(file) {
-            return new Promise((resolve, reject) => {
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                reader.onload = () => resolve(reader.result);
-                reader.onerror = error => reject(error);
-            });
         }
         
         // Delete file from Firebase
@@ -1139,7 +1162,7 @@
             openDeleteModal();
         }
         
-        function confirmDelete() {
+        async function confirmDelete() {
             const adminCode = document.getElementById('deleteAdminCode').value;
             
             if (!adminCode) {
@@ -1152,31 +1175,48 @@
                 return;
             }
             
-            // Delete from Database
-            if (currentImageKey) {
-                // Delete image from gallery
-                database.ref(`files/${currentImageKey}`).remove()
-                    .then(() => {
-                        showNotification('Image deleted successfully!');
-                        closeDeleteModal();
-                        loadFiles();
-                    })
-                    .catch((error) => {
-                        console.error('Database delete failed:', error);
-                        showNotification('Delete from database failed.', true);
-                    });
-            } else if (currentFileKey) {
-                // Delete file from list
-                database.ref(`files/${currentFileKey}`).remove()
-                    .then(() => {
-                        showNotification('File deleted successfully!');
-                        closeDeleteModal();
-                        loadFiles();
-                    })
-                    .catch((error) => {
-                        console.error('Database delete failed:', error);
-                        showNotification('Delete from database failed.', true);
-                    });
+            try {
+                // Delete from both Storage and Database
+                if (currentImageKey) {
+                    // Delete image from both storage and database
+                    const imageRef = database.ref(`files/${currentImageKey}`);
+                    const imageSnapshot = await imageRef.once('value');
+                    const imageData = imageSnapshot.val();
+                    
+                    if (imageData && imageData.storagePath) {
+                        // Delete from storage
+                        const storageRef = storage.ref(imageData.storagePath);
+                        await storageRef.delete();
+                    }
+                    
+                    // Delete from database
+                    await imageRef.remove();
+                    
+                    showNotification('Image deleted successfully!');
+                    closeDeleteModal();
+                    loadFiles();
+                } else if (currentFileKey) {
+                    // Delete file from both storage and database
+                    const fileRef = database.ref(`files/${currentFileKey}`);
+                    const fileSnapshot = await fileRef.once('value');
+                    const fileData = fileSnapshot.val();
+                    
+                    if (fileData && fileData.storagePath) {
+                        // Delete from storage
+                        const storageRef = storage.ref(fileData.storagePath);
+                        await storageRef.delete();
+                    }
+                    
+                    // Delete from database
+                    await fileRef.remove();
+                    
+                    showNotification('File deleted successfully!');
+                    closeDeleteModal();
+                    loadFiles();
+                }
+            } catch (error) {
+                console.error('Delete failed:', error);
+                showNotification('Delete failed. Please try again.', true);
             }
             
             // Reset current keys
@@ -1189,9 +1229,9 @@
             closeFileActionsModal();
             
             if (currentFileData.type.startsWith('image/')) {
-                openModal(currentFileData.data);
+                openModal(currentFileData.url);
             } else if (currentFileData.type === 'application/pdf') {
-                openFilePreview(currentFileData.data);
+                openFilePreview(currentFileData.url);
             } else {
                 // For non-PDF files, download instead of trying to preview
                 downloadFile();
@@ -1203,7 +1243,7 @@
             
             // Create a temporary link for downloading
             const link = document.createElement('a');
-            link.href = currentFileData.data;
+            link.href = currentFileData.url;
             link.download = currentFileData.filename;
             document.body.appendChild(link);
             link.click();
@@ -1304,15 +1344,17 @@
                 const galleryItem = document.createElement('div');
                 galleryItem.className = 'gallery-item';
                 
+                // Use thumbnail if available, otherwise use main URL
+                const imageUrl = file.thumbnail || file.url;
+                
                 galleryItem.innerHTML = `
-                    <img src="${file.data}" alt="${file.name}">
+                    <img src="${imageUrl}" alt="${file.name}">
                     <p>${file.name}</p>
                 `;
                 
                 galleryItem.addEventListener('click', () => {
                     currentImageKey = file.key;
-                    currentImageUrl = file.data;
-                    currentImagePath = file.path;
+                    currentImageUrl = file.url;
                     openModal(currentImageUrl);
                 });
                 
