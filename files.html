@@ -127,6 +127,7 @@
             padding: 12px 15px;
             border-bottom: 1px solid #f0f0f0;
             transition: background-color 0.2s;
+            cursor: pointer;
         }
         
         .file-item:hover {
@@ -1189,8 +1190,11 @@
             
             if (currentFileData.type.startsWith('image/')) {
                 openModal(currentFileData.data);
-            } else {
+            } else if (currentFileData.type === 'application/pdf') {
                 openFilePreview(currentFileData.data);
+            } else {
+                // For non-PDF files, download instead of trying to preview
+                downloadFile();
             }
         }
         
@@ -1205,34 +1209,17 @@
             link.click();
             document.body.removeChild(link);
             
-            showNotification('Download started');
+            showNotification('Download started!');
         }
         
         // Load files from Firebase
         function loadFiles() {
-            // Set loading state
-            document.getElementById('files-list').innerHTML = `
-                <div class="empty-files">
-                    <div class="spinner"></div>
-                    <div>Loading files...</div>
-                </div>
-            `;
+            if (!dataLoaded) {
+                document.querySelectorAll('.spinner').forEach(spinner => {
+                    spinner.style.display = 'block';
+                });
+            }
             
-            document.getElementById('marketing-gallery').innerHTML = `
-                <div class="empty-gallery">
-                    <div class="spinner"></div>
-                    <div>Loading images...</div>
-                </div>
-            `;
-            
-            document.getElementById('requirements-gallery').innerHTML = `
-                <div class="empty-gallery">
-                    <div class="spinner"></div>
-                    <div>Loading images...</div>
-                </div>
-            `;
-            
-            // Load from Realtime Database
             database.ref('files').once('value')
                 .then((snapshot) => {
                     const files = [];
@@ -1242,10 +1229,6 @@
                         files.push(file);
                     });
                     
-                    // Sort by timestamp (newest first)
-                    files.sort((a, b) => b.timestamp - a.timestamp);
-                    
-                    // Render files
                     renderFiles(files);
                     renderGallery(files, 'marketing');
                     renderGallery(files, 'requirements');
@@ -1254,7 +1237,7 @@
                 })
                 .catch((error) => {
                     console.error('Error loading files:', error);
-                    showNotification('Error loading files', true);
+                    showNotification('Error loading files. Please refresh the page.', true);
                 });
         }
         
@@ -1264,46 +1247,42 @@
             const filesData = files.filter(file => file.section === 'files');
             
             if (filesData.length === 0) {
-                filesList.innerHTML = `
-                    <div class="empty-files">
-                        <i class="fas fa-file-upload" style="font-size: 3rem; margin-bottom: 15px; color: #ccc;"></i>
-                        <div>No files uploaded yet</div>
-                    </div>
-                `;
+                filesList.innerHTML = '<div class="empty-files">No files uploaded yet</div>';
                 return;
             }
             
-            let html = '';
+            // Sort files by timestamp (newest first)
+            filesData.sort((a, b) => b.timestamp - a.timestamp);
+            
+            filesList.innerHTML = '';
+            
             filesData.forEach(file => {
+                const fileItem = document.createElement('div');
+                fileItem.className = 'file-item';
+                
                 const iconClass = getFileIcon(file.filename);
                 
-                html += `
-                    <div class="file-item" onclick="handleFileClick('${file.key}')">
-                        <div style="display: flex; align-items: center;">
-                            <div class="file-icon">
-                                <i class="fas ${iconClass}"></i>
-                            </div>
-                            <div class="file-info">
-                                <div class="file-name">${file.name}</div>
-                                <div class="file-date">${formatDate(file.timestamp)}</div>
-                            </div>
+                fileItem.innerHTML = `
+                    <div style="display: flex; align-items: center; width: 100%;">
+                        <div class="file-icon">
+                            <i class="fas ${iconClass}"></i>
                         </div>
-                        <div class="file-actions">
-                            <button class="file-action-btn btn-open" onclick="event.stopPropagation(); handleFileClick('${file.key}')">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="file-action-btn btn-download" onclick="event.stopPropagation(); downloadFileFromList('${file.key}')">
-                                <i class="fas fa-download"></i>
-                            </button>
-                            <button class="file-action-btn btn-delete" onclick="event.stopPropagation(); requestDeleteFileFromList('${file.key}')">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                        <div class="file-info">
+                            <div class="file-name">${file.name}</div>
+                            <div class="file-date">${formatDate(file.timestamp)}</div>
                         </div>
                     </div>
                 `;
+                
+                // Add click event to show file actions
+                fileItem.addEventListener('click', () => {
+                    currentFileKey = file.key;
+                    currentFileData = file;
+                    openFileActionsModal();
+                });
+                
+                filesList.appendChild(fileItem);
             });
-            
-            filesList.innerHTML = html;
         }
         
         // Render gallery
@@ -1312,121 +1291,52 @@
             const galleryData = files.filter(file => file.section === section);
             
             if (galleryData.length === 0) {
-                gallery.innerHTML = `
-                    <div class="empty-gallery">
-                        <i class="fas fa-image" style="font-size: 3rem; margin-bottom: 15px; color: #ccc;"></i>
-                        <div>No images uploaded yet</div>
-                    </div>
-                `;
+                gallery.innerHTML = `<div class="empty-gallery">No images uploaded yet</div>`;
                 return;
             }
             
-            let html = '';
-            galleryData.forEach(file => {
-                html += `
-                    <div class="gallery-item" onclick="handleImageClick('${file.key}', '${file.data}')">
-                        <img src="${file.data}" alt="${file.name}">
-                        <p>${file.name}</p>
-                    </div>
-                `;
-            });
+            // Sort images by timestamp (newest first)
+            galleryData.sort((a, b) => b.timestamp - a.timestamp);
             
-            gallery.innerHTML = html;
-        }
-        
-        // Handle file click
-        function handleFileClick(fileKey) {
-            database.ref(`files/${fileKey}`).once('value')
-                .then((snapshot) => {
-                    const file = snapshot.val();
-                    file.key = snapshot.key;
-                    currentFileKey = file.key;
-                    currentFileData = file;
-                    openFileActionsModal();
-                })
-                .catch((error) => {
-                    console.error('Error loading file:', error);
-                    showNotification('Error loading file', true);
+            gallery.innerHTML = '';
+            
+            galleryData.forEach(file => {
+                const galleryItem = document.createElement('div');
+                galleryItem.className = 'gallery-item';
+                
+                galleryItem.innerHTML = `
+                    <img src="${file.data}" alt="${file.name}">
+                    <p>${file.name}</p>
+                `;
+                
+                galleryItem.addEventListener('click', () => {
+                    currentImageKey = file.key;
+                    currentImageUrl = file.data;
+                    currentImagePath = file.path;
+                    openModal(currentImageUrl);
                 });
-        }
-        
-        // Handle image click
-        function handleImageClick(imageKey, imageUrl) {
-            currentImageKey = imageKey;
-            currentImageUrl = imageUrl;
-            openModal(imageUrl);
-        }
-        
-        // Download file from list
-        function downloadFileFromList(fileKey) {
-            database.ref(`files/${fileKey}`).once('value')
-                .then((snapshot) => {
-                    const file = snapshot.val();
-                    
-                    // Create a temporary link for downloading
-                    const link = document.createElement('a');
-                    link.href = file.data;
-                    link.download = file.filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    
-                    showNotification('Download started');
-                })
-                .catch((error) => {
-                    console.error('Error downloading file:', error);
-                    showNotification('Error downloading file', true);
-                });
-        }
-        
-        // Request delete file from list
-        function requestDeleteFileFromList(fileKey) {
-            currentFileKey = fileKey;
-            openDeleteModal();
+                
+                gallery.appendChild(galleryItem);
+            });
         }
         
         // Initialize the app
         function initApp() {
-            // Load files on page load
             loadFiles();
             
-            // Set up event listeners
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closeModal();
-                    closeFilePreview();
-                    closeUploadModal();
-                    closeDeleteModal();
-                    closeFileActionsModal();
-                }
-            });
-            
-            // Close modals when clicking outside
-            window.addEventListener('click', (e) => {
-                const uploadModal = document.getElementById('uploadModal');
-                const deleteModal = document.getElementById('deleteModal');
-                const fileActionsModal = document.getElementById('fileActionsModal');
-                const imageModal = document.getElementById('imageModal');
-                const filePreviewModal = document.getElementById('filePreviewModal');
-                
-                if (e.target === uploadModal) {
-                    closeUploadModal();
-                }
-                
-                if (e.target === deleteModal) {
-                    closeDeleteModal();
-                }
-                
-                if (e.target === fileActionsModal) {
-                    closeFileActionsModal();
-                }
-                
-                if (e.target === imageModal) {
-                    closeModal();
-                }
-                
-                if (e.target === filePreviewModal) {
-                    closeFilePreview();
+            // Set up real-time updates
+            database.ref('files').on('value', (snapshot) => {
+                if (dataLoaded) {
+                    const files = [];
+                    snapshot.forEach((childSnapshot) => {
+                        const file = childSnapshot.val();
+                        file.key = childSnapshot.key;
+                        files.push(file);
+                    });
+                    
+                    renderFiles(files);
+                    renderGallery(files, 'marketing');
+                    renderGallery(files, 'requirements');
                 }
             });
         }
