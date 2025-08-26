@@ -1023,9 +1023,10 @@
             }, 300);
         }
         
-        function openModal(imageUrl) {
+        function openModal(imageUrl, imageKey = '') {
             const modal = document.getElementById('imageModal');
             document.getElementById('modalImage').src = imageUrl;
+            currentImageKey = imageKey;
             modal.style.display = 'flex';
             
             setTimeout(() => {
@@ -1206,24 +1207,34 @@
             }
             
             try {
-                // Delete from Database and Storage if applicable
-                if (currentImageKey) {
-                    // Delete image from gallery
-                    const fileRef = database.ref(`files/${currentImageKey}`);
-                    const snapshot = await fileRef.once('value');
-                    const fileData = snapshot.val();
-                    
-                    // If it's a file with a storage reference, delete from storage too
-                    if (fileData.downloadURL) {
-                        const storageRef = storage.refFromURL(fileData.downloadURL);
-                        await storageRef.delete();
-                    }
-                    
-                    await fileRef.remove();
-                    showNotification('Image deleted successfully!');
-                    loadFiles();
+                // Determine what to delete based on context
+                let deleteKey = currentImageKey || currentFileKey;
+                
+                if (!deleteKey) {
+                    showNotification('No item selected for deletion', true);
+                    return;
                 }
                 
+                // Delete from Database and Storage if applicable
+                const fileRef = database.ref(`files/${deleteKey}`);
+                const snapshot = await fileRef.once('value');
+                const fileData = snapshot.val();
+                
+                // If it's a file with a storage reference, delete from storage too
+                if (fileData.downloadURL) {
+                    const storageRef = storage.refFromURL(fileData.downloadURL);
+                    await storageRef.delete();
+                }
+                
+                await fileRef.remove();
+                showNotification('Item deleted successfully!');
+                
+                // Reset deletion keys
+                currentImageKey = '';
+                currentFileKey = '';
+                
+                // Reload files
+                loadFiles();
                 closeDeleteModal();
             } catch (error) {
                 console.error('Delete failed:', error);
@@ -1320,7 +1331,7 @@
                         const galleryItem = document.createElement('div');
                         galleryItem.className = 'gallery-item';
                         galleryItem.innerHTML = `
-                            <img src="${image.data}" alt="${image.name}" onclick="openModal('${image.data}')">
+                            <img src="${image.data}" alt="${image.name}" onclick="openModal('${image.data}', '${image.key}')">
                             <p>${image.name}</p>
                         `;
                         document.getElementById('marketing-gallery').appendChild(galleryItem);
@@ -1335,7 +1346,7 @@
                         const galleryItem = document.createElement('div');
                         galleryItem.className = 'gallery-item';
                         galleryItem.innerHTML = `
-                            <img src="${image.data}" alt="${image.name}" onclick="openModal('${image.data}')">
+                            <img src="${image.data}" alt="${image.name}" onclick="openModal('${image.data}', '${image.key}')">
                             <p>${image.name}</p>
                         `;
                         document.getElementById('requirements-gallery').appendChild(galleryItem);
@@ -1357,14 +1368,23 @@
             openDeleteModal();
         }
         
-        // Download file
+        // Download file (fixed to force download)
         function downloadFile(url, filename) {
+            // Create a temporary anchor element
             const a = document.createElement('a');
             a.href = url;
             a.download = filename;
+            a.target = '_blank'; // Open in new tab for safety
+            
+            // Programmatically click the anchor to trigger download
             document.body.appendChild(a);
             a.click();
-            document.body.removeChild(a);
+            
+            // Clean up
+            setTimeout(() => {
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            }, 100);
         }
         
         // Initialize the app
