@@ -430,6 +430,7 @@
             justify-content: flex-end;
             gap: 12px;
             margin-top: 25px;
+            flex-wrap: wrap;
         }
         
         .btn {
@@ -440,6 +441,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 1rem;
+            min-width: 120px;
         }
         
         .btn-primary {
@@ -1368,22 +1370,23 @@
             openDeleteModal();
         }
         
-        // Download file (fixed to force download)
+        // Download file - FIXED to prevent opening in new tab
         function downloadFile(url, filename) {
             // Create a temporary anchor element
             const a = document.createElement('a');
             a.href = url;
-            a.download = filename;
-            a.target = '_blank'; // Open in new tab for safety
+            a.download = filename || 'download';
+            
+            // Set the anchor to be invisible
+            a.style.display = 'none';
+            document.body.appendChild(a);
             
             // Programmatically click the anchor to trigger download
-            document.body.appendChild(a);
             a.click();
             
             // Clean up
             setTimeout(() => {
                 document.body.removeChild(a);
-                window.URL.revokeObjectURL(url);
             }, 100);
         }
         
