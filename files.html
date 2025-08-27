@@ -401,6 +401,15 @@
         
         .form-group {
             margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            cursor: pointer;
+            color: #777;
         }
         
         .form-group label {
@@ -825,6 +834,9 @@
             <div class="form-group">
                 <label for="adminCode">Admin Code</label>
                 <input type="password" id="adminCode" placeholder="Enter admin code">
+                <span class="password-toggle" onclick="togglePassword('adminCode')">
+                    <i class="fas fa-eye"></i>
+                </span>
             </div>
             <div class="progress-bar">
                 <div class="progress" id="uploadProgress"></div>
@@ -843,6 +855,9 @@
             <div class="form-group">
                 <label for="deleteAdminCode">Admin Code</label>
                 <input type="password" id="deleteAdminCode" placeholder="Enter admin code to confirm">
+                <span class="password-toggle" onclick="togglePassword('deleteAdminCode')">
+                    <i class="fas fa-eye"></i>
+                </span>
             </div>
             <div class="form-actions">
                 <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
@@ -860,20 +875,6 @@
                     <i class="fas fa-trash"></i>
                 </div>
                 <div class="modal-control" onclick="closeModal()">
-                    <i class="fas fa-times"></i>
-                </div>
-            </div>
-        </div>
-    </div>
-    
-    <!-- File Preview Modal (Removed functionality but keeping structure) -->
-    <div id="filePreviewModal" class="modal">
-        <div class="modal-content">
-            <div class="file-preview-container">
-                <iframe id="filePreview" class="file-preview-iframe"></iframe>
-            </div>
-            <div class="modal-controls">
-                <div class="modal-control" onclick="closeFilePreview()">
                     <i class="fas fa-times"></i>
                 </div>
             </div>
@@ -930,6 +931,22 @@
             'gif': 'fa-file-image',
             'default': 'fa-file'
         };
+        
+        // Toggle password visibility
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -1050,14 +1067,6 @@
             }, 300);
         }
         
-        function openFilePreview(url) {
-            // Functionality removed as requested
-        }
-        
-        function closeFilePreview() {
-            // Functionality removed as requested
-        }
-        
         // Get file icon based on extension
         function getFileIcon(filename) {
             const extension = filename.split('.').pop().toLowerCase();
@@ -1111,8 +1120,14 @@
                     const storageRef = storage.ref();
                     const fileRefStorage = storageRef.child(`files/${timestamp}_${fileInput.name}`);
                     
+                    // Add metadata to force download
+                    const metadata = {
+                        contentType: fileInput.type,
+                        contentDisposition: 'attachment'  // This forces download instead of preview
+                    };
+                    
                     // Upload to storage with progress monitoring
-                    uploadTask = fileRefStorage.put(fileInput);
+                    uploadTask = fileRefStorage.put(fileInput, metadata);
                     
                     // Monitor upload progress
                     uploadTask.on('state_changed',
@@ -1370,7 +1385,7 @@
             openDeleteModal();
         }
         
-        // Download file - FIXED to prevent opening in new tab
+        // Download file - FIXED to force download instead of preview
         function downloadFile(url, filename) {
             // Create a temporary anchor element
             const a = document.createElement('a');
