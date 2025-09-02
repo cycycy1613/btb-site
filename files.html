@@ -666,7 +666,7 @@
             margin: 15px auto;
         }
         
-        /* File Preview Styles */
+        /* File Preview Styles (unused by Files section; safe to keep) */
         .file-preview-container {
             width: 100%;
             height: 80vh;
@@ -1424,7 +1424,7 @@
                                     </div>
                                 </div>
                                 <div class="file-actions">
-                                    <div class="action-icon download-icon" onclick="downloadFile('${file.url}', '${file.name}.${file.extension}')">
+                                    <div class="action-icon download-icon" onclick="forceDownload('${file.url}', '${file.name}.${file.extension}')">
                                         <i class="fas fa-download"></i>
                                     </div>
                                     <div class="action-icon delete-icon" onclick="requestDelete('file', '${file.key}', '${file.path}')">
@@ -1700,16 +1700,36 @@
                     });
             }
         }
-        
-        // Download file
-        function downloadFile(url, fileName) {
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = fileName;
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+
+        /**
+         * FORCE DOWNLOAD (no new tab)
+         * 1) Try to fetch the file as a Blob and save via an Object URL.
+         * 2) If CORS blocks Blob, fall back to a hidden <iframe> (still no new tab).
+         */
+        async function forceDownload(url, fileName) {
+            try {
+                const resp = await fetch(url, { mode: 'cors', credentials: 'omit' });
+                if (!resp.ok) throw new Error('Network error');
+                const blob = await resp.blob();
+                const objectUrl = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = objectUrl;
+                a.download = fileName || 'download';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
+                showNotification('Download started.');
+            } catch (err) {
+                // Fallback: use hidden iframe to trigger browser download without opening a new tab
+                const iframe = document.createElement('iframe');
+                iframe.style.display = 'none';
+                iframe.src = url;
+                document.body.appendChild(iframe);
+                // Cleanup after a minute
+                setTimeout(() => iframe.remove(), 60000);
+                showNotification('Attempting download…');
+            }
         }
         
         // Initialize the page
