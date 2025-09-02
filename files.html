@@ -905,7 +905,6 @@
         </header>
         
         <div class="sections-container">
-            <!-- Files Section (Unchanged) -->
             <div class="section">
                 <div class="section-header">
                     <h2 class="section-title">Files</h2>
@@ -921,7 +920,6 @@
                 </div>
             </div>
             
-            <!-- Gallery Section (Now Folder System) -->
             <div class="section">
                 <div class="section-header">
                     <h2 class="section-title">Gallery Folders</h2>
@@ -943,7 +941,6 @@
         </footer>
     </div>
     
-    <!-- Upload Modal -->
     <div id="uploadModal" class="upload-modal">
         <div class="modal-box">
             <h2 id="uploadModalTitle">Upload File</h2>
@@ -972,7 +969,6 @@
         </div>
     </div>
     
-    <!-- Folder Create Modal -->
     <div id="folderModal" class="folder-modal">
         <div class="modal-box">
             <h2>Create New Folder</h2>
@@ -994,7 +990,6 @@
         </div>
     </div>
     
-    <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="delete-modal">
         <div class="modal-box">
             <h2>Confirm Deletion</h2>
@@ -1012,12 +1007,11 @@
         </div>
     </div>
     
-    <!-- Image View Modal -->
     <div id="imageModal" class="modal">
         <div class="modal-content">
             <img id="modalImage" src="" alt="">
             <div class="modal-controls">
-                <div class="modal-control" onclick="deleteImage()">
+                <div class="modal-control" onclick="requestDelete('image', currentImageKey, currentImagePath)">
                     <i class="fas fa-trash"></i>
                 </div>
                 <div class="modal-control" onclick="closeModal()">
@@ -1027,7 +1021,6 @@
         </div>
     </div>
     
-    <!-- Notification -->
     <div id="notification" class="notification"></div>
     
     <script>
@@ -1047,6 +1040,9 @@
         firebase.initializeApp(firebaseConfig);
         const storage = firebase.storage();
         const database = firebase.database();
+
+        // New constant for the admin code
+        const ADMIN_CODE = "001122";
         
         // Global variables
         let currentSection = '';
@@ -1080,6 +1076,15 @@
             'gif': 'fa-file-image',
             'default': 'fa-file'
         };
+
+        // Helper function to validate admin code
+        function validateAdminCode(code) {
+            if (code !== ADMIN_CODE) {
+                showNotification('Invalid admin code', true);
+                return false;
+            }
+            return true;
+        }
         
         // Toggle password visibility
         function togglePassword(inputId) {
@@ -1253,8 +1258,10 @@
                 return;
             }
             
-            if (!adminCode) {
-                showNotification('Please enter admin code', true);
+            if (!validateAdminCode(adminCode)) {
+                // Re-enable upload button since validation failed
+                uploadButton.disabled = false;
+                uploadButton.textContent = 'Upload';
                 return;
             }
             
@@ -1348,8 +1355,7 @@
                 return;
             }
             
-            if (!adminCode) {
-                showNotification('Please enter admin code', true);
+            if (!validateAdminCode(adminCode)) {
                 return;
             }
             
@@ -1400,7 +1406,8 @@
                             fileItem.className = 'file-item';
                             
                             const iconClass = fileIcons[file.extension] || fileIcons.default;
-                            const formattedDate = new Date(file.timestamp).toLocaleDateString();
+                            const fileDate = new Date(file.timestamp);
+                            const formattedDateTime = fileDate.toLocaleDateString() + ' at ' + fileDate.toLocaleTimeString();
                             const formattedSize = formatFileSize(file.size);
                             
                             fileItem.innerHTML = `
@@ -1411,12 +1418,8 @@
                                     <div class="file-info">
                                         <div class="file-name">${file.name}</div>
                                         <div class="file-details">
-                                            <div class="file-date">
-                                                <i class="far fa-calendar-alt"></i> ${formattedDate}
-                                            </div>
-                                            <div class="file-size">
-                                                <i class="fas fa-weight-hanging"></i> ${formattedSize}
-                                            </div>
+                                            <div class="file-date">${formattedDateTime}</div>
+                                            <div class="file-size">${formattedSize}</div>
                                         </div>
                                     </div>
                                 </div>
@@ -1615,6 +1618,7 @@
         function requestDelete(type, key, path = '') {
             currentFileKey = key;
             currentFileData = { type, path };
+            closeModal(); // Close the image modal if it's open
             openDeleteModal();
         }
         
@@ -1622,8 +1626,7 @@
         function confirmDelete() {
             const adminCode = document.getElementById('deleteAdminCode').value.trim();
             
-            if (!adminCode) {
-                showNotification('Please enter admin code', true);
+            if (!validateAdminCode(adminCode)) {
                 return;
             }
             
@@ -1677,33 +1680,25 @@
                         console.error('Error deleting folder:', error);
                         showNotification('Error deleting folder: ' + error.message, true);
                     });
+            } else if (currentFileData.type === 'image') {
+                // Delete image from storage and database
+                const storageRef = storage.ref(currentFileData.path);
+
+                storageRef.delete()
+                    .then(() => {
+                        // Delete from database
+                        return database.ref(`gallery/${currentFolderId}/images/${currentFileKey}`).remove();
+                    })
+                    .then(() => {
+                        showNotification('Image deleted successfully!');
+                        closeDeleteModal();
+                        loadFolderImages(currentFolderId);
+                    })
+                    .catch((error) => {
+                        console.error('Error deleting image:', error);
+                        showNotification('Error deleting image: ' + error.message, true);
+                    });
             }
-        }
-        
-        // Delete image from folder
-        function deleteImage() {
-            if (!currentImageKey || !currentImagePath) {
-                showNotification('No image selected for deletion', true);
-                return;
-            }
-            
-            // Delete image from storage
-            const storageRef = storage.ref(currentImagePath);
-            
-            storageRef.delete()
-                .then(() => {
-                    // Delete from database
-                    return database.ref(`gallery/${currentFolderId}/images/${currentImageKey}`).remove();
-                })
-                .then(() => {
-                    showNotification('Image deleted successfully!');
-                    closeModal();
-                    loadFolderImages(currentFolderId);
-                })
-                .catch((error) => {
-                    console.error('Error deleting image:', error);
-                    showNotification('Error deleting image: ' + error.message, true);
-                });
         }
         
         // Download file
