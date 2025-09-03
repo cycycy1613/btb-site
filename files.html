@@ -1422,10 +1422,10 @@
                                     </div>
                                 </div>
                                 <div class="file-actions">
-                                    <div class="action-icon download-icon" onclick="forceDownload('${file.url}', '${file.name}.${file.extension}')">
+                                    <div class="action-icon download-icon" onclick="event.stopPropagation(); forceDownload('${file.url}', '${file.name}.${file.extension}')">
                                         <i class="fas fa-download"></i>
                                     </div>
-                                    <div class="action-icon delete-icon" onclick="requestDelete('file', '${file.key}', '${file.path}')">
+                                    <div class="action-icon delete-icon" onclick="event.stopPropagation(); requestDelete('file', '${file.key}', '${file.path}')">
                                         <i class="fas fa-trash"></i>
                                     </div>
                                 </div>
@@ -1702,8 +1702,15 @@
          * ENHANCED FORCE DOWNLOAD FUNCTION
          * This function handles direct file downloads similar to Google Drive behavior
          * Works with Firebase Storage URLs and other file URLs
+         * PREVENTS PREVIEW BY USING BLOB DOWNLOAD METHOD AND IFRAME TECHNIQUE
          */
         async function forceDownload(url, fileName) {
+            // Prevent event bubbling to avoid triggering other click handlers
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
             try {
                 showNotification('Preparing download...');
                 
@@ -1713,39 +1720,48 @@
                     cleanFileName = 'download';
                 }
                 
-                // For Firebase Storage URLs, we need to handle CORS properly
-                if (url.includes('firebasestorage.googleapis.com')) {
-                    // Method 1: Try to use the direct download approach with Firebase URLs
-                    try {
-                        // Add download token to Firebase URL if not present
-                        let downloadUrl = url;
-                        if (!url.includes('&response-content-disposition=')) {
-                            const separator = url.includes('?') ? '&' : '?';
-                            downloadUrl = url + separator + 'response-content-disposition=attachment';
-                        }
-                        
-                        // Create temporary anchor element
-                        const tempLink = document.createElement('a');
-                        tempLink.href = downloadUrl;
-                        tempLink.download = cleanFileName;
-                        tempLink.target = '_blank';
-                        tempLink.rel = 'noopener noreferrer';
-                        tempLink.style.display = 'none';
-                        
-                        // Add to DOM, click, and remove
-                        document.body.appendChild(tempLink);
-                        tempLink.click();
-                        document.body.removeChild(tempLink);
-                        
-                        showNotification('Download started successfully!');
-                        return;
-                        
-                    } catch (firebaseError) {
-                        console.log('Firebase direct method failed, trying fetch approach:', firebaseError);
+                // Method 1: Use hidden iframe for download (prevents preview)
+                try {
+                    // Create a hidden iframe for download
+                    const iframe = document.createElement('iframe');
+                    iframe.style.display = 'none';
+                    iframe.style.visibility = 'hidden';
+                    iframe.style.position = 'absolute';
+                    iframe.style.left = '-9999px';
+                    iframe.style.top = '-9999px';
+                    iframe.style.width = '1px';
+                    iframe.style.height = '1px';
+                    
+                    // Modify Firebase Storage URL to force download
+                    let downloadUrl = url;
+                    if (url.includes('firebasestorage.googleapis.com')) {
+                        // For Firebase Storage, add response-content-disposition parameter
+                        const separator = url.includes('?') ? '&' : '?';
+                        downloadUrl = url + separator + 'response-content-disposition=attachment;filename=' + encodeURIComponent(cleanFileName);
                     }
+                    
+                    // Set iframe source to the download URL
+                    iframe.src = downloadUrl;
+                    
+                    // Add iframe to DOM
+                    document.body.appendChild(iframe);
+                    
+                    // Remove iframe after download starts
+                    setTimeout(() => {
+                        if (iframe.parentNode) {
+                            document.body.removeChild(iframe);
+                        }
+                    }, 5000);
+                    
+                    showNotification('Download initiated successfully!');
+                    return;
+                    
+                } catch (iframeError) {
+                    console.log('Iframe method failed, trying fetch method:', iframeError);
                 }
                 
-                // Method 2: Fetch the file and create blob URL (works for most cases)
+                // Method 2: Fetch the file and create blob URL (most reliable for direct download)
+                // This method prevents browser preview by forcing download through blob
                 try {
                     const response = await fetch(url, {
                         method: 'GET',
@@ -1763,11 +1779,15 @@
                     const blob = await response.blob();
                     const blobUrl = URL.createObjectURL(blob);
                     
-                    // Create download link
+                    // Create download link with forced download
                     const downloadLink = document.createElement('a');
                     downloadLink.href = blobUrl;
                     downloadLink.download = cleanFileName;
                     downloadLink.style.display = 'none';
+                    
+                    // Force download by setting proper attributes
+                    downloadLink.setAttribute('download', cleanFileName);
+                    downloadLink.setAttribute('target', '_self'); // Prevent new tab
                     
                     // Add to DOM, trigger download, and cleanup
                     document.body.appendChild(downloadLink);
@@ -1783,22 +1803,22 @@
                     return;
                     
                 } catch (fetchError) {
-                    console.log('Fetch method failed, trying fallback:', fetchError);
+                    console.log('Fetch method failed, trying final fallback:', fetchError);
                 }
                 
-                // Method 3: Fallback - Open in new tab with download attribute
+                // Method 3: Final fallback - Direct link with download attribute
                 const fallbackLink = document.createElement('a');
                 fallbackLink.href = url;
                 fallbackLink.download = cleanFileName;
-                fallbackLink.target = '_blank';
-                fallbackLink.rel = 'noopener noreferrer';
                 fallbackLink.style.display = 'none';
+                fallbackLink.setAttribute('download', cleanFileName);
+                fallbackLink.setAttribute('target', '_self');
                 
                 document.body.appendChild(fallbackLink);
                 fallbackLink.click();
                 document.body.removeChild(fallbackLink);
                 
-                showNotification('Download initiated. If the file opens in a new tab, right-click and select "Save as..."');
+                showNotification('Download initiated. If file opens in browser, right-click and select "Save as..."');
                 
             } catch (error) {
                 console.error('All download methods failed:', error);
