@@ -1412,14 +1412,12 @@
                             
                             fileItem.innerHTML = `
                                 <div class="file-info-container">
-                                    <div class="file-icon">
-                                        <i class="fas ${iconClass}"></i>
-                                    </div>
+                                    <i class="fas ${iconClass} file-icon"></i>
                                     <div class="file-info">
-                                        <div class="file-name">${file.name}</div>
+                                        <span class="file-name">${file.name}</span>
                                         <div class="file-details">
-                                            <div class="file-date">${formattedDateTime}</div>
-                                            <div class="file-size">${formattedSize}</div>
+                                            <span class="file-date"><i class="fas fa-calendar-alt"></i>&nbsp;${formattedDateTime}</span>
+                                            <span class="file-size"><i class="fas fa-hdd"></i>&nbsp;${formattedSize}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -1432,7 +1430,6 @@
                                     </div>
                                 </div>
                             `;
-                            
                             filesList.appendChild(fileItem);
                         });
                     } else {
@@ -1702,33 +1699,118 @@
         }
 
         /**
-         * FORCE DOWNLOAD (no new tab)
-         * 1) Try to fetch the file as a Blob and save via an Object URL.
-         * 2) If CORS blocks Blob, fall back to a hidden <iframe> (still no new tab).
+         * ENHANCED FORCE DOWNLOAD FUNCTION
+         * This function handles direct file downloads similar to Google Drive behavior
+         * Works with Firebase Storage URLs and other file URLs
          */
         async function forceDownload(url, fileName) {
             try {
-                const resp = await fetch(url, { mode: 'cors', credentials: 'omit' });
-                if (!resp.ok) throw new Error('Network error');
-                const blob = await resp.blob();
-                const objectUrl = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = objectUrl;
-                a.download = fileName || 'download';
-                document.body.appendChild(a);
-                a.click();
-                a.remove();
-                setTimeout(() => URL.revokeObjectURL(objectUrl), 1500);
-                showNotification('Download started.');
-            } catch (err) {
-                // Fallback: use hidden iframe to trigger browser download without opening a new tab
-                const iframe = document.createElement('iframe');
-                iframe.style.display = 'none';
-                iframe.src = url;
-                document.body.appendChild(iframe);
-                // Cleanup after a minute
-                setTimeout(() => iframe.remove(), 60000);
-                showNotification('Attempting download…');
+                showNotification('Preparing download...');
+                
+                // Clean the filename to ensure it has proper extension
+                let cleanFileName = fileName;
+                if (!cleanFileName || cleanFileName === 'undefined') {
+                    cleanFileName = 'download';
+                }
+                
+                // For Firebase Storage URLs, we need to handle CORS properly
+                if (url.includes('firebasestorage.googleapis.com')) {
+                    // Method 1: Try to use the direct download approach with Firebase URLs
+                    try {
+                        // Add download token to Firebase URL if not present
+                        let downloadUrl = url;
+                        if (!url.includes('&response-content-disposition=')) {
+                            const separator = url.includes('?') ? '&' : '?';
+                            downloadUrl = url + separator + 'response-content-disposition=attachment';
+                        }
+                        
+                        // Create temporary anchor element
+                        const tempLink = document.createElement('a');
+                        tempLink.href = downloadUrl;
+                        tempLink.download = cleanFileName;
+                        tempLink.target = '_blank';
+                        tempLink.rel = 'noopener noreferrer';
+                        tempLink.style.display = 'none';
+                        
+                        // Add to DOM, click, and remove
+                        document.body.appendChild(tempLink);
+                        tempLink.click();
+                        document.body.removeChild(tempLink);
+                        
+                        showNotification('Download started successfully!');
+                        return;
+                        
+                    } catch (firebaseError) {
+                        console.log('Firebase direct method failed, trying fetch approach:', firebaseError);
+                    }
+                }
+                
+                // Method 2: Fetch the file and create blob URL (works for most cases)
+                try {
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        mode: 'cors',
+                        credentials: 'omit',
+                        headers: {
+                            'Cache-Control': 'no-cache',
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const blob = await response.blob();
+                    const blobUrl = URL.createObjectURL(blob);
+                    
+                    // Create download link
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = blobUrl;
+                    downloadLink.download = cleanFileName;
+                    downloadLink.style.display = 'none';
+                    
+                    // Add to DOM, trigger download, and cleanup
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                    
+                    // Clean up blob URL after a delay
+                    setTimeout(() => {
+                        URL.revokeObjectURL(blobUrl);
+                    }, 2000);
+                    
+                    showNotification('Download completed successfully!');
+                    return;
+                    
+                } catch (fetchError) {
+                    console.log('Fetch method failed, trying fallback:', fetchError);
+                }
+                
+                // Method 3: Fallback - Open in new tab with download attribute
+                const fallbackLink = document.createElement('a');
+                fallbackLink.href = url;
+                fallbackLink.download = cleanFileName;
+                fallbackLink.target = '_blank';
+                fallbackLink.rel = 'noopener noreferrer';
+                fallbackLink.style.display = 'none';
+                
+                document.body.appendChild(fallbackLink);
+                fallbackLink.click();
+                document.body.removeChild(fallbackLink);
+                
+                showNotification('Download initiated. If the file opens in a new tab, right-click and select "Save as..."');
+                
+            } catch (error) {
+                console.error('All download methods failed:', error);
+                showNotification('Download failed. Please try again or contact support.', true);
+                
+                // Last resort: Copy URL to clipboard
+                try {
+                    await navigator.clipboard.writeText(url);
+                    showNotification('Download failed, but URL copied to clipboard. You can paste it in a new tab.', true);
+                } catch (clipboardError) {
+                    console.error('Clipboard copy also failed:', clipboardError);
+                }
             }
         }
         
