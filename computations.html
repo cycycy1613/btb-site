@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BTB Information Portal</title>
+    <title>BTB Gallery Portal</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
@@ -55,17 +55,15 @@
             opacity: 0.9;
         }
         
-        .financing-sections {
+        .sections-container {
             display: flex;
-            flex-wrap: wrap;
+            flex-direction: column;
             gap: 30px;
             margin-bottom: 40px;
             animation: fadeIn 0.8s ease-out;
         }
         
         .section {
-            flex: 1;
-            min-width: 300px;
             background: white;
             border-radius: 12px;
             padding: 25px;
@@ -113,6 +111,7 @@
             transform: scale(1.05) rotate(5deg);
         }
         
+        /* Gallery Styles */
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
@@ -157,6 +156,125 @@
             font-weight: 500;
         }
         
+        /* Folder System Styles */
+        .folders-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+        
+        .folder-item {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .folder-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+        }
+        
+        .folder-icon {
+            font-size: 3.5rem;
+            color: #ffa726;
+            margin-bottom: 15px;
+        }
+        
+        .folder-name {
+            font-weight: 600;
+            color: #2a5298;
+            margin-bottom: 5px;
+            word-break: break-word;
+        }
+        
+        .folder-count {
+            font-size: 0.85rem;
+            color: #888;
+        }
+        
+        .folder-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 8px;
+        }
+        
+        .folder-action {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            opacity: 0;
+        }
+        
+        .folder-item:hover .folder-action {
+            opacity: 1;
+        }
+        
+        .folder-action:hover {
+            transform: scale(1.1);
+            background: rgba(0, 0, 0, 0.9);
+        }
+        
+        .folder-delete {
+            background: rgba(244, 67, 54, 0.8);
+        }
+        
+        .folder-delete:hover {
+            background: rgba(211, 47, 47, 0.9);
+        }
+        
+        .folder-view-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f5f7fa;
+            border-radius: 10px;
+        }
+        
+        .folder-view-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            color: #2a5298;
+            font-weight: 600;
+        }
+        
+        .back-button {
+            padding: 8px 16px;
+            background: #2a5298;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .back-button:hover {
+            background: #1a3a6c;
+        }
+        
+        /* Modal Styles */
         .modal {
             display: none;
             position: fixed;
@@ -223,7 +341,7 @@
             background: rgba(0, 0, 0, 0.9);
         }
         
-        .upload-modal, .delete-modal {
+        .upload-modal, .delete-modal, .folder-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -238,7 +356,7 @@
             transition: opacity 0.3s ease;
         }
         
-        .upload-modal.active, .delete-modal.active {
+        .upload-modal.active, .delete-modal.active, .folder-modal.active {
             opacity: 1;
         }
         
@@ -268,6 +386,15 @@
         
         .form-group {
             margin-bottom: 20px;
+            position: relative;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 38px;
+            cursor: pointer;
+            color: #777;
         }
         
         .form-group label {
@@ -277,7 +404,7 @@
             color: #444;
         }
         
-        .form-group input {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 14px;
             border: 1px solid #ddd;
@@ -286,7 +413,7 @@
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
         
-        .form-group input:focus {
+        .form-group input:focus, .form-group select:focus {
             border-color: #2a5298;
             box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
             outline: none;
@@ -297,6 +424,7 @@
             justify-content: flex-end;
             gap: 12px;
             margin-top: 25px;
+            flex-wrap: wrap;
         }
         
         .btn {
@@ -307,6 +435,7 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 1rem;
+            min-width: 120px;
         }
         
         .btn-primary {
@@ -343,7 +472,7 @@
             border-top: 1px solid #eee;
         }
         
-        .empty-gallery {
+        .empty-gallery, .empty-folders {
             text-align: center;
             padding: 40px 20px;
             color: #888;
@@ -475,8 +604,7 @@
                 font-size: 2rem;
             }
             
-            .financing-sections {
-                flex-direction: column;
+            .sections-container {
                 gap: 20px;
             }
             
@@ -569,38 +697,27 @@
 <body>
     <div class="container">
         <header>
-            <h1>Computations</h1>
-            <p>tab is currently undergoing upgrades to provide a more user-friendly interface. For the latest updates and information, kindly coordinate with your respective brokers.</p>
+            <h1>BTB Gallery</h1>
+            <p>Organize and share your images</p>
         </header>
         
-        <div class="financing-sections">
-            <div class="section">
+        <div class="sections-container">
+            <!-- Gallery Section -->
+            <div class="section" id="gallery-section">
                 <div class="section-header">
-                    <h2 class="section-title">HDMF Pag-IBIG</h2>
-                    <div class="upload-icon" onclick="openUploadModal('pagibig')">
-                        <i class="fas fa-upload"></i>
+                    <h2 class="section-title">Gallery</h2>
+                    <div class="upload-icon" onclick="openFolderModal()">
+                        <i class="fas fa-folder-plus"></i>
                     </div>
                 </div>
-                <div id="pagibig-gallery" class="gallery">
-                    <div class="empty-gallery">
+                <div id="gallery-folders" class="folders-container">
+                    <div class="empty-folders">
                         <div class="spinner"></div>
-                        <div>Loading images...</div>
+                        <div>Loading folders...</div>
                     </div>
                 </div>
-            </div>
-            
-            <div class="section">
-                <div class="section-header">
-                    <h2 class="section-title">Bank BPI-MayBahay </h2>
-                    <div class="upload-icon" onclick="openUploadModal('bank')">
-                        <i class="fas fa-upload"></i>
-                    </div>
-                </div>
-                <div id="bank-gallery" class="gallery">
-                    <div class="empty-gallery">
-                        <div class="spinner"></div>
-                        <div>Loading images...</div>
-                    </div>
+                <div id="gallery-view" class="gallery" style="display: none;">
+                    <!-- Gallery images will be loaded here -->
                 </div>
             </div>
         </div>
@@ -613,25 +730,32 @@
     <!-- Upload Modal -->
     <div id="uploadModal" class="upload-modal">
         <div class="modal-box">
-            <h2>Upload Image</h2>
+            <h2 id="uploadModalTitle">Upload Image</h2>
             <div class="form-group">
-                <label for="fileName">File Name</label>
-                <input type="text" id="fileName" placeholder="Enter file name">
+                <label for="fileName">Image Name</label>
+                <input type="text" id="fileName" placeholder="Enter image name">
             </div>
             <div class="form-group">
-                <label for="imageFile">Select Image</label>
-                <input type="file" id="imageFile" accept="image/*">
+                <label for="fileInput">Select Image</label>
+                <input type="file" id="fileInput" accept="image/*">
+            </div>
+            <div class="form-group" id="folderNameGroup" style="display: none;">
+                <label for="folderName">Folder Name</label>
+                <input type="text" id="folderName" placeholder="Enter folder name">
             </div>
             <div class="form-group">
                 <label for="adminCode">Admin Code</label>
                 <input type="password" id="adminCode" placeholder="Enter admin code">
+                <span class="password-toggle" onclick="togglePassword('adminCode')">
+                    <i class="fas fa-eye"></i>
+                </span>
             </div>
             <div class="progress-bar">
                 <div class="progress" id="uploadProgress"></div>
             </div>
             <div class="form-actions">
                 <button class="btn btn-secondary" onclick="closeUploadModal()">Cancel</button>
-                <button class="btn btn-primary" id="uploadButton" onclick="uploadImage()">Upload</button>
+                <button class="btn btn-primary" id="uploadButton" onclick="uploadFile()">Upload</button>
             </div>
         </div>
     </div>
@@ -643,10 +767,35 @@
             <div class="form-group">
                 <label for="deleteAdminCode">Admin Code</label>
                 <input type="password" id="deleteAdminCode" placeholder="Enter admin code to confirm">
+                <span class="password-toggle" onclick="togglePassword('deleteAdminCode')">
+                    <i class="fas fa-eye"></i>
+                </span>
             </div>
             <div class="form-actions">
                 <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancel</button>
                 <button class="btn btn-primary" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Folder Creation Modal -->
+    <div id="folderModal" class="folder-modal">
+        <div class="modal-box">
+            <h2>Create New Folder</h2>
+            <div class="form-group">
+                <label for="newFolderName">Folder Name</label>
+                <input type="text" id="newFolderName" placeholder="Enter new folder name">
+            </div>
+            <div class="form-group">
+                <label for="folderAdminCode">Admin Code</label>
+                <input type="password" id="folderAdminCode" placeholder="Enter admin code">
+                <span class="password-toggle" onclick="togglePassword('folderAdminCode')">
+                    <i class="fas fa-eye"></i>
+                </span>
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-secondary" onclick="closeFolderModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="createFolder()">Create Folder</button>
             </div>
         </div>
     </div>
@@ -688,16 +837,31 @@
         const database = firebase.database();
         
         // Global variables
-        let currentSection = '';
+        let currentSection = 'gallery';
+        let currentFolderId = '';
+        let currentFolderName = '';
+        let currentFolderView = false;
         let currentImageKey = '';
         let currentImageUrl = '';
-        let currentImagePath = '';
         let uploadTask = null;
-        let uploadTimeout = null;
         let dataLoaded = false;
+        let itemToDelete = null;
         
-        // Default placeholder image
-        const DEFAULT_IMAGE = "data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjVmN2ZhIi8+CiAgPHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzhjOGM4YyIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk5vIGltYWdlIGF2YWlsYWJsZTwvdGV4dD4KICA8dGV4dCB4PSI1MCUiIHk9IjY1JSIgZm9udC1mYW1pbHk9IkFyaWFsLCBzYW5zLXNlcmlmIiBmb250LXNpemU9IjEyIiBmaWxsPSIjYzBjMGMwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBkeT0iLjNlbSI+Q2xpY2sgdG8gdXBsb2FkPC90ZXh0Pgo8L3N2Zz4=";
+        // Toggle password visibility
+        function togglePassword(inputId) {
+            const input = document.getElementById(inputId);
+            const icon = input.nextElementSibling.querySelector('i');
+            
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        }
         
         // Show notification
         function showNotification(message, isError = false) {
@@ -717,9 +881,17 @@
         }
         
         // Modal functions
-        function openUploadModal(section) {
-            currentSection = section;
+        function openUploadModal() {
             const modal = document.getElementById('uploadModal');
+            const folderNameGroup = document.getElementById('folderNameGroup');
+            
+            // Show folder name input only when not in a folder view
+            if (currentFolderView) {
+                folderNameGroup.style.display = 'none';
+            } else {
+                folderNameGroup.style.display = 'block';
+            }
+            
             modal.style.display = 'flex';
             
             setTimeout(() => {
@@ -734,20 +906,15 @@
                 uploadTask = null;
             }
             
-            // Clear any timeout
-            if (uploadTimeout) {
-                clearTimeout(uploadTimeout);
-                uploadTimeout = null;
-            }
-            
             const modal = document.getElementById('uploadModal');
             modal.classList.remove('active');
             
             setTimeout(() => {
                 modal.style.display = 'none';
                 document.getElementById('fileName').value = '';
-                document.getElementById('imageFile').value = '';
+                document.getElementById('fileInput').value = '';
                 document.getElementById('adminCode').value = '';
+                document.getElementById('folderName').value = '';
                 document.querySelector('.progress-bar').style.display = 'none';
                 document.getElementById('uploadProgress').style.width = '0%';
                 
@@ -757,10 +924,27 @@
             }, 300);
         }
         
-        function openDeleteModal(imageKey, imageUrl, imagePath) {
-            currentImageKey = imageKey;
-            currentImageUrl = imageUrl;
-            currentImagePath = imagePath;
+        function openFolderModal() {
+            const modal = document.getElementById('folderModal');
+            modal.style.display = 'flex';
+            
+            setTimeout(() => {
+                modal.classList.add('active');
+            }, 10);
+        }
+        
+        function closeFolderModal() {
+            const modal = document.getElementById('folderModal');
+            modal.classList.remove('active');
+            
+            setTimeout(() => {
+                modal.style.display = 'none';
+                document.getElementById('newFolderName').value = '';
+                document.getElementById('folderAdminCode').value = '';
+            }, 300);
+        }
+        
+        function openDeleteModal() {
             const modal = document.getElementById('deleteModal');
             modal.style.display = 'flex';
             
@@ -779,9 +963,10 @@
             }, 300);
         }
         
-        function openModal(imageUrl) {
+        function openModal(imageUrl, imageKey = '') {
             const modal = document.getElementById('imageModal');
             document.getElementById('modalImage').src = imageUrl;
+            currentImageKey = imageKey;
             modal.style.display = 'flex';
             
             setTimeout(() => {
@@ -803,8 +988,8 @@
             }, 300);
         }
         
-        // Convert image to Base64
-        function convertImageToBase64(file) {
+        // Convert file to Base64 (for gallery images)
+        function convertFileToBase64(file) {
             return new Promise((resolve, reject) => {
                 const reader = new FileReader();
                 reader.readAsDataURL(file);
@@ -813,14 +998,273 @@
             });
         }
         
-        // Upload image to Firebase
-        async function uploadImage() {
-            const fileName = document.getElementById('fileName').value;
-            const imageFile = document.getElementById('imageFile').files[0];
-            const adminCode = document.getElementById('adminCode').value;
+        // Delete image from modal
+        function deleteImage() {
+            if (!currentImageKey) {
+                showNotification('No image selected for deletion', true);
+                return;
+            }
             
-            if (!fileName || !imageFile || !adminCode) {
-                showNotification('Please fill all fields', true);
+            // Set the item to delete as an image
+            itemToDelete = { type: 'image', key: currentImageKey };
+            closeModal();
+            openDeleteModal();
+        }
+        
+        // Create folder function
+        async function createFolder() {
+            const folderName = document.getElementById('newFolderName').value.trim();
+            const adminCode = document.getElementById('folderAdminCode').value.trim();
+
+            if (!folderName) {
+                showNotification('Please enter a folder name', true);
+                return;
+            }
+
+            if (adminCode !== '001122') {
+                showNotification('Invalid admin code', true);
+                return;
+            }
+
+            try {
+                const newFolderRef = database.ref('folders1').push();
+                await newFolderRef.set({
+                    name: folderName,
+                    timestamp: Date.now()
+                });
+                showNotification('Folder created successfully!');
+                closeFolderModal();
+                loadFolders(); // Reload to show new folder
+            } catch (error) {
+                console.error('Error creating folder:', error);
+                showNotification('Failed to create folder. Please try again.', true);
+            }
+        }
+
+        // View folder contents
+        function viewFolder(folderId, folderName) {
+            currentFolderId = folderId;
+            currentFolderName = folderName;
+            currentFolderView = true;
+
+            document.getElementById('gallery-folders').style.display = 'none';
+            document.getElementById('gallery-view').style.display = 'grid';
+
+            // Update header for folder view
+            const gallerySectionHeader = document.querySelector('#gallery-section .section-header');
+            gallerySectionHeader.innerHTML = `
+                <div class="folder-view-title">
+                    <i class="fas fa-folder-open"></i>
+                    <span>${folderName}</span>
+                </div>
+                <div style="display: flex; gap: 10px;">
+                    <div class="upload-icon" onclick="openUploadModal()" title="Upload Image">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                    <button class="back-button" onclick="backToFolders()">
+                        <i class="fas fa-arrow-left"></i>
+                        Back
+                    </button>
+                </div>
+            `;
+
+            loadFolderImages(folderId);
+        }
+
+        // Load images for a specific folder
+        async function loadFolderImages(folderId) {
+            try {
+                const filesRef = database.ref('files').orderByChild('folderId').equalTo(folderId);
+                const snapshot = await filesRef.once('value');
+                const filesData = snapshot.val();
+
+                const galleryView = document.getElementById('gallery-view');
+                galleryView.innerHTML = '';
+
+                if (!filesData) {
+                    galleryView.innerHTML = '<div class="empty-gallery">No images in this folder</div>';
+                    return;
+                }
+
+                const images = [];
+                Object.keys(filesData).forEach(key => {
+                    const file = filesData[key];
+                    if (file.section === 'gallery') {
+                        file.key = key;
+                        images.push(file);
+                    }
+                });
+
+                // Sort images by timestamp (newest first)
+                images.sort((a, b) => b.timestamp - a.timestamp);
+
+                images.forEach(image => {
+                    const galleryItem = document.createElement('div');
+                    galleryItem.className = 'gallery-item';
+                    galleryItem.innerHTML = `
+                        <img src="${image.data}" alt="${image.name}" onclick="openModal('${image.data}', '${image.key}')">
+                        <p>${image.name}</p>
+                    `;
+                    galleryView.appendChild(galleryItem);
+                });
+
+            } catch (error) {
+                console.error('Error loading folder images:', error);
+                showNotification('Error loading images. Please try again.', true);
+            }
+        }
+
+        // Back to folders view
+        function backToFolders() {
+            currentFolderId = '';
+            currentFolderName = '';
+            currentFolderView = false;
+
+            document.getElementById('gallery-view').style.display = 'none';
+            document.getElementById('gallery-folders').style.display = 'grid';
+
+            // Restore original header
+            const gallerySectionHeader = document.querySelector('#gallery-section .section-header');
+            gallerySectionHeader.innerHTML = `
+                <h2 class="section-title">Gallery</h2>
+                <div class="upload-icon" onclick="openFolderModal()">
+                    <i class="fas fa-folder-plus"></i>
+                </div>
+            `;
+        }
+
+        // Request delete confirmation for folder
+        function requestDeleteFolder(key) {
+            itemToDelete = { type: 'folder', key };
+            openDeleteModal();
+        }
+
+        // Confirm delete from Firebase
+        async function confirmDelete() {
+            const adminCode = document.getElementById('deleteAdminCode').value;
+            
+            if (adminCode !== '001122') {
+                showNotification('Invalid admin code', true);
+                return;
+            }
+            
+            if (!itemToDelete) {
+                showNotification('No item selected for deletion', true);
+                return;
+            }
+
+            try {
+                if (itemToDelete.type === 'folder') {
+                    // Delete folder and all its contents
+                    const folderRef = database.ref(`folders/${itemToDelete.key}`);
+                    await folderRef.remove();
+
+                    // Delete all images within that folder
+                    const imagesInFolderRef = database.ref('files').orderByChild('folderId').equalTo(itemToDelete.key);
+                    const snapshot = await imagesInFolderRef.once('value');
+                    const updates = {};
+                    snapshot.forEach(childSnapshot => {
+                        updates[childSnapshot.key] = null; // Set to null to delete
+                    });
+                    if (Object.keys(updates).length > 0) {
+                        await database.ref('files').update(updates);
+                    }
+
+                    showNotification('Folder and its contents deleted successfully');
+                } else if (itemToDelete.type === 'image') {
+                    // Delete image
+                    const fileRef = database.ref(`files/${itemToDelete.key}`);
+                    await fileRef.remove();
+                    showNotification('Image deleted successfully');
+                }
+                
+                closeDeleteModal();
+                itemToDelete = null;
+                
+                // Refresh the view
+                if (currentFolderView) {
+                    loadFolderImages(currentFolderId);
+                } else {
+                    loadFolders();
+                }
+            } catch (error) {
+                console.error('Error deleting item:', error);
+                showNotification('Failed to delete item. Please try again.', true);
+            }
+        }
+
+        // Load folders from Firebase
+        async function loadFolders() {
+            try {
+                const foldersRef = database.ref('folders');
+                const snapshot = await foldersRef.once('value');
+                const foldersData = snapshot.val();
+
+                const foldersContainer = document.getElementById('gallery-folders');
+                foldersContainer.innerHTML = '';
+
+                if (!foldersData) {
+                    foldersContainer.innerHTML = '<div class="empty-folders">No folders created yet</div>';
+                    return;
+                }
+
+                const folders = [];
+                Object.keys(foldersData).forEach(key => {
+                    const folder = foldersData[key];
+                    folder.key = key;
+                    folders.push(folder);
+                });
+
+                // Sort folders by timestamp (newest first)
+                folders.sort((a, b) => b.timestamp - a.timestamp);
+
+                // Count images in each folder
+                for (const folder of folders) {
+                    const filesRef = database.ref('files').orderByChild('folderId').equalTo(folder.key);
+                    const filesSnapshot = await filesRef.once('value');
+                    folder.imageCount = filesSnapshot.exists() ? filesSnapshot.numChildren() : 0;
+                }
+
+                folders.forEach(folder => {
+                    const folderItem = document.createElement('div');
+                    folderItem.className = 'folder-item';
+                    folderItem.innerHTML = `
+                        <div class="folder-actions">
+                            <div class="folder-action folder-delete" onclick="event.stopPropagation(); requestDeleteFolder('${folder.key}')">
+                                <i class="fas fa-trash"></i>
+                            </div>
+                        </div>
+                        <div class="folder-icon">
+                            <i class="fas fa-folder"></i>
+                        </div>
+                        <div class="folder-name">${folder.name}</div>
+                        <div class="folder-count">${folder.imageCount} image(s)</div>
+                    `;
+                    folderItem.addEventListener('click', () => viewFolder(folder.key, folder.name));
+                    foldersContainer.appendChild(folderItem);
+                });
+
+            } catch (error) {
+                console.error('Error loading folders:', error);
+                showNotification('Error loading folders. Please try again.', true);
+            }
+        }
+
+        // Upload file to Firebase
+        async function uploadFile() {
+            const fileName = document.getElementById('fileName').value.trim();
+            const fileInput = document.getElementById('fileInput');
+            const adminCode = document.getElementById('adminCode').value.trim();
+            const folderName = document.getElementById('folderName').value.trim();
+            const uploadButton = document.getElementById('uploadButton');
+            
+            if (!fileName) {
+                showNotification('Please enter a file name', true);
+                return;
+            }
+            
+            if (!fileInput.files[0]) {
+                showNotification('Please select a file to upload', true);
                 return;
             }
             
@@ -830,228 +1274,103 @@
             }
             
             // Disable upload button to prevent multiple clicks
-            const uploadButton = document.getElementById('uploadButton');
             uploadButton.disabled = true;
             uploadButton.textContent = 'Uploading...';
             
-            // Show progress bar
-            const progressBar = document.querySelector('.progress-bar');
-            progressBar.style.display = 'block';
+            const file = fileInput.files[0];
+            const fileExtension = file.name.split('.').pop();
+            const timestamp = Date.now();
+            const storageRef = storage.ref().child(`images/${fileName}_${timestamp}.${fileExtension}`);
             
             try {
-                // Convert image to base64
-                const imageData = await convertImageToBase64(imageFile);
+                // Show progress bar
+                const progressBar = document.querySelector('.progress-bar');
+                const progressElement = document.getElementById('uploadProgress');
+                progressBar.style.display = 'block';
                 
-                // Save to Realtime Database
-                const timestamp = Date.now();
-                const imageRef = {
-                    name: fileName,
-                    url: imageData,
-                    path: `${currentSection}/${timestamp}_${imageFile.name}`,
-                    timestamp: timestamp,
-                    section: currentSection
-                };
+                // Upload to Firebase Storage
+                uploadTask = storageRef.put(file);
                 
-                // Push data to database
-                const newImageRef = database.ref('images').push();
-                await newImageRef.set(imageRef);
-                
-                showNotification('Image uploaded successfully!');
-                closeUploadModal();
-                loadImages();
-                
+                // Monitor upload progress
+                uploadTask.on('state_changed', 
+                    (snapshot) => {
+                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                        progressElement.style.width = progress + '%';
+                    },
+                    (error) => {
+                        console.error('Upload error:', error);
+                        showNotification('Upload failed. Please try again.', true);
+                        progressBar.style.display = 'none';
+                        uploadButton.disabled = false;
+                        uploadButton.textContent = 'Upload';
+                    },
+                    async () => {
+                        try {
+                            // Get download URL
+                            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                            
+                            // Save to Realtime Database
+                            const fileData = {
+                                name: fileName,
+                                data: downloadURL,
+                                timestamp: timestamp,
+                                section: currentSection
+                            };
+                            
+                            // If we're in a folder view, add folderId
+                            if (currentFolderView) {
+                                fileData.folderId = currentFolderId;
+                            } else if (folderName) {
+                                // If folder name is provided, find or create folder
+                                const foldersRef = database.ref('folders');
+                                const snapshot = await foldersRef.orderByChild('name').equalTo(folderName).once('value');
+                                
+                                let folderId;
+                                if (snapshot.exists()) {
+                                    // Use existing folder
+                                    const folderData = snapshot.val();
+                                    folderId = Object.keys(folderData)[0];
+                                } else {
+                                    // Create new folder
+                                    const newFolderRef = foldersRef.push();
+                                    folderId = newFolderRef.key;
+                                    await newFolderRef.set({
+                                        name: folderName,
+                                        timestamp: Date.now()
+                                    });
+                                }
+                                
+                                fileData.folderId = folderId;
+                            }
+                            
+                            await database.ref('files').push(fileData);
+                            
+                            showNotification('File uploaded successfully!');
+                            closeUploadModal();
+                            
+                            // Refresh the view
+                            if (currentFolderView) {
+                                loadFolderImages(currentFolderId);
+                            } else {
+                                loadFolders();
+                            }
+                        } catch (error) {
+                            console.error('Error saving file data:', error);
+                            showNotification('Upload completed but failed to save metadata. Please try again.', true);
+                        }
+                    }
+                );
             } catch (error) {
-                console.error('Upload failed:', error);
+                console.error('Upload error:', error);
                 showNotification('Upload failed. Please try again.', true);
-                progressBar.style.display = 'none';
                 uploadButton.disabled = false;
                 uploadButton.textContent = 'Upload';
             }
         }
         
-        // Delete image from Firebase
-        function deleteImage() {
-            closeModal();
-            // We need to get the image path from the database
-            database.ref('images').orderByChild('url').equalTo(currentImageUrl).once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        const imageData = Object.values(snapshot.val())[0];
-                        const imageKey = Object.keys(snapshot.val())[0];
-                        openDeleteModal(imageKey, currentImageUrl, imageData.path);
-                    }
-                })
-                .catch((error) => {
-                    console.error('Error finding image in database:', error);
-                    showNotification('Error preparing for deletion', true);
-                });
-        }
-        
-        function confirmDelete() {
-            const adminCode = document.getElementById('deleteAdminCode').value;
-            
-            if (!adminCode) {
-                showNotification('Please enter admin code', true);
-                return;
-            }
-            
-            if (adminCode !== '001122') {
-                showNotification('Invalid admin code', true);
-                return;
-            }
-            
-            // Delete from Database
-            database.ref(`images/${currentImageKey}`).remove()
-                .then(() => {
-                    showNotification('Image deleted successfully!');
-                    closeDeleteModal();
-                    loadImages();
-                })
-                .catch((error) => {
-                    console.error('Database delete failed:', error);
-                    showNotification('Delete from database failed.', true);
-                });
-        }
-        
-        // Load images from Firebase
-        function loadImages() {
-            // Set loading state
-            document.getElementById('pagibig-gallery').innerHTML = `
-                <div class="empty-gallery">
-                    <div class="spinner"></div>
-                    <div>Loading images...</div>
-                </div>
-            `;
-            document.getElementById('bank-gallery').innerHTML = `
-                <div class="empty-gallery">
-                    <div class="spinner"></div>
-                    <div>Loading images...</div>
-                </div>
-            `;
-            
-            // Set timeout to show default images if Firebase doesn't respond in 3 seconds
-            const timeout = setTimeout(() => {
-                if (!dataLoaded) {
-                    console.log("Firebase response timed out, using default images");
-                    document.getElementById('pagibig-gallery').innerHTML = `
-                        <div class="empty-gallery">No images uploaded yet</div>
-                    `;
-                    document.getElementById('bank-gallery').innerHTML = `
-                        <div class="empty-gallery">No images uploaded yet</div>
-                    `;
-                    showNotification("Connection timeout. Using cached data.", false);
-                }
-            }, 3000);
-            
-            // Load all images from database
-            database.ref('images').once('value').then((snapshot) => {
-                clearTimeout(timeout);
-                dataLoaded = true;
-                
-                if (!snapshot.exists()) {
-                    document.getElementById('pagibig-gallery').innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
-                    document.getElementById('bank-gallery').innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
-                    return;
-                }
-                
-                const images = [];
-                snapshot.forEach((childSnapshot) => {
-                    images.push({
-                        key: childSnapshot.key,
-                        ...childSnapshot.val()
-                    });
-                });
-                
-                // Sort by timestamp (newest first)
-                images.sort((a, b) => b.timestamp - a.timestamp);
-                
-                // Separate images by section
-                const pagibigImages = images.filter(img => img.section === 'pagibig');
-                const bankImages = images.filter(img => img.section === 'bank');
-                
-                // Display Pag-IBIG images
-                const pagibigGallery = document.getElementById('pagibig-gallery');
-                if (pagibigImages.length === 0) {
-                    pagibigGallery.innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
-                } else {
-                    pagibigGallery.innerHTML = '';
-                    pagibigImages.forEach((image) => {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.className = 'gallery-item';
-                        itemDiv.innerHTML = `
-                            <img src="${image.url}" alt="${image.name}">
-                            <p>${image.name}</p>
-                        `;
-                        itemDiv.addEventListener('click', () => {
-                            currentSection = image.section;
-                            currentImageKey = image.key;
-                            currentImageUrl = image.url;
-                            currentImagePath = image.path;
-                            openModal(image.url);
-                        });
-                        pagibigGallery.appendChild(itemDiv);
-                    });
-                }
-                
-                // Display Bank images
-                const bankGallery = document.getElementById('bank-gallery');
-                if (bankImages.length === 0) {
-                    bankGallery.innerHTML = '<div class="empty-gallery">No images uploaded yet</div>';
-                } else {
-                    bankGallery.innerHTML = '';
-                    bankImages.forEach((image) => {
-                        const itemDiv = document.createElement('div');
-                        itemDiv.className = 'gallery-item';
-                        itemDiv.innerHTML = `
-                            <img src="${image.url}" alt="${image.name}">
-                            <p>${image.name}</p>
-                        `;
-                        itemDiv.addEventListener('click', () => {
-                            currentSection = image.section;
-                            currentImageKey = image.key;
-                            currentImageUrl = image.url;
-                            currentImagePath = image.path;
-                            openModal(image.url);
-                        });
-                        bankGallery.appendChild(itemDiv);
-                    });
-                }
-            }).catch((error) => {
-                clearTimeout(timeout);
-                console.error('Error loading images:', error);
-                showNotification('Error loading images', true);
-                
-                // Show empty state on error
-                document.getElementById('pagibig-gallery').innerHTML = '<div class="empty-gallery">Error loading images</div>';
-                document.getElementById('bank-gallery').innerHTML = '<div class="empty-gallery">Error loading images</div>';
-            });
-        }
-        
-        // Initial load
+        // Initialize the app
         window.onload = function() {
-            loadImages();
-            
-            // Close modals when clicking outside
-            window.onclick = function(event) {
-                if (event.target === document.getElementById('uploadModal')) {
-                    closeUploadModal();
-                }
-                if (event.target === document.getElementById('deleteModal')) {
-                    closeDeleteModal();
-                }
-                if (event.target === document.getElementById('imageModal')) {
-                    closeModal();
-                }
-            };
-            
-            // Close modals with Escape key
-            document.addEventListener('keydown', function(event) {
-                if (event.key === 'Escape') {
-                    closeModal();
-                    closeUploadModal();
-                    closeDeleteModal();
-                }
-            });
+            loadFolders();
         };
     </script>
 </body>
