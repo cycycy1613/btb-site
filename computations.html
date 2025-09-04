@@ -336,21 +336,6 @@
             border: 2px solid white;
         }
         
-        .modal-control.nav-control {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            display: none; /* Hidden by default */
-        }
-        
-        .modal-control.nav-control.prev {
-            left: -70px;
-        }
-        
-        .modal-control.nav-control.next {
-            right: -70px;
-        }
-
         .modal-control:hover {
             transform: scale(1.1);
             background: rgba(0, 0, 0, 0.9);
@@ -706,14 +691,6 @@
                 height: 40px;
                 font-size: 1.1rem;
             }
-
-            .modal-control.nav-control.prev {
-                left: 10px;
-            }
-            
-            .modal-control.nav-control.next {
-                right: 10px;
-            }
         }
     </style>
 </head>
@@ -822,12 +799,6 @@
         <div class="modal-content">
             <img id="modalImage" src="" alt="">
             <div class="modal-controls">
-                <div class="modal-control nav-control prev" onclick="navigateImage(-1)">
-                    <i class="fas fa-chevron-left"></i>
-                </div>
-                <div class="modal-control nav-control next" onclick="navigateImage(1)">
-                    <i class="fas fa-chevron-right"></i>
-                </div>
                 <div class="modal-control" onclick="deleteImage()">
                     <i class="fas fa-trash"></i>
                 </div>
@@ -868,9 +839,6 @@
         let uploadTask = null;
         let dataLoaded = false;
         let itemToDelete = null;
-
-        let currentImages = []; // Stores the array of images for the current folder view
-        let currentIndex = 0;   // Stores the index of the currently displayed image
         
         // Toggle password visibility
         function togglePassword(inputId) {
@@ -988,29 +956,17 @@
             }, 300);
         }
         
-        // Function to open the image modal
-        function openModal(imageUrl, imageKey) {
+        function openModal(imageUrl, imageKey = '') {
             const modal = document.getElementById('imageModal');
-            const navControls = document.querySelectorAll('.nav-control');
-
-            // Find the index of the clicked image
-            currentIndex = currentImages.findIndex(image => image.data === imageUrl);
-
             document.getElementById('modalImage').src = imageUrl;
             currentImageKey = imageKey;
             modal.style.display = 'flex';
-
+            
             setTimeout(() => {
                 modal.classList.add('active');
             }, 10);
-
-            // Show/hide navigation controls based on the number of images
-            if (currentImages.length > 1) {
-                navControls.forEach(control => control.style.display = 'flex');
-            } else {
-                navControls.forEach(control => control.style.display = 'none');
-            }
-
+            
+            // Prevent body from scrolling when modal is open
             document.body.style.overflow = 'hidden';
         }
         
@@ -1023,23 +979,6 @@
                 // Re-enable body scrolling
                 document.body.style.overflow = 'auto';
             }, 300);
-        }
-
-        // Function to navigate between images
-        function navigateImage(direction) {
-            let newIndex = currentIndex + direction;
-            
-            // Loop back if at the beginning or end of the array
-            if (newIndex < 0) {
-                newIndex = currentImages.length - 1;
-            } else if (newIndex >= currentImages.length) {
-                newIndex = 0;
-            }
-            
-            currentIndex = newIndex;
-            const newImage = currentImages[currentIndex];
-            document.getElementById('modalImage').src = newImage.data;
-            currentImageKey = newImage.key;
         }
         
         // Convert file to Base64 (for gallery images)
@@ -1137,7 +1076,6 @@
 
                 if (!filesData) {
                     galleryView.innerHTML = '<div class="empty-gallery">No images in this folder</div>';
-                    currentImages = []; // Clear the image array
                     return;
                 }
 
@@ -1152,9 +1090,6 @@
 
                 // Sort images by timestamp (newest first)
                 images.sort((a, b) => b.timestamp - a.timestamp);
-                
-                // Store the sorted images in the global variable
-                currentImages = images;
 
                 images.forEach(image => {
                     const galleryItem = document.createElement('div');
@@ -1177,7 +1112,6 @@
             currentFolderId = '';
             currentFolderName = '';
             currentFolderView = false;
-            currentImages = []; // Clear the image array when leaving the folder
 
             document.getElementById('gallery-view').style.display = 'none';
             document.getElementById('gallery-folders').style.display = 'grid';
@@ -1190,7 +1124,6 @@
                     <i class="fas fa-folder-plus"></i>
                 </div>
             `;
-            loadFolders();
         }
 
         // Request delete confirmation for folder
