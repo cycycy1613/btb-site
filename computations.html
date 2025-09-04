@@ -697,15 +697,14 @@
 <body>
     <div class="container">
         <header>
-            <h1>BTB Gallery</h1>
-            <p>Organize and share your images</p>
+            <h1>Computations</h1>
+            <p>Your One-Stop Hub for Sample Computations</p>
         </header>
         
         <div class="sections-container">
-            <!-- Gallery Section -->
             <div class="section" id="gallery-section">
                 <div class="section-header">
-                    <h2 class="section-title">Gallery</h2>
+                    <h2 class="section-title">Folders</h2>
                     <div class="upload-icon" onclick="openFolderModal()">
                         <i class="fas fa-folder-plus"></i>
                     </div>
@@ -717,8 +716,7 @@
                     </div>
                 </div>
                 <div id="gallery-view" class="gallery" style="display: none;">
-                    <!-- Gallery images will be loaded here -->
-                </div>
+                    </div>
             </div>
         </div>
         
@@ -727,7 +725,6 @@
         </footer>
     </div>
     
-    <!-- Upload Modal -->
     <div id="uploadModal" class="upload-modal">
         <div class="modal-box">
             <h2 id="uploadModalTitle">Upload Image</h2>
@@ -760,7 +757,6 @@
         </div>
     </div>
     
-    <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="delete-modal">
         <div class="modal-box">
             <h2>Confirm Deletion</h2>
@@ -778,7 +774,6 @@
         </div>
     </div>
     
-    <!-- Folder Creation Modal -->
     <div id="folderModal" class="folder-modal">
         <div class="modal-box">
             <h2>Create New Folder</h2>
@@ -800,7 +795,6 @@
         </div>
     </div>
     
-    <!-- Image View Modal -->
     <div id="imageModal" class="modal">
         <div class="modal-content">
             <img id="modalImage" src="" alt="">
@@ -815,7 +809,6 @@
         </div>
     </div>
     
-    <!-- Notification -->
     <div id="notification" class="notification"></div>
     
     <script>
@@ -1027,7 +1020,7 @@
             }
 
             try {
-                const newFolderRef = database.ref('folders1').push();
+                const newFolderRef = database.ref('folders01').push();
                 await newFolderRef.set({
                     name: folderName,
                     timestamp: Date.now()
@@ -1074,7 +1067,7 @@
         // Load images for a specific folder
         async function loadFolderImages(folderId) {
             try {
-                const filesRef = database.ref('files').orderByChild('folderId').equalTo(folderId);
+                const filesRef = database.ref('files01').orderByChild('folderId').equalTo(folderId);
                 const snapshot = await filesRef.once('value');
                 const filesData = snapshot.val();
 
@@ -1156,24 +1149,24 @@
             try {
                 if (itemToDelete.type === 'folder') {
                     // Delete folder and all its contents
-                    const folderRef = database.ref(`folders/${itemToDelete.key}`);
+                    const folderRef = database.ref(`folders01/${itemToDelete.key}`);
                     await folderRef.remove();
 
                     // Delete all images within that folder
-                    const imagesInFolderRef = database.ref('files').orderByChild('folderId').equalTo(itemToDelete.key);
+                    const imagesInFolderRef = database.ref('files01').orderByChild('folderId').equalTo(itemToDelete.key);
                     const snapshot = await imagesInFolderRef.once('value');
                     const updates = {};
                     snapshot.forEach(childSnapshot => {
                         updates[childSnapshot.key] = null; // Set to null to delete
                     });
                     if (Object.keys(updates).length > 0) {
-                        await database.ref('files').update(updates);
+                        await database.ref('files01').update(updates);
                     }
 
                     showNotification('Folder and its contents deleted successfully');
                 } else if (itemToDelete.type === 'image') {
                     // Delete image
-                    const fileRef = database.ref(`files/${itemToDelete.key}`);
+                    const fileRef = database.ref(`files01/${itemToDelete.key}`);
                     await fileRef.remove();
                     showNotification('Image deleted successfully');
                 }
@@ -1196,7 +1189,7 @@
         // Load folders from Firebase
         async function loadFolders() {
             try {
-                const foldersRef = database.ref('folders');
+                const foldersRef = database.ref('folders01');
                 const snapshot = await foldersRef.once('value');
                 const foldersData = snapshot.val();
 
@@ -1220,7 +1213,7 @@
 
                 // Count images in each folder
                 for (const folder of folders) {
-                    const filesRef = database.ref('files').orderByChild('folderId').equalTo(folder.key);
+                    const filesRef = database.ref('files01').orderByChild('folderId').equalTo(folder.key);
                     const filesSnapshot = await filesRef.once('value');
                     folder.imageCount = filesSnapshot.exists() ? filesSnapshot.numChildren() : 0;
                 }
@@ -1322,7 +1315,7 @@
                                 fileData.folderId = currentFolderId;
                             } else if (folderName) {
                                 // If folder name is provided, find or create folder
-                                const foldersRef = database.ref('folders');
+                                const foldersRef = database.ref('folders01');
                                 const snapshot = await foldersRef.orderByChild('name').equalTo(folderName).once('value');
                                 
                                 let folderId;
@@ -1343,7 +1336,7 @@
                                 fileData.folderId = folderId;
                             }
                             
-                            await database.ref('files').push(fileData);
+                            await database.ref('files01').push(fileData);
                             
                             showNotification('File uploaded successfully!');
                             closeUploadModal();
