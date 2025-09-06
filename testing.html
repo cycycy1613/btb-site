@@ -349,8 +349,8 @@
             color: white;
             font-size: 0.9rem;
             cursor: pointer;
-            transition: all 0.2s ease;
             opacity: 0;
+            transition: all 0.2s ease;
         }
         
         .folder-item:hover .folder-action {
@@ -499,6 +499,13 @@
         .modal-nav-btn:hover {
             background: rgba(0, 0, 0, 0.7);
             transform: scale(1.1);
+        }
+        
+        /* HIDE SLIDE BUTTONS ON MOBILE */
+        @media (max-width: 768px) {
+            .modal-nav-btn {
+                display: none;
+            }
         }
         
         .upload-modal, .delete-modal, .folder-modal {
@@ -832,12 +839,6 @@
             
             .file-actions {
                 align-self: flex-end;
-            }
-            
-            .action-icon {
-                width: 32px;
-                height: 32px;
-                font-size: 0.9rem;
             }
             
             .file-details {
