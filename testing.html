@@ -15,7 +15,7 @@
             box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-
+        
         body {
             background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
             color: #333;
@@ -24,7 +24,7 @@
             display: flex;
             flex-direction: column;
         }
-
+        
         .container {
             width: 100%;
             max-width: 1200px;
@@ -32,7 +32,7 @@
             padding: 20px;
             flex: 1;
         }
-
+        
         header {
             background: linear-gradient(to right, #1a3a6c, #2a5298);
             color: white;
@@ -43,18 +43,18 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
             animation: slideDown 0.5s ease-out;
         }
-
+        
         header h1 {
             font-size: 2.5rem;
             margin-bottom: 10px;
             text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
         }
-
+        
         header p {
             font-size: 1.1rem;
             opacity: 0.9;
         }
-
+        
         .sections-container {
             display: flex;
             flex-direction: column;
@@ -62,7 +62,7 @@
             margin-bottom: 40px;
             animation: fadeIn 0.8s ease-out;
         }
-
+        
         .section {
             background: white;
             border-radius: 12px;
@@ -70,12 +70,12 @@
             box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
+        
         .section:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
         }
-
+        
         .section-header {
             display: flex;
             justify-content: space-between;
@@ -84,13 +84,13 @@
             padding-bottom: 15px;
             border-bottom: 2px solid #eaeaea;
         }
-
+        
         .section-title {
             font-size: 1.8rem;
             color: #2a5298;
             font-weight: 600;
         }
-
+        
         .upload-icon {
             width: 50px;
             height: 50px;
@@ -105,19 +105,152 @@
             transition: all 0.3s ease;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
         }
-
+        
         .upload-icon:hover {
             background: #1a3a6c;
             transform: scale(1.05) rotate(5deg);
         }
-
+        
+        /* Files List Styles */
+        .files-list {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            padding: 10px;
+        }
+        
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 15px;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background-color 0.2s;
+        }
+        
+        .file-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .file-info-container {
+            display: flex;
+            align-items: center;
+            flex: 1;
+        }
+        
+        .file-icon {
+            margin-right: 15px;
+            font-size: 1.8rem;
+            width: 40px;
+            text-align: center;
+            color: #2a5298;
+        }
+        
+        .file-info {
+            display: flex;
+            flex-direction: column;
+            flex: 1;
+        }
+        
+        .file-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2a5298;
+        }
+        
+        .file-details {
+            display: flex;
+            gap: 15px;
+            font-size: 0.85rem;
+            color: #888;
+        }
+        
+        .file-date, .file-size {
+            display: flex;
+            align-items: center;
+        }
+        
+        .file-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .file-action-btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        
+        .btn-open {
+            background-color: #2a5298;
+            color: white;
+        }
+        
+        .btn-open:hover {
+            background-color: #1a3a6c;
+        }
+        
+        .btn-download {
+            background-color: #4caf50;
+            color: white;
+        }
+        
+        .btn-download:hover {
+            background-color: #3d8b40;
+        }
+        
+        .btn-delete {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        .btn-delete:hover {
+            background-color: #d32f2f;
+        }
+        
+        /* Action icons for files */
+        .action-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 1rem;
+            color: white;
+        }
+        
+        .download-icon {
+            background-color: #4caf50;
+        }
+        
+        .download-icon:hover {
+            background-color: #3d8b40;
+            transform: scale(1.1);
+        }
+        
+        .delete-icon {
+            background-color: #f44336;
+        }
+        
+        .delete-icon:hover {
+            background-color: #d32f2f;
+            transform: scale(1.1);
+        }
+        
         /* Gallery Styles */
         .gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
             gap: 15px;
         }
-
+        
         .gallery-item {
             position: relative;
             border-radius: 10px;
@@ -127,12 +260,12 @@
             transition: all 0.3s ease;
             animation: fadeIn 0.5s ease-out;
         }
-
+        
         .gallery-item:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 15px rgba(0, 0, 0, 0.15);
         }
-
+        
         .gallery-item img {
             width: 100%;
             height: 130px;
@@ -140,11 +273,11 @@
             display: block;
             transition: transform 0.5s ease;
         }
-
+        
         .gallery-item:hover img {
             transform: scale(1.05);
         }
-
+        
         .gallery-item p {
             padding: 10px;
             font-size: 0.85rem;
@@ -155,14 +288,14 @@
             text-overflow: ellipsis;
             font-weight: 500;
         }
-
+        
         /* Folder System Styles */
         .folders-container {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
             gap: 20px;
         }
-
+        
         .folder-item {
             background: white;
             border-radius: 12px;
@@ -173,30 +306,30 @@
             cursor: pointer;
             position: relative;
         }
-
+        
         .folder-item:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
         }
-
+        
         .folder-icon {
             font-size: 3.5rem;
             color: #ffa726;
             margin-bottom: 15px;
         }
-
+        
         .folder-name {
             font-weight: 600;
             color: #2a5298;
             margin-bottom: 5px;
             word-break: break-word;
         }
-
+        
         .folder-count {
             font-size: 0.85rem;
             color: #888;
         }
-
+        
         .folder-actions {
             position: absolute;
             top: 10px;
@@ -204,7 +337,7 @@
             display: flex;
             gap: 8px;
         }
-
+        
         .folder-action {
             width: 30px;
             height: 30px;
@@ -219,24 +352,24 @@
             transition: all 0.2s ease;
             opacity: 0;
         }
-
+        
         .folder-item:hover .folder-action {
             opacity: 1;
         }
-
+        
         .folder-action:hover {
             transform: scale(1.1);
             background: rgba(0, 0, 0, 0.9);
         }
-
+        
         .folder-delete {
             background: rgba(244, 67, 54, 0.8);
         }
-
+        
         .folder-delete:hover {
             background: rgba(211, 47, 47, 0.9);
         }
-
+        
         .folder-view-header {
             display: flex;
             justify-content: space-between;
@@ -246,7 +379,7 @@
             background: #f5f7fa;
             border-radius: 10px;
         }
-
+        
         .folder-view-title {
             display: flex;
             align-items: center;
@@ -255,7 +388,7 @@
             color: #2a5298;
             font-weight: 600;
         }
-
+        
         .back-button {
             padding: 8px 16px;
             background: #2a5298;
@@ -269,11 +402,11 @@
             align-items: center;
             gap: 8px;
         }
-
+        
         .back-button:hover {
             background: #1a3a6c;
         }
-
+        
         /* Modal Styles */
         .modal {
             display: none;
@@ -289,11 +422,11 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-
+        
         .modal.active {
             opacity: 1;
         }
-
+        
         .modal-content {
             position: relative;
             max-width: 90vw;
@@ -302,16 +435,15 @@
             justify-content: center;
             align-items: center;
             animation: zoomIn 0.3s ease-out;
-            overflow: hidden; /* To keep images within bounds */
         }
-
+        
         .modal-content img {
             max-width: 100%;
             max-height: 80vh;
             border-radius: 8px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         }
-
+        
         .modal-controls {
             position: absolute;
             top: 20px;
@@ -320,7 +452,7 @@
             gap: 15px;
             z-index: 1001;
         }
-
+        
         .modal-control {
             width: 50px;
             height: 50px;
@@ -336,44 +468,39 @@
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
             border: 2px solid white;
         }
-
+        
         .modal-control:hover {
             transform: scale(1.1);
             background: rgba(0, 0, 0, 0.9);
         }
-
-        /* Swipe navigation buttons */
+        
         .modal-nav {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.5rem;
+            width: 100%;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background 0.3s ease;
-            z-index: 1002;
+            justify-content: space-between;
+            padding: 0 10px;
         }
-
-        .modal-nav:hover {
-            background: rgba(0, 0, 0, 0.8);
+        
+        .modal-nav-btn {
+            background: rgba(0, 0, 0, 0.5);
+            border: none;
+            color: white;
+            font-size: 2rem;
+            cursor: pointer;
+            padding: 10px;
+            border-radius: 50%;
+            transition: background 0.3s, transform 0.3s;
+            z-index: 1001;
         }
-
-        .modal-nav-prev {
-            left: 20px;
+        
+        .modal-nav-btn:hover {
+            background: rgba(0, 0, 0, 0.7);
+            transform: scale(1.1);
         }
-
-        .modal-nav-next {
-            right: 20px;
-        }
-
+        
         .upload-modal, .delete-modal, .folder-modal {
             display: none;
             position: fixed;
@@ -388,11 +515,11 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
-
+        
         .upload-modal.active, .delete-modal.active, .folder-modal.active {
             opacity: 1;
         }
-
+        
         .modal-box {
             background: white;
             padding: 30px;
@@ -404,11 +531,11 @@
             transition: transform 0.3s ease;
             animation: modalSlideIn 0.3s ease-out;
         }
-
+        
         .upload-modal.active .modal-box, .delete-modal.active .modal-box {
             transform: translateY(0);
         }
-
+        
         .modal-box h2 {
             margin-bottom: 20px;
             color: #2a5298;
@@ -416,12 +543,12 @@
             font-size: 1.8rem;
             font-weight: 600;
         }
-
+        
         .form-group {
             margin-bottom: 20px;
             position: relative;
         }
-
+        
         .password-toggle {
             position: absolute;
             right: 10px;
@@ -429,14 +556,14 @@
             cursor: pointer;
             color: #777;
         }
-
+        
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 600;
             color: #444;
         }
-
+        
         .form-group input, .form-group select {
             width: 100%;
             padding: 14px;
@@ -445,13 +572,13 @@
             font-size: 1rem;
             transition: border-color 0.3s ease, box-shadow 0.3s ease;
         }
-
+        
         .form-group input:focus, .form-group select:focus {
             border-color: #2a5298;
             box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.2);
             outline: none;
         }
-
+        
         .form-actions {
             display: flex;
             justify-content: flex-end;
@@ -459,7 +586,7 @@
             margin-top: 25px;
             flex-wrap: wrap;
         }
-
+        
         .btn {
             padding: 14px 26px;
             border: none;
@@ -470,31 +597,31 @@
             font-size: 1rem;
             min-width: 120px;
         }
-
+        
         .btn-primary {
             background: #2a5298;
             color: white;
             box-shadow: 0 4px 10px rgba(42, 82, 152, 0.25);
         }
-
+        
         .btn-primary:hover {
             background: #1a3a6c;
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(42, 82, 152, 0.3);
         }
-
+        
         .btn-secondary {
             background: #eaeaea;
             color: #555;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-
+        
         .btn-secondary:hover {
             background: #d4d4d4;
             transform: translateY(-2px);
             box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
         }
-
+        
         footer {
             text-align: center;
             padding: 25px;
@@ -504,15 +631,15 @@
             margin-top: 40px;
             border-top: 1px solid #eee;
         }
-
-        .empty-gallery, .empty-folders {
+        
+        .empty-gallery, .empty-files {
             text-align: center;
             padding: 40px 20px;
             color: #888;
             font-style: italic;
             grid-column: 1 / -1;
         }
-
+        
         .notification {
             position: fixed;
             top: 20px;
@@ -530,15 +657,15 @@
             align-items: center;
             gap: 10px;
         }
-
+        
         .notification.show {
             transform: translateX(0);
         }
-
+        
         .notification.error {
             background: #f44336;
         }
-
+        
         .progress-bar {
             height: 6px;
             background: #ddd;
@@ -547,7 +674,7 @@
             overflow: hidden;
             display: none;
         }
-
+        
         .progress {
             height: 100%;
             background: linear-gradient(to right, #2a5298, #3a6cc8);
@@ -555,7 +682,7 @@
             transition: width 0.3s ease;
             border-radius: 10px;
         }
-
+        
         .spinner {
             border: 4px solid rgba(0, 0, 0, 0.1);
             border-left: 4px solid #2a5298;
@@ -565,164 +692,212 @@
             animation: spin 1s linear infinite;
             margin: 15px auto;
         }
-
+        
+        /* File Preview Styles */
+        .file-preview-container {
+            width: 100%;
+            height: 80vh;
+            border: none;
+            border-radius: 8px;
+            background: white;
+        }
+        
+        .file-preview-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            border-radius: 8px;
+        }
+        
         /* Animations */
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
-
+        
         @keyframes fadeIn {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
+        
         @keyframes slideDown {
-            from {
+            from { 
                 opacity: 0;
                 transform: translateY(-20px);
             }
-            to {
+            to { 
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-
+        
         @keyframes zoomIn {
-            from {
+            from { 
                 opacity: 0;
                 transform: scale(0.9);
             }
-            to {
+            to { 
                 opacity: 1;
                 transform: scale(1);
             }
         }
-
+        
         @keyframes modalSlideIn {
-            from {
+            from { 
                 opacity: 0;
                 transform: translateY(-30px);
             }
-            to {
+            to { 
                 opacity: 1;
                 transform: translateY(0);
             }
         }
-
+        
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
-
+        
         /* Responsive Design */
         @media (max-width: 992px) {
             .gallery {
                 grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
             }
         }
-
+        
         @media (max-width: 768px) {
             .container {
                 padding: 15px;
             }
-
+            
             header {
                 padding: 20px 0;
                 border-radius: 10px;
             }
-
+            
             header h1 {
                 font-size: 2rem;
             }
-
+            
             .sections-container {
                 gap: 20px;
             }
-
+            
             .section {
                 min-width: 100%;
             }
-
+            
             .section-title {
                 font-size: 1.6rem;
             }
-
+            
             .gallery {
                 grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
                 gap: 12px;
             }
-
+            
             .gallery-item img {
                 height: 110px;
             }
-
+            
             .modal-controls {
                 top: 15px;
                 right: 15px;
             }
-
+            
             .modal-control {
                 width: 45px;
                 height: 45px;
                 font-size: 1.2rem;
             }
-
+            
             .modal-box {
                 padding: 25px 20px;
             }
-
+            
             .form-actions {
                 flex-direction: column;
             }
-
+            
             .btn {
                 width: 100%;
             }
+            
+            .file-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+            
+            .file-actions {
+                align-self: flex-end;
+            }
+            
+            .action-icon {
+                width: 32px;
+                height: 32px;
+                font-size: 0.9rem;
+            }
+            
+            .file-details {
+                flex-direction: column;
+                gap: 5px;
+            }
         }
-
+        
         @media (max-width: 480px) {
             header h1 {
                 font-size: 1.7rem;
             }
-
+            
             header p {
                 font-size: 1rem;
             }
-
+            
             .section-header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 15px;
             }
-
+            
             .upload-icon {
                 align-self: flex-end;
             }
-
+            
             .gallery {
                 grid-template-columns: repeat(2, 1fr);
             }
-
+            
             .gallery-item img {
                 height: 100px;
             }
-
+            
             .modal-content img {
                 max-height: 70vh;
             }
-
+            
             .modal-controls {
                 top: 10px;
                 right: 10px;
                 flex-direction: column;
             }
-
+            
             .modal-control {
                 width: 40px;
                 height: 40px;
                 font-size: 1.1rem;
+            }
+            
+            .file-actions {
+                flex-direction: row;
+                width: 100%;
+                justify-content: flex-end;
+            }
+            
+            .action-icon {
+                width: 36px;
+                height: 36px;
             }
         }
     </style>
@@ -730,11 +905,26 @@
 <body>
     <div class="container">
         <header>
-            <h1>Computations</h1>
-            <p>Your One-Stop Hub for Sample Computations</p>
+            <h1>Files Folder</h1>
+            <p>Everything in its place, easy to find.</p>
         </header>
-
+        
         <div class="sections-container">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Files</h2>
+                    <div class="upload-icon" onclick="openUploadModal('files')">
+                        <i class="fas fa-upload"></i>
+                    </div>
+                </div>
+                <div id="files-list" class="files-list">
+                    <div class="empty-files">
+                        <div class="spinner"></div>
+                        <div>Loading files...</div>
+                    </div>
+                </div>
+            </div>
+            
             <div class="section" id="gallery-section">
                 <div class="section-header">
                     <h2 class="section-title">Folders</h2>
@@ -751,27 +941,26 @@
                 <div id="gallery-view" class="gallery" style="display: none;">
                     </div>
             </div>
-        </div>
 
+            
+
+        </div>
+        
         <footer>
             <p>BTB Information Portal</p>
         </footer>
     </div>
-
+    
     <div id="uploadModal" class="upload-modal">
         <div class="modal-box">
-            <h2 id="uploadModalTitle">Upload Image</h2>
+            <h2 id="uploadModalTitle">Upload File</h2>
             <div class="form-group">
-                <label for="fileName">Image Name</label>
-                <input type="text" id="fileName" placeholder="Enter image name">
+                <label for="fileName">File Name</label>
+                <input type="text" id="fileName" placeholder="Enter file name">
             </div>
             <div class="form-group">
-                <label for="fileInput">Select Image</label>
-                <input type="file" id="fileInput" accept="image/*">
-            </div>
-            <div class="form-group" id="folderNameGroup" style="display: none;">
-                <label for="folderName">Folder Name</label>
-                <input type="text" id="folderName" placeholder="Enter folder name">
+                <label for="fileInput">Select File</label>
+                <input type="file" id="fileInput">
             </div>
             <div class="form-group">
                 <label for="adminCode">Admin Code</label>
@@ -779,6 +968,10 @@
                 <span class="password-toggle" onclick="togglePassword('adminCode')">
                     <i class="fas fa-eye"></i>
                 </span>
+            </div>
+            <div class="form-group" id="folderNameGroup" style="display: none;">
+                <label for="folderName">Folder Name (Optional)</label>
+                <input type="text" id="folderName" placeholder="Enter folder name for images">
             </div>
             <div class="progress-bar">
                 <div class="progress" id="uploadProgress"></div>
@@ -789,7 +982,7 @@
             </div>
         </div>
     </div>
-
+    
     <div id="deleteModal" class="delete-modal">
         <div class="modal-box">
             <h2>Confirm Deletion</h2>
@@ -806,7 +999,7 @@
             </div>
         </div>
     </div>
-
+    
     <div id="folderModal" class="folder-modal">
         <div class="modal-box">
             <h2>Create New Folder</h2>
@@ -827,10 +1020,14 @@
             </div>
         </div>
     </div>
-
+    
     <div id="imageModal" class="modal">
         <div class="modal-content">
             <img id="modalImage" src="" alt="">
+            <div class="modal-nav">
+                <button class="modal-nav-btn" onclick="navigateImage(-1)"><i class="fas fa-chevron-left"></i></button>
+                <button class="modal-nav-btn" onclick="navigateImage(1)"><i class="fas fa-chevron-right"></i></button>
+            </div>
             <div class="modal-controls">
                 <div class="modal-control" onclick="deleteImage()">
                     <i class="fas fa-trash"></i>
@@ -839,17 +1036,11 @@
                     <i class="fas fa-times"></i>
                 </div>
             </div>
-            <button class="modal-nav modal-nav-prev" onclick="prevImage()">
-                <i class="fas fa-chevron-left"></i>
-            </button>
-            <button class="modal-nav modal-nav-next" onclick="nextImage()">
-                <i class="fas fa-chevron-right"></i>
-            </button>
         </div>
     </div>
-
+    
     <div id="notification" class="notification"></div>
-
+    
     <script>
         // Firebase configuration
         const firebaseConfig = {
@@ -862,34 +1053,57 @@
             measurementId: "G-T9EQGE2TWG",
             databaseURL: "https://btb-announcement-default-rtdb.firebaseio.com"
         };
-
+        
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const storage = firebase.storage();
         const database = firebase.database();
-
+        
         // Global variables
-        let currentSection = 'gallery';
+        let currentSection = '';
+        let currentFolder = ''; // New: To keep track of the currently viewed folder
+        let currentImageKey = '';
+        let currentImageUrl = '';
+        let currentImagePath = '';
+        let currentFileKey = '';
+        let currentFileData = null;
+        let uploadTask = null;
+        let uploadTimeout = null;
+        let dataLoaded = false;
         let currentFolderId = '';
         let currentFolderName = '';
         let currentFolderView = false;
-        let currentImageKey = '';
-        let currentImageUrl = '';
-        let uploadTask = null;
-        let dataLoaded = false;
-        let itemToDelete = null;
-        let imagesInFolder = [];
-        let currentImageIndex = 0;
-
-        // Swipe variables
+        let currentModalImages = []; // Array to hold images in the current folder
+        let currentImageIndex = 0; // Index of the currently viewed image in the array
         let touchstartX = 0;
         let touchendX = 0;
-
+        
+        const swipeThreshold = 50; // Minimum distance in pixels for a swipe gesture
+        
+        // File type icons mapping
+        const fileIcons = {
+            'pdf': 'fa-file-pdf',
+            'doc': 'fa-file-word',
+            'docx': 'fa-file-word',
+            'xls': 'fa-file-excel',
+            'xlsx': 'fa-file-excel',
+            'ppt': 'fa-file-powerpoint',
+            'pptx': 'fa-file-powerpoint',
+            'txt': 'fa-file-alt',
+            'zip': 'fa-file-archive',
+            'rar': 'fa-file-archive',
+            'jpg': 'fa-file-image',
+            'jpeg': 'fa-file-image',
+            'png': 'fa-file-image',
+            'gif': 'fa-file-image',
+            'default': 'fa-file'
+        };
+        
         // Toggle password visibility
         function togglePassword(inputId) {
             const input = document.getElementById(inputId);
             const icon = input.nextElementSibling.querySelector('i');
-
+            
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.classList.remove('fa-eye');
@@ -900,53 +1114,71 @@
                 icon.classList.add('fa-eye');
             }
         }
-
+        
         // Show notification
         function showNotification(message, isError = false) {
             const notification = document.getElementById('notification');
             notification.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${message}`;
             notification.classList.remove('error');
-
+            
             if (isError) {
                 notification.classList.add('error');
             }
-
+            
             notification.classList.add('show');
-
+            
             setTimeout(() => {
                 notification.classList.remove('show');
             }, 3000);
         }
-
+        
+        // Format file size to human readable format
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+        
         // Modal functions
-        function openUploadModal() {
+        function openUploadModal(section) {
+            currentSection = section;
             const modal = document.getElementById('uploadModal');
+            const title = document.getElementById('uploadModalTitle');
             const folderNameGroup = document.getElementById('folderNameGroup');
-
-            // Show folder name input only when not in a folder view
-            if (currentFolderView) {
+            
+            if (section === 'files') {
+                title.textContent = 'Upload File';
                 folderNameGroup.style.display = 'none';
             } else {
+                title.textContent = 'Upload Image';
                 folderNameGroup.style.display = 'block';
             }
-
+            
             modal.style.display = 'flex';
-
+            
             setTimeout(() => {
                 modal.classList.add('active');
             }, 10);
         }
-
+        
         function closeUploadModal() {
             // Cancel any ongoing upload
             if (uploadTask) {
                 uploadTask.cancel();
                 uploadTask = null;
             }
-
+            
+            // Clear any timeout
+            if (uploadTimeout) {
+                clearTimeout(uploadTimeout);
+                uploadTimeout = null;
+            }
+            
             const modal = document.getElementById('uploadModal');
             modal.classList.remove('active');
-
+            
             setTimeout(() => {
                 modal.style.display = 'none';
                 document.getElementById('fileName').value = '';
@@ -955,138 +1187,279 @@
                 document.getElementById('folderName').value = '';
                 document.querySelector('.progress-bar').style.display = 'none';
                 document.getElementById('uploadProgress').style.width = '0%';
-
+                
                 // Re-enable upload button
                 document.getElementById('uploadButton').disabled = false;
                 document.getElementById('uploadButton').textContent = 'Upload';
             }, 300);
         }
-
+        
         function openFolderModal() {
             const modal = document.getElementById('folderModal');
             modal.style.display = 'flex';
-
+            
             setTimeout(() => {
                 modal.classList.add('active');
             }, 10);
         }
-
+        
         function closeFolderModal() {
             const modal = document.getElementById('folderModal');
             modal.classList.remove('active');
-
+            
             setTimeout(() => {
                 modal.style.display = 'none';
                 document.getElementById('newFolderName').value = '';
                 document.getElementById('folderAdminCode').value = '';
             }, 300);
         }
-
+        
         function openDeleteModal() {
             const modal = document.getElementById('deleteModal');
             modal.style.display = 'flex';
-
+            
             setTimeout(() => {
                 modal.classList.add('active');
             }, 10);
         }
-
+        
         function closeDeleteModal() {
             const modal = document.getElementById('deleteModal');
             modal.classList.remove('active');
-
+            
             setTimeout(() => {
                 modal.style.display = 'none';
                 document.getElementById('deleteAdminCode').value = '';
             }, 300);
         }
-
-        function openModal(imageIndex) {
-            if (!imagesInFolder || imagesInFolder.length === 0) {
-                return;
-            }
-
+        
+        // Modified openModal function
+        function openModal(images, startIndex) {
+            currentModalImages = images;
+            currentImageIndex = startIndex;
+            
             const modal = document.getElementById('imageModal');
-            currentImageIndex = imageIndex;
-            showImage(currentImageIndex);
-
+            const modalImage = document.getElementById('modalImage');
+            
+            modalImage.src = currentModalImages[currentImageIndex].data;
+            currentImageKey = currentModalImages[currentImageIndex].key;
+            
             modal.style.display = 'flex';
-
+            
             setTimeout(() => {
                 modal.classList.add('active');
             }, 10);
-
-            // Prevent body from scrolling when modal is open
+            
             document.body.style.overflow = 'hidden';
             
-            // Add swipe event listeners
+            // Add event listeners for swiping
+            modal.addEventListener('touchstart', handleTouchStart, false);
+            modal.addEventListener('touchmove', handleTouchMove, false);
+            modal.addEventListener('touchend', handleTouchEnd, false);
+        }
+        
+        // Navigate between images in the modal
+        function navigateImage(direction) {
+            let newIndex = currentImageIndex + direction;
+            
+            if (newIndex < 0) {
+                newIndex = currentModalImages.length - 1;
+            } else if (newIndex >= currentModalImages.length) {
+                newIndex = 0;
+            }
+            
+            currentImageIndex = newIndex;
             const modalImage = document.getElementById('modalImage');
-            modalImage.addEventListener('touchstart', handleTouchStart, false);
-            modalImage.addEventListener('touchmove', handleTouchMove, false);
-            modalImage.addEventListener('touchend', handleTouchEnd, false);
+            
+            // Update image source and key
+            modalImage.src = currentModalImages[currentImageIndex].data;
+            currentImageKey = currentModalImages[currentImageIndex].key;
         }
         
-        function showImage(index) {
-            const modalImage = document.getElementById('modalImage');
-            const image = imagesInFolder[index];
-            modalImage.src = image.data;
-            currentImageKey = image.key;
+        // Handle touch events for swiping
+        function handleTouchStart(e) {
+            touchstartX = e.touches[0].clientX;
         }
         
-        function nextImage() {
-            currentImageIndex = (currentImageIndex + 1) % imagesInFolder.length;
-            showImage(currentImageIndex);
+        function handleTouchMove(e) {
+            touchendX = e.touches[0].clientX;
         }
         
-        function prevImage() {
-            currentImageIndex = (currentImageIndex - 1 + imagesInFolder.length) % imagesInFolder.length;
-            showImage(currentImageIndex);
+        function handleTouchEnd() {
+            const diff = touchendX - touchstartX;
+            
+            if (diff > swipeThreshold) {
+                // Swipe right
+                navigateImage(-1);
+            } else if (diff < -swipeThreshold) {
+                // Swipe left
+                navigateImage(1);
+            }
+            
+            // Reset touch coordinates
+            touchstartX = 0;
+            touchendX = 0;
         }
-
+        
         function closeModal() {
             const modal = document.getElementById('imageModal');
             modal.classList.remove('active');
-
+            
+            // Remove event listeners
+            modal.removeEventListener('touchstart', handleTouchStart, false);
+            modal.removeEventListener('touchmove', handleTouchMove, false);
+            modal.removeEventListener('touchend', handleTouchEnd, false);
+            
             setTimeout(() => {
                 modal.style.display = 'none';
-                // Re-enable body scrolling
                 document.body.style.overflow = 'auto';
             }, 300);
+        }
+        
+        // Get file icon based on extension
+        function getFileIcon(filename) {
+            const extension = filename.split('.').pop().toLowerCase();
+            return fileIcons[extension] || fileIcons['default'];
+        }
+        
+        // Format date
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString() + ' ' + date.toLocaleTimeString();
+        }
+        
+        // Upload file to Firebase
+        async function uploadFile() {
+            const fileName = document.getElementById('fileName').value.trim();
+            const fileInput = document.getElementById('fileInput');
+            const adminCode = document.getElementById('adminCode').value.trim();
+            const uploadButton = document.getElementById('uploadButton');
+            const folderNameInput = document.getElementById('folderName');
+            const folderName = folderNameInput ? folderNameInput.value.trim() : '';
             
-            const modalImage = document.getElementById('modalImage');
-            modalImage.removeEventListener('touchstart', handleTouchStart, false);
-            modalImage.removeEventListener('touchmove', handleTouchMove, false);
-            modalImage.removeEventListener('touchend', handleTouchEnd, false);
-        }
-
-        // Swipe gesture handlers
-        function handleTouchStart(e) {
-            touchstartX = e.changedTouches[0].screenX;
-        }
-
-        function handleTouchMove(e) {
-            // No action needed for touchmove, we only care about the end position
-        }
-
-        function handleTouchEnd(e) {
-            touchendX = e.changedTouches[0].screenX;
-            handleGesture();
-        }
-
-        function handleGesture() {
-            const swipeThreshold = 50; // Minimum distance for a swipe
-
-            if (touchendX < touchstartX - swipeThreshold) {
-                // Swiped left
-                nextImage();
+            // Validate inputs
+            if (!fileName) {
+                showNotification('Please enter a file name', true);
+                return;
             }
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showNotification('Please select a file to upload', true);
+                return;
+            }
+            
+            if (adminCode !== '001122') {
+                showNotification('Invalid admin code', true);
+                return;
+            }
+            
+            // Disable upload button to prevent multiple clicks
+            uploadButton.disabled = true;
+            uploadButton.textContent = 'Uploading...';
+            
+            // Show progress bar
+            const progressBar = document.querySelector('.progress-bar');
+            progressBar.style.display = 'block';
+            
+            try {
+                const timestamp = Date.now();
+                let fileRef = {
+                    name: fileName,
+                    filename: fileInput.files[0].name,
+                    type: fileInput.files[0].type,
+                    size: fileInput.files[0].size,
+                    timestamp: timestamp,
+                    section: currentSection
+                };
 
-            if (touchendX > touchstartX + swipeThreshold) {
-                // Swiped right
-                prevImage();
+                if (currentSection === 'gallery') {
+                    if (!folderName && !currentFolderId) {
+                        showNotification('Please enter a folder name or select an existing folder', true);
+                        uploadButton.disabled = false;
+                        uploadButton.textContent = 'Upload';
+                        progressBar.style.display = 'none';
+                        return;
+                    }
+                    fileRef.folderId = currentFolderId || folderName; // Use currentFolderId if viewing a folder, else use new folderName
+                }
+                
+                if (currentSection === 'files') {
+                    // For files section: Upload to Firebase Storage
+                    const storageRef = storage.ref();
+                    const fileRefStorage = storageRef.child(`files/${timestamp}_${fileInput.files[0].name}`);
+                    
+                    // Add metadata to force download
+                    const metadata = {
+                        contentType: fileInput.files[0].type,
+                        contentDisposition: 'attachment'
+                    };
+                    
+                    // Upload to storage with progress monitoring
+                    uploadTask = fileRefStorage.put(fileInput.files[0], metadata);
+                    
+                    // Monitor upload progress
+                    uploadTask.on('state_changed',
+                        (snapshot) => {
+                            const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                            document.getElementById('uploadProgress').style.width = progress + '%';
+                        },
+                        (error) => {
+                            console.error('Upload failed:', error);
+                            showNotification('Upload failed. Please try again.', true);
+                            progressBar.style.display = 'none';
+                            uploadButton.disabled = false;
+                            uploadButton.textContent = 'Upload';
+                        },
+                        async () => {
+                            try {
+                                const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
+                                fileRef.downloadURL = downloadURL;
+                                
+                                const newFileRef = database.ref('files').push();
+                                await newFileRef.set(fileRef);
+                                
+                                showNotification('File uploaded successfully!');
+                                closeUploadModal();
+                                loadFiles();
+                            } catch (error) {
+                                console.error('Error getting download URL:', error);
+                                showNotification('Upload failed. Please try again.', true);
+                                progressBar.style.display = 'none';
+                                uploadButton.disabled = false;
+                                uploadButton.textContent = 'Upload';
+                            }
+                        }
+                    );
+                } else if (currentSection === 'gallery') {
+                    // For gallery sections: Convert to base64
+                    if (fileInput.files[0].type.startsWith('image/')) {
+                        const fileData = await convertFileToBase64(fileInput.files[0]);
+                        fileRef.data = fileData;
+                    }
+                    
+                    // Push data to database
+                    const newFileRef = database.ref('files').push();
+                    await newFileRef.set(fileRef);
+                    
+                    showNotification('Image uploaded successfully!');
+                    closeUploadModal();
+                    
+                    if (currentFolderView) {
+                        loadFolderImages(currentFolderId);
+                    } else {
+                        loadFiles();
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Upload failed:', error);
+                showNotification('Upload failed. Please try again.', true);
+                progressBar.style.display = 'none';
+                uploadButton.disabled = false;
+                uploadButton.textContent = 'Upload';
             }
         }
-
+        
         // Convert file to Base64 (for gallery images)
         function convertFileToBase64(file) {
             return new Promise((resolve, reject) => {
@@ -1096,20 +1469,184 @@
                 reader.onerror = error => reject(error);
             });
         }
-
-        // Delete image from modal
+        
+        // Delete file from Firebase
         function deleteImage() {
-            if (!currentImageKey) {
-                showNotification('No image selected for deletion', true);
-                return;
-            }
-
-            // Set the item to delete as an image
-            itemToDelete = { type: 'image', key: currentImageKey };
             closeModal();
             openDeleteModal();
         }
-
+        
+        async function confirmDelete() {
+            const adminCode = document.getElementById('deleteAdminCode').value;
+            
+            if (!adminCode) {
+                showNotification('Please enter admin code', true);
+                return;
+            }
+            
+            if (adminCode !== '001122') {
+                showNotification('Invalid admin code', true);
+                return;
+            }
+            
+            try {
+                let deleteKey = currentImageKey || currentFileKey;
+                
+                if (!deleteKey) {
+                    showNotification('No item selected for deletion', true);
+                    return;
+                }
+                
+                const fileRef = database.ref(`files/${deleteKey}`);
+                const snapshot = await fileRef.once('value');
+                const fileData = snapshot.val();
+                
+                if (fileData.downloadURL) {
+                    const storageRef = storage.refFromURL(fileData.downloadURL);
+                    await storageRef.delete();
+                }
+                
+                await fileRef.remove();
+                showNotification('Item deleted successfully!');
+                
+                currentImageKey = '';
+                currentFileKey = '';
+                
+                if (currentFolderView) {
+                    loadFolderImages(currentFolderId);
+                } else {
+                    loadFiles();
+                }
+                closeDeleteModal();
+            } catch (error) {
+                console.error('Delete failed:', error);
+                showNotification('Delete failed. Please try again.', true);
+            }
+        }
+        
+        // Load files from Firebase
+        async function loadFiles() {
+            try {
+                const filesRef = database.ref('files');
+                const foldersRef = database.ref('folders');
+                
+                const [filesSnapshot, foldersSnapshot] = await Promise.all([
+                    filesRef.once('value'),
+                    foldersRef.once('value')
+                ]);
+                
+                const filesData = filesSnapshot.val();
+                const foldersData = foldersSnapshot.val();
+                
+                document.getElementById('files-list').innerHTML = '';
+                document.getElementById('gallery-folders').innerHTML = '';
+                
+                if (!filesData) {
+                    document.getElementById('files-list').innerHTML = '<div class="empty-files">No files found</div>';
+                }
+                
+                if (!foldersData) {
+                    document.getElementById('gallery-folders').innerHTML = '<div class="empty-folders">No folders found</div>';
+                } else {
+                    const folders = [];
+                    Object.keys(foldersData).forEach(key => {
+                        const folder = foldersData[key];
+                        folder.key = key;
+                        folders.push(folder);
+                    });
+                    
+                    folders.sort((a, b) => b.timestamp - a.timestamp);
+                    
+                    const folderImageCounts = {};
+                    if (filesData) {
+                        Object.keys(filesData).forEach(key => {
+                            const file = filesData[key];
+                            if (file.section === 'gallery' && file.folderId) {
+                                folderImageCounts[file.folderId] = (folderImageCounts[file.folderId] || 0) + 1;
+                            }
+                        });
+                    }
+                    
+                    folders.forEach(folder => {
+                        const imageCount = folderImageCounts[folder.key] || 0;
+                        const folderItem = document.createElement('div');
+                        folderItem.className = 'folder-item';
+                        folderItem.innerHTML = `
+                            <div class="folder-actions">
+                                <div class="folder-action folder-delete" onclick="event.stopPropagation(); requestDelete('folder', '${folder.key}')">
+                                    <i class="fas fa-trash"></i>
+                                </div>
+                            </div>
+                            <div class="folder-icon">
+                                <i class="fas fa-folder"></i>
+                            </div>
+                            <div class="folder-name">${folder.name}</div>
+                            <div class="folder-count">${imageCount} images</div>
+                        `;
+                        folderItem.onclick = () => viewFolder(folder.key, folder.name);
+                        document.getElementById('gallery-folders').appendChild(folderItem);
+                    });
+                }
+                
+                if (filesData) {
+                    const files = [];
+                    
+                    Object.keys(filesData).forEach(key => {
+                        const file = filesData[key];
+                        file.key = key;
+                        
+                        if (file.section === 'files') {
+                            files.push(file);
+                        }
+                    });
+                    
+                    files.sort((a, b) => b.timestamp - a.timestamp);
+                    
+                    if (files.length === 0) {
+                        document.getElementById('files-list').innerHTML = '<div class="empty-files">No files found</div>';
+                    } else {
+                        files.forEach(file => {
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'file-item';
+                            
+                            const fileExtension = file.filename.split('.').pop().toLowerCase();
+                            const fileIconClass = getFileIcon(file.filename);
+                            
+                            fileItem.innerHTML = `
+                                <div class="file-info-container">
+                                    <div class="file-icon">
+                                        <i class="fas ${fileIconClass}"></i>
+                                    </div>
+                                    <div class="file-info">
+                                        <div class="file-name">${file.name}</div>
+                                        <div class="file-details">
+                                            <span class="file-date">${formatDate(file.timestamp)}</span>
+                                            <span class="file-size">${formatFileSize(file.size)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="file-actions">
+                                    <div class="action-icon download-icon" onclick="event.stopPropagation(); downloadFile('${file.downloadURL}', '${file.filename}')">
+                                        <i class="fas fa-download"></i>
+                                    </div>
+                                    <div class="action-icon delete-icon" onclick="event.stopPropagation(); requestDeleteFile('${file.key}', '${file.filename}')">
+                                        <i class="fas fa-trash"></i>
+                                    </div>
+                                </div>
+                            `;
+                            
+                            document.getElementById('files-list').appendChild(fileItem);
+                        });
+                    }
+                }
+                
+                dataLoaded = true;
+            } catch (error) {
+                console.error('Error loading files:', error);
+                showNotification('Error loading files. Please refresh the page.', true);
+            }
+        }
+        
         // Create folder function
         async function createFolder() {
             const folderName = document.getElementById('newFolderName').value.trim();
@@ -1126,21 +1663,20 @@
             }
 
             try {
-                const newFolderRef = database.ref('folders01').push();
+                const newFolderRef = database.ref('folders').push();
                 await newFolderRef.set({
                     name: folderName,
                     timestamp: Date.now()
                 });
                 showNotification('Folder created successfully!');
                 closeFolderModal();
-                loadFolders(); // Reload to show new folder
+                loadFiles();
             } catch (error) {
                 console.error('Error creating folder:', error);
                 showNotification('Failed to create folder. Please try again.', true);
             }
         }
 
-        // View folder contents
         function viewFolder(folderId, folderName) {
             currentFolderId = folderId;
             currentFolderName = folderName;
@@ -1149,7 +1685,6 @@
             document.getElementById('gallery-folders').style.display = 'none';
             document.getElementById('gallery-view').style.display = 'grid';
 
-            // Update header for folder view
             const gallerySectionHeader = document.querySelector('#gallery-section .section-header');
             gallerySectionHeader.innerHTML = `
                 <div class="folder-view-title">
@@ -1157,7 +1692,7 @@
                     <span>${folderName}</span>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <div class="upload-icon" onclick="openUploadModal()" title="Upload Image">
+                    <div class="upload-icon" onclick="openUploadModal('gallery')" title="Upload Image">
                         <i class="fas fa-upload"></i>
                     </div>
                     <button class="back-button" onclick="backToFolders()">
@@ -1170,16 +1705,14 @@
             loadFolderImages(folderId);
         }
 
-        // Load images for a specific folder
         async function loadFolderImages(folderId) {
             try {
-                const filesRef = database.ref('files01').orderByChild('folderId').equalTo(folderId);
+                const filesRef = database.ref('files').orderByChild('folderId').equalTo(folderId);
                 const snapshot = await filesRef.once('value');
                 const filesData = snapshot.val();
 
                 const galleryView = document.getElementById('gallery-view');
                 galleryView.innerHTML = '';
-                imagesInFolder = [];
 
                 if (!filesData) {
                     galleryView.innerHTML = '<div class="empty-gallery">No images in this folder</div>';
@@ -1195,18 +1728,18 @@
                     }
                 });
 
-                // Sort images by timestamp (newest first)
                 images.sort((a, b) => b.timestamp - a.timestamp);
-                imagesInFolder = images; // Store for modal navigation
+                
+                // Store the loaded images for modal navigation
+                currentModalImages = images;
 
                 images.forEach((image, index) => {
                     const galleryItem = document.createElement('div');
                     galleryItem.className = 'gallery-item';
                     galleryItem.innerHTML = `
-                        <img src="${image.data}" alt="${image.name}">
+                        <img src="${image.data}" alt="${image.name}" onclick="openModal(currentModalImages, ${index})">
                         <p>${image.name}</p>
                     `;
-                    galleryItem.addEventListener('click', () => openModal(index));
                     galleryView.appendChild(galleryItem);
                 });
 
@@ -1216,16 +1749,15 @@
             }
         }
 
-        // Back to folders view
         function backToFolders() {
             currentFolderId = '';
             currentFolderName = '';
             currentFolderView = false;
+            currentModalImages = [];
 
             document.getElementById('gallery-view').style.display = 'none';
             document.getElementById('gallery-folders').style.display = 'grid';
 
-            // Restore original header
             const gallerySectionHeader = document.querySelector('#gallery-section .section-header');
             gallerySectionHeader.innerHTML = `
                 <h2 class="section-title">Folders</h2>
@@ -1233,24 +1765,25 @@
                     <i class="fas fa-folder-plus"></i>
                 </div>
             `;
-            loadFolders();
+            
+            loadFiles();
         }
-
-        // Request delete confirmation for folder
-        function requestDeleteFolder(key) {
-            itemToDelete = { type: 'folder', key };
+        
+        // Request delete confirmation
+        let itemToDelete = null;
+        function requestDelete(type, key, path = '') {
+            itemToDelete = { type, key, path };
             openDeleteModal();
         }
 
-        // Confirm delete from Firebase
         async function confirmDelete() {
             const adminCode = document.getElementById('deleteAdminCode').value;
-
+            
             if (adminCode !== '001122') {
                 showNotification('Invalid admin code', true);
                 return;
             }
-
+            
             if (!itemToDelete) {
                 showNotification('No item selected for deletion', true);
                 return;
@@ -1258,223 +1791,80 @@
 
             try {
                 if (itemToDelete.type === 'folder') {
-                    // Delete folder and all its contents
-                    const folderRef = database.ref(`folders01/${itemToDelete.key}`);
+                    const folderRef = database.ref(`folders/${itemToDelete.key}`);
                     await folderRef.remove();
 
-                    // Delete all images within that folder
-                    const imagesInFolderRef = database.ref('files01').orderByChild('folderId').equalTo(itemToDelete.key);
+                    const imagesInFolderRef = database.ref('files').orderByChild('folderId').equalTo(itemToDelete.key);
                     const snapshot = await imagesInFolderRef.once('value');
                     const updates = {};
                     snapshot.forEach(childSnapshot => {
-                        updates[childSnapshot.key] = null; // Set to null to delete
+                        updates[childSnapshot.key] = null;
                     });
                     if (Object.keys(updates).length > 0) {
-                        await database.ref('files01').update(updates);
+                        await database.ref('files').update(updates);
                     }
 
-                    showNotification('Folder and its contents deleted successfully');
+                    showNotification('Folder and its contents deleted successfully!');
                 } else if (itemToDelete.type === 'image') {
-                    // Delete image
-                    const fileRef = database.ref(`files01/${itemToDelete.key}`);
+                    const imageRef = database.ref(`files/${itemToDelete.key}`);
+                    await imageRef.remove();
+                    showNotification('Image deleted successfully!');
+                } else if (itemToDelete.type === 'file') {
+                    const fileRef = database.ref(`files/${itemToDelete.key}`);
+                    const snapshot = await fileRef.once('value');
+                    const fileData = snapshot.val();
+                    
+                    if (fileData && fileData.downloadURL) {
+                        const storageRef = storage.refFromURL(fileData.downloadURL);
+                        await storageRef.delete();
+                    }
                     await fileRef.remove();
-                    showNotification('Image deleted successfully');
+                    showNotification('File deleted successfully!');
                 }
-
-                closeDeleteModal();
+                
                 itemToDelete = null;
-
-                // Refresh the view
+                closeDeleteModal();
+                
                 if (currentFolderView) {
                     loadFolderImages(currentFolderId);
                 } else {
-                    loadFolders();
+                    loadFiles();
                 }
             } catch (error) {
-                console.error('Error deleting item:', error);
-                showNotification('Failed to delete item. Please try again.', true);
+                console.error('Delete failed:', error);
+                showNotification('Delete failed. Please try again.', true);
             }
         }
-
-        // Load folders from Firebase
-        async function loadFolders() {
-            try {
-                const foldersRef = database.ref('folders01');
-                const snapshot = await foldersRef.once('value');
-                const foldersData = snapshot.val();
-
-                const foldersContainer = document.getElementById('gallery-folders');
-                foldersContainer.innerHTML = '';
-
-                if (!foldersData) {
-                    foldersContainer.innerHTML = '<div class="empty-folders">No folders created yet</div>';
-                    return;
+        
+        function requestDeleteFile(key, filename) {
+            itemToDelete = { type: 'file', key: key };
+            openDeleteModal();
+        }
+        
+        function downloadFile(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename || 'download';
+            
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            
+            a.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(a);
+            }, 100);
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadFiles();
+            
+            database.ref('files').on('value', function(snapshot) {
+                if (dataLoaded) {
+                    loadFiles();
                 }
-
-                const folders = [];
-                Object.keys(foldersData).forEach(key => {
-                    const folder = foldersData[key];
-                    folder.key = key;
-                    folders.push(folder);
-                });
-
-                // Sort folders by timestamp (newest first)
-                folders.sort((a, b) => b.timestamp - a.timestamp);
-
-                // Count images in each folder
-                for (const folder of folders) {
-                    const filesRef = database.ref('files01').orderByChild('folderId').equalTo(folder.key);
-                    const filesSnapshot = await filesRef.once('value');
-                    folder.imageCount = filesSnapshot.exists() ? filesSnapshot.numChildren() : 0;
-                }
-
-                folders.forEach(folder => {
-                    const folderItem = document.createElement('div');
-                    folderItem.className = 'folder-item';
-                    folderItem.innerHTML = `
-                        <div class="folder-actions">
-                            <div class="folder-action folder-delete" onclick="event.stopPropagation(); requestDeleteFolder('${folder.key}')">
-                                <i class="fas fa-trash"></i>
-                            </div>
-                        </div>
-                        <div class="folder-icon">
-                            <i class="fas fa-folder"></i>
-                        </div>
-                        <div class="folder-name">${folder.name}</div>
-                        <div class="folder-count">${folder.imageCount} image(s)</div>
-                    `;
-                    folderItem.addEventListener('click', () => viewFolder(folder.key, folder.name));
-                    foldersContainer.appendChild(folderItem);
-                });
-
-            } catch (error) {
-                console.error('Error loading folders:', error);
-                showNotification('Error loading folders. Please try again.', true);
-            }
-        }
-
-        // Upload file to Firebase
-        async function uploadFile() {
-            const fileName = document.getElementById('fileName').value.trim();
-            const fileInput = document.getElementById('fileInput');
-            const adminCode = document.getElementById('adminCode').value.trim();
-            const folderName = document.getElementById('folderName').value.trim();
-            const uploadButton = document.getElementById('uploadButton');
-
-            if (!fileName) {
-                showNotification('Please enter a file name', true);
-                return;
-            }
-
-            if (!fileInput.files[0]) {
-                showNotification('Please select a file to upload', true);
-                return;
-            }
-
-            if (adminCode !== '001122') {
-                showNotification('Invalid admin code', true);
-                return;
-            }
-
-            // Disable upload button to prevent multiple clicks
-            uploadButton.disabled = true;
-            uploadButton.textContent = 'Uploading...';
-
-            const file = fileInput.files[0];
-            const fileExtension = file.name.split('.').pop();
-            const timestamp = Date.now();
-            const storageRef = storage.ref().child(`images/${fileName}_${timestamp}.${fileExtension}`);
-
-            try {
-                // Show progress bar
-                const progressBar = document.querySelector('.progress-bar');
-                const progressElement = document.getElementById('uploadProgress');
-                progressBar.style.display = 'block';
-
-                // Upload to Firebase Storage
-                uploadTask = storageRef.put(file);
-
-                // Monitor upload progress
-                uploadTask.on('state_changed',
-                    (snapshot) => {
-                        const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                        progressElement.style.width = progress + '%';
-                    },
-                    (error) => {
-                        console.error('Upload error:', error);
-                        showNotification('Upload failed. Please try again.', true);
-                        progressBar.style.display = 'none';
-                        uploadButton.disabled = false;
-                        uploadButton.textContent = 'Upload';
-                    },
-                    async () => {
-                        try {
-                            // Get download URL
-                            const downloadURL = await uploadTask.snapshot.ref.getDownloadURL();
-
-                            // Save to Realtime Database
-                            const fileData = {
-                                name: fileName,
-                                data: downloadURL,
-                                timestamp: timestamp,
-                                section: currentSection
-                            };
-
-                            // If we're in a folder view, add folderId
-                            if (currentFolderView) {
-                                fileData.folderId = currentFolderId;
-                            } else if (folderName) {
-                                // If folder name is provided, find or create folder
-                                const foldersRef = database.ref('folders01');
-                                const snapshot = await foldersRef.orderByChild('name').equalTo(folderName).once('value');
-
-                                let folderId;
-                                if (snapshot.exists()) {
-                                    // Use existing folder
-                                    const folderData = snapshot.val();
-                                    folderId = Object.keys(folderData)[0];
-                                } else {
-                                    // Create new folder
-                                    const newFolderRef = foldersRef.push();
-                                    folderId = newFolderRef.key;
-                                    await newFolderRef.set({
-                                        name: folderName,
-                                        timestamp: Date.now()
-                                    });
-                                }
-
-                                fileData.folderId = folderId;
-                            }
-
-                            await database.ref('files01').push(fileData);
-
-                            showNotification('File uploaded successfully!');
-                            closeUploadModal();
-
-                            // Refresh the view
-                            if (currentFolderView) {
-                                loadFolderImages(currentFolderId);
-                            } else {
-                                loadFolders();
-                            }
-                        } catch (error) {
-                            console.error('Error saving file data:', error);
-                            showNotification('Upload completed but failed to save metadata. Please try again.', true);
-                        }
-                    }
-                );
-            } catch (error) {
-                console.error('Upload error:', error);
-                showNotification('Upload failed. Please try again.', true);
-                uploadButton.disabled = false;
-                uploadButton.textContent = 'Upload';
-            }
-        }
-
-        // Initialize the app
-        window.onload = function() {
-            loadFolders();
-        };
+            });
+        });
     </script>
 </body>
 </html>
