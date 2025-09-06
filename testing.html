@@ -484,30 +484,6 @@
             padding: 0 10px;
         }
         
-        .modal-nav-btn {
-            background: rgba(0, 0, 0, 0.5);
-            border: none;
-            color: white;
-            font-size: 2rem;
-            cursor: pointer;
-            padding: 10px;
-            border-radius: 50%;
-            transition: background 0.3s, transform 0.3s;
-            z-index: 1001;
-        }
-        
-        .modal-nav-btn:hover {
-            background: rgba(0, 0, 0, 0.7);
-            transform: scale(1.1);
-        }
-        
-        /* HIDE SLIDE BUTTONS ON MOBILE */
-        @media (max-width: 768px) {
-            .modal-nav-btn {
-                display: none;
-            }
-        }
-        
         .upload-modal, .delete-modal, .folder-modal {
             display: none;
             position: fixed;
@@ -1026,8 +1002,6 @@
         <div class="modal-content">
             <img id="modalImage" src="" alt="">
             <div class="modal-nav">
-                <button class="modal-nav-btn" onclick="navigateImage(-1)"><i class="fas fa-chevron-left"></i></button>
-                <button class="modal-nav-btn" onclick="navigateImage(1)"><i class="fas fa-chevron-right"></i></button>
             </div>
             <div class="modal-controls">
                 <div class="modal-control" onclick="deleteImage()">
