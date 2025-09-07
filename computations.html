@@ -343,35 +343,9 @@
         }
 
         /* Swipe navigation buttons */
+        /* These are hidden as per the request, but the logic remains */
         .modal-nav {
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 50px;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.5);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            font-size: 1.5rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: background 0.3s ease;
-            z-index: 1002;
-        }
-
-        .modal-nav:hover {
-            background: rgba(0, 0, 0, 0.8);
-        }
-
-        .modal-nav-prev {
-            left: 20px;
-        }
-
-        .modal-nav-next {
-            right: 20px;
+            display: none; 
         }
 
         .upload-modal, .delete-modal, .folder-modal {
@@ -875,6 +849,7 @@
         let currentFolderView = false;
         let currentImageKey = '';
         let currentImageUrl = '';
+        let currentImageStoragePath = ''; // Added to store the storage path
         let uploadTask = null;
         let dataLoaded = false;
         let itemToDelete = null;
@@ -1024,6 +999,9 @@
             modalImage.addEventListener('touchstart', handleTouchStart, false);
             modalImage.addEventListener('touchmove', handleTouchMove, false);
             modalImage.addEventListener('touchend', handleTouchEnd, false);
+
+            // Add keyboard event listener for desktop
+            document.addEventListener('keydown', handleKeyDown);
         }
         
         function showImage(index) {
@@ -1031,6 +1009,7 @@
             const image = imagesInFolder[index];
             modalImage.src = image.data;
             currentImageKey = image.key;
+            currentImageStoragePath = image.storagePath; // Store storage path
         }
         
         function nextImage() {
@@ -1057,6 +1036,7 @@
             modalImage.removeEventListener('touchstart', handleTouchStart, false);
             modalImage.removeEventListener('touchmove', handleTouchMove, false);
             modalImage.removeEventListener('touchend', handleTouchEnd, false);
+            document.removeEventListener('keydown', handleKeyDown);
         }
 
         // Swipe gesture handlers
@@ -1086,6 +1066,16 @@
                 prevImage();
             }
         }
+        
+        // Keyboard navigation for desktop
+        function handleKeyDown(e) {
+            if (e.key === 'ArrowRight') {
+                nextImage();
+            } else if (e.key === 'ArrowLeft') {
+                prevImage();
+            }
+        }
+
 
         // Convert file to Base64 (for gallery images)
         function convertFileToBase64(file) {
@@ -1099,13 +1089,13 @@
 
         // Delete image from modal
         function deleteImage() {
-            if (!currentImageKey) {
+            if (!currentImageKey || !currentImageStoragePath) {
                 showNotification('No image selected for deletion', true);
                 return;
             }
 
             // Set the item to delete as an image
-            itemToDelete = { type: 'image', key: currentImageKey };
+            itemToDelete = { type: 'image', key: currentImageKey, storagePath: currentImageStoragePath };
             closeModal();
             openDeleteModal();
         }
@@ -1262,22 +1252,37 @@
                     const folderRef = database.ref(`folders01/${itemToDelete.key}`);
                     await folderRef.remove();
 
-                    // Delete all images within that folder
+                    // Delete all images within that folder and from storage
                     const imagesInFolderRef = database.ref('files01').orderByChild('folderId').equalTo(itemToDelete.key);
                     const snapshot = await imagesInFolderRef.once('value');
                     const updates = {};
+                    const storageDeletions = [];
                     snapshot.forEach(childSnapshot => {
-                        updates[childSnapshot.key] = null; // Set to null to delete
+                        updates[childSnapshot.key] = null; // Set to null to delete from Realtime DB
+                        const storagePath = childSnapshot.val().storagePath;
+                        if (storagePath) {
+                            storageDeletions.push(storage.ref(storagePath).delete());
+                        }
                     });
+                    
                     if (Object.keys(updates).length > 0) {
                         await database.ref('files01').update(updates);
                     }
+                    
+                    await Promise.all(storageDeletions);
 
                     showNotification('Folder and its contents deleted successfully');
                 } else if (itemToDelete.type === 'image') {
-                    // Delete image
+                    // Delete image from Realtime DB and Storage
                     const fileRef = database.ref(`files01/${itemToDelete.key}`);
                     await fileRef.remove();
+                    
+                    // Delete from storage
+                    if (itemToDelete.storagePath) {
+                        const imageRef = storage.ref(itemToDelete.storagePath);
+                        await imageRef.delete();
+                    }
+                    
                     showNotification('Image deleted successfully');
                 }
 
@@ -1376,6 +1381,38 @@
                 return;
             }
 
+            // Determine the target folder ID
+            let targetFolderId = currentFolderView ? currentFolderId : '';
+
+            // If not in a folder view, check if a folder name was provided
+            if (!currentFolderView && folderName) {
+                try {
+                    const foldersRef = database.ref('folders01');
+                    const snapshot = await foldersRef.orderByChild('name').equalTo(folderName).once('value');
+
+                    if (snapshot.exists()) {
+                        // Use existing folder
+                        const folderData = snapshot.val();
+                        targetFolderId = Object.keys(folderData)[0];
+                    } else {
+                        // Create new folder
+                        const newFolderRef = foldersRef.push();
+                        targetFolderId = newFolderRef.key;
+                        await newFolderRef.set({
+                            name: folderName,
+                            timestamp: Date.now()
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error finding or creating folder:', error);
+                    showNotification('Failed to process folder. Please try again.', true);
+                    return;
+                }
+            } else if (!currentFolderView && !folderName) {
+                showNotification('Please enter a folder name to upload an image outside of a folder.', true);
+                return;
+            }
+
             // Disable upload button to prevent multiple clicks
             uploadButton.disabled = true;
             uploadButton.textContent = 'Uploading...';
@@ -1383,7 +1420,8 @@
             const file = fileInput.files[0];
             const fileExtension = file.name.split('.').pop();
             const timestamp = Date.now();
-            const storageRef = storage.ref().child(`images/${fileName}_${timestamp}.${fileExtension}`);
+            const storagePath = `images/${fileName}_${timestamp}.${fileExtension}`;
+            const storageRef = storage.ref().child(storagePath);
 
             try {
                 // Show progress bar
@@ -1416,35 +1454,11 @@
                             const fileData = {
                                 name: fileName,
                                 data: downloadURL,
+                                storagePath: storagePath, // Save the storage path
                                 timestamp: timestamp,
-                                section: currentSection
+                                section: currentSection,
+                                folderId: targetFolderId
                             };
-
-                            // If we're in a folder view, add folderId
-                            if (currentFolderView) {
-                                fileData.folderId = currentFolderId;
-                            } else if (folderName) {
-                                // If folder name is provided, find or create folder
-                                const foldersRef = database.ref('folders01');
-                                const snapshot = await foldersRef.orderByChild('name').equalTo(folderName).once('value');
-
-                                let folderId;
-                                if (snapshot.exists()) {
-                                    // Use existing folder
-                                    const folderData = snapshot.val();
-                                    folderId = Object.keys(folderData)[0];
-                                } else {
-                                    // Create new folder
-                                    const newFolderRef = foldersRef.push();
-                                    folderId = newFolderRef.key;
-                                    await newFolderRef.set({
-                                        name: folderName,
-                                        timestamp: Date.now()
-                                    });
-                                }
-
-                                fileData.folderId = folderId;
-                            }
 
                             await database.ref('files01').push(fileData);
 
