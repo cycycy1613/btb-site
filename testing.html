@@ -946,10 +946,6 @@
                     <i class="fas fa-eye"></i>
                 </span>
             </div>
-            <div class="form-group" id="folderNameGroup" style="display: none;">
-                <label for="folderName">Folder Name (Optional)</label>
-                <input type="text" id="folderName" placeholder="Enter folder name for images">
-            </div>
             <div class="progress-bar">
                 <div class="progress" id="uploadProgress"></div>
             </div>
@@ -1118,17 +1114,18 @@
         
         // Modal functions
         function openUploadModal(section) {
+            if (section === 'gallery' && !currentFolderView) {
+                showNotification('Please select a folder first before uploading an image.', true);
+                return;
+            }
             currentSection = section;
             const modal = document.getElementById('uploadModal');
             const title = document.getElementById('uploadModalTitle');
-            const folderNameGroup = document.getElementById('folderNameGroup');
             
             if (section === 'files') {
                 title.textContent = 'Upload File';
-                folderNameGroup.style.display = 'none';
             } else {
                 title.textContent = 'Upload Image';
-                folderNameGroup.style.display = 'block';
             }
             
             modal.style.display = 'flex';
@@ -1159,7 +1156,6 @@
                 document.getElementById('fileName').value = '';
                 document.getElementById('fileInput').value = '';
                 document.getElementById('adminCode').value = '';
-                document.getElementById('folderName').value = '';
                 document.querySelector('.progress-bar').style.display = 'none';
                 document.getElementById('uploadProgress').style.width = '0%';
                 
@@ -1250,6 +1246,18 @@
             modalImage.src = currentModalImages[currentImageIndex].data;
             currentImageKey = currentModalImages[currentImageIndex].key;
         }
+
+        // Handle keydown for navigation
+        document.addEventListener('keydown', function(e) {
+            const modal = document.getElementById('imageModal');
+            if (modal.classList.contains('active')) {
+                if (e.key === "ArrowRight") {
+                    navigateImage(1);
+                } else if (e.key === "ArrowLeft") {
+                    navigateImage(-1);
+                }
+            }
+        });
         
         // Handle touch events for swiping
         function handleTouchStart(e) {
@@ -1309,8 +1317,6 @@
             const fileInput = document.getElementById('fileInput');
             const adminCode = document.getElementById('adminCode').value.trim();
             const uploadButton = document.getElementById('uploadButton');
-            const folderNameInput = document.getElementById('folderName');
-            const folderName = folderNameInput ? folderNameInput.value.trim() : '';
             
             // Validate inputs
             if (!fileName) {
@@ -1346,17 +1352,6 @@
                     timestamp: timestamp,
                     section: currentSection
                 };
-
-                if (currentSection === 'gallery') {
-                    if (!folderName && !currentFolderId) {
-                        showNotification('Please enter a folder name or select an existing folder', true);
-                        uploadButton.disabled = false;
-                        uploadButton.textContent = 'Upload';
-                        progressBar.style.display = 'none';
-                        return;
-                    }
-                    fileRef.folderId = currentFolderId || folderName; // Use currentFolderId if viewing a folder, else use new folderName
-                }
                 
                 if (currentSection === 'files') {
                     // For files section: Upload to Firebase Storage
@@ -1406,6 +1401,16 @@
                         }
                     );
                 } else if (currentSection === 'gallery') {
+                    if (!currentFolderId) {
+                        showNotification('A folder must be selected to upload an image', true);
+                        uploadButton.disabled = false;
+                        uploadButton.textContent = 'Upload';
+                        progressBar.style.display = 'none';
+                        return;
+                    }
+                    
+                    fileRef.folderId = currentFolderId;
+                    
                     // For gallery sections: Convert to base64
                     if (fileInput.files[0].type.startsWith('image/')) {
                         const fileData = await convertFileToBase64(fileInput.files[0]);
