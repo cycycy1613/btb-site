@@ -1450,9 +1450,11 @@
             });
         }
         
-        // Delete file from Firebase
+        // Delete image from modal
         function deleteImage() {
             closeModal();
+            // Store the item to be deleted before opening the modal
+            itemToDelete = { type: 'image', key: currentImageKey };
             openDeleteModal();
         }
         
@@ -1469,39 +1471,76 @@
                 return;
             }
             
+            if (!itemToDelete) {
+                showNotification('No item selected for deletion', true);
+                return;
+            }
+            
             try {
-                let deleteKey = currentImageKey || currentFileKey;
-                
-                if (!deleteKey) {
-                    showNotification('No item selected for deletion', true);
-                    return;
+                if (itemToDelete.type === 'folder') {
+                    const folderRef = database.ref(`folders/${itemToDelete.key}`);
+                    await folderRef.remove();
+                    
+                    const imagesInFolderRef = database.ref('files').orderByChild('folderId').equalTo(itemToDelete.key);
+                    const snapshot = await imagesInFolderRef.once('value');
+                    const updates = {};
+                    snapshot.forEach(childSnapshot => {
+                        updates[childSnapshot.key] = null;
+                    });
+                    if (Object.keys(updates).length > 0) {
+                        await database.ref('files').update(updates);
+                    }
+                    
+                    showNotification('Folder and its contents deleted successfully!');
+                } else if (itemToDelete.type === 'image') {
+                    const imageRef = database.ref(`files/${itemToDelete.key}`);
+                    await imageRef.remove();
+                    showNotification('Image deleted successfully!');
+                } else if (itemToDelete.type === 'file') {
+                    const fileRef = database.ref(`files/${itemToDelete.key}`);
+                    const snapshot = await fileRef.once('value');
+                    const fileData = snapshot.val();
+                    
+                    if (fileData && fileData.downloadURL) {
+                        const storageRef = storage.refFromURL(fileData.downloadURL);
+                        await storageRef.delete();
+                    }
+                    await fileRef.remove();
+                    showNotification('File deleted successfully!');
                 }
                 
-                const fileRef = database.ref(`files/${deleteKey}`);
-                const snapshot = await fileRef.once('value');
-                const fileData = snapshot.val();
-                
-                if (fileData.downloadURL) {
-                    const storageRef = storage.refFromURL(fileData.downloadURL);
-                    await storageRef.delete();
-                }
-                
-                await fileRef.remove();
-                showNotification('Item deleted successfully!');
-                
-                currentImageKey = '';
-                currentFileKey = '';
+                itemToDelete = null;
+                closeDeleteModal();
                 
                 if (currentFolderView) {
                     loadFolderImages(currentFolderId);
                 } else {
                     loadFiles();
                 }
-                closeDeleteModal();
             } catch (error) {
                 console.error('Delete failed:', error);
                 showNotification('Delete failed. Please try again.', true);
             }
+        }
+        
+        function requestDeleteFile(key, filename) {
+            itemToDelete = { type: 'file', key: key };
+            openDeleteModal();
+        }
+        
+        function downloadFile(url, filename) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename || 'download';
+            
+            a.style.display = 'none';
+            document.body.appendChild(a);
+            
+            a.click();
+            
+            setTimeout(() => {
+                document.body.removeChild(a);
+            }, 100);
         }
         
         // Load files from Firebase
@@ -1754,66 +1793,6 @@
         function requestDelete(type, key, path = '') {
             itemToDelete = { type, key, path };
             openDeleteModal();
-        }
-
-        async function confirmDelete() {
-            const adminCode = document.getElementById('deleteAdminCode').value;
-            
-            if (adminCode !== '001122') {
-                showNotification('Invalid admin code', true);
-                return;
-            }
-            
-            if (!itemToDelete) {
-                showNotification('No item selected for deletion', true);
-                return;
-            }
-
-            try {
-                if (itemToDelete.type === 'folder') {
-                    const folderRef = database.ref(`folders/${itemToDelete.key}`);
-                    await folderRef.remove();
-
-                    const imagesInFolderRef = database.ref('files').orderByChild('folderId').equalTo(itemToDelete.key);
-                    const snapshot = await imagesInFolderRef.once('value');
-                    const updates = {};
-                    snapshot.forEach(childSnapshot => {
-                        updates[childSnapshot.key] = null;
-                    });
-                    if (Object.keys(updates).length > 0) {
-                        await database.ref('files').update(updates);
-                    }
-
-                    showNotification('Folder and its contents deleted successfully!');
-                } else if (itemToDelete.type === 'image') {
-                    const imageRef = database.ref(`files/${itemToDelete.key}`);
-                    await imageRef.remove();
-                    showNotification('Image deleted successfully!');
-                } else if (itemToDelete.type === 'file') {
-                    const fileRef = database.ref(`files/${itemToDelete.key}`);
-                    const snapshot = await fileRef.once('value');
-                    const fileData = snapshot.val();
-                    
-                    if (fileData && fileData.downloadURL) {
-                        const storageRef = storage.refFromURL(fileData.downloadURL);
-                        await storageRef.delete();
-                    }
-                    await fileRef.remove();
-                    showNotification('File deleted successfully!');
-                }
-                
-                itemToDelete = null;
-                closeDeleteModal();
-                
-                if (currentFolderView) {
-                    loadFolderImages(currentFolderId);
-                } else {
-                    loadFiles();
-                }
-            } catch (error) {
-                console.error('Delete failed:', error);
-                showNotification('Delete failed. Please try again.', true);
-            }
         }
         
         function requestDeleteFile(key, filename) {
