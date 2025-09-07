@@ -712,9 +712,7 @@
             <div class="section" id="gallery-section">
                 <div class="section-header">
                     <h2 class="section-title">Folders</h2>
-                    <div class="upload-icon" onclick="openFolderModal()">
-                        <i class="fas fa-folder-plus"></i>
-                    </div>
+                    
                 </div>
                 <div id="gallery-folders" class="folders-container">
                     <div class="empty-folders">
@@ -806,9 +804,7 @@
         <div class="modal-content">
             <img id="modalImage" src="" alt="">
             <div class="modal-controls">
-                <div class="modal-control" onclick="deleteImage()">
-                    <i class="fas fa-trash"></i>
-                </div>
+                
                 <div class="modal-control" onclick="closeModal()">
                     <i class="fas fa-times"></i>
                 </div>
@@ -1147,9 +1143,7 @@
                     <span>${folderName}</span>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <div class="upload-icon" onclick="openUploadModal()" title="Upload Image">
-                        <i class="fas fa-upload"></i>
-                    </div>
+                    
                     <button class="back-button" onclick="backToFolders()">
                         <i class="fas fa-arrow-left"></i>
                         Back
@@ -1219,9 +1213,7 @@
             const gallerySectionHeader = document.querySelector('#gallery-section .section-header');
             gallerySectionHeader.innerHTML = `
                 <h2 class="section-title">Folders</h2>
-                <div class="upload-icon" onclick="openFolderModal()">
-                    <i class="fas fa-folder-plus"></i>
-                </div>
+                
             `;
             loadFolders();
         }
@@ -1337,11 +1329,7 @@
                     const folderItem = document.createElement('div');
                     folderItem.className = 'folder-item';
                     folderItem.innerHTML = `
-                        <div class="folder-actions">
-                            <div class="folder-action folder-delete" onclick="event.stopPropagation(); requestDeleteFolder('${folder.key}')">
-                                <i class="fas fa-trash"></i>
-                            </div>
-                        </div>
+                        
                         <div class="folder-icon">
                             <i class="fas fa-folder"></i>
                         </div>
