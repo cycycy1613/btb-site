@@ -890,7 +890,7 @@
             <div class="section">
                 <div class="section-header">
                     <h2 class="section-title">Files</h2>
-                    <div class="upload-icon" onclick="openUploadModal('files')">
+                    <div class="upload-icon" onclick="openUploadModal('files')" style="display: none;">
                         <i class="fas fa-upload"></i>
                     </div>
                 </div>
@@ -905,7 +905,7 @@
             <div class="section" id="gallery-section">
                 <div class="section-header">
                     <h2 class="section-title">Folders</h2>
-                    <div class="upload-icon" onclick="openFolderModal()">
+                    <div class="upload-icon" onclick="openFolderModal()" style="display: none;">
                         <i class="fas fa-folder-plus"></i>
                     </div>
                 </div>
@@ -928,7 +928,7 @@
         </footer>
     </div>
     
-    <div id="uploadModal" class="upload-modal">
+    <div id="uploadModal" class="upload-modal" style="display: none;">
         <div class="modal-box">
             <h2 id="uploadModalTitle">Upload File</h2>
             <div class="form-group">
@@ -956,7 +956,7 @@
         </div>
     </div>
     
-    <div id="deleteModal" class="delete-modal">
+    <div id="deleteModal" class="delete-modal" style="display: none;">
         <div class="modal-box">
             <h2>Confirm Deletion</h2>
             <div class="form-group">
@@ -973,7 +973,7 @@
         </div>
     </div>
     
-    <div id="folderModal" class="folder-modal">
+    <div id="folderModal" class="folder-modal" style="display: none;">
         <div class="modal-box">
             <h2>Create New Folder</h2>
             <div class="form-group">
@@ -1000,7 +1000,7 @@
             <div class="modal-nav">
             </div>
             <div class="modal-controls">
-                <div class="modal-control" onclick="deleteImage()">
+                <div class="modal-control" onclick="deleteImage()" style="display: none;">
                     <i class="fas fa-trash"></i>
                 </div>
                 <div class="modal-control" onclick="closeModal()">
@@ -1591,7 +1591,7 @@
                         const folderItem = document.createElement('div');
                         folderItem.className = 'folder-item';
                         folderItem.innerHTML = `
-                            <div class="folder-actions">
+                            <div class="folder-actions" style="display: none;">
                                 <div class="folder-action folder-delete" onclick="event.stopPropagation(); requestDelete('folder', '${folder.key}')">
                                     <i class="fas fa-trash"></i>
                                 </div>
@@ -1648,7 +1648,7 @@
                                     <div class="action-icon download-icon" onclick="event.stopPropagation(); downloadFile('${file.downloadURL}', '${file.filename}')">
                                         <i class="fas fa-download"></i>
                                     </div>
-                                    <div class="action-icon delete-icon" onclick="event.stopPropagation(); requestDeleteFile('${file.key}', '${file.filename}')">
+                                    <div class="action-icon delete-icon" onclick="event.stopPropagation(); requestDeleteFile('${file.key}', '${file.filename}')" style="display: none;">
                                         <i class="fas fa-trash"></i>
                                     </div>
                                 </div>
@@ -1711,7 +1711,7 @@
                     <span>${folderName}</span>
                 </div>
                 <div style="display: flex; gap: 10px;">
-                    <div class="upload-icon" onclick="openUploadModal('gallery')" title="Upload Image">
+                    <div class="upload-icon" onclick="openUploadModal('gallery')" title="Upload Image" style="display: none;">
                         <i class="fas fa-upload"></i>
                     </div>
                     <button class="back-button" onclick="backToFolders()">
@@ -1780,7 +1780,7 @@
             const gallerySectionHeader = document.querySelector('#gallery-section .section-header');
             gallerySectionHeader.innerHTML = `
                 <h2 class="section-title">Folders</h2>
-                <div class="upload-icon" onclick="openFolderModal()">
+                <div class="upload-icon" onclick="openFolderModal()" style="display: none;">
                     <i class="fas fa-folder-plus"></i>
                 </div>
             `;
