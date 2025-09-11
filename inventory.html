@@ -1010,7 +1010,9 @@
             const element = document.getElementById('inventory-table-container');
             const mapTitleElement = document.getElementById('map-title');
             const mapName = mapTitleElement.textContent.trim();
-            const filename = `BTB INVENTORY - ${mapName} - ${lastUpdatedTimestamp.replace(/[:\/,\s]/g, '-')}.pdf`;
+            const today = new Date();
+            const formattedDate = (today.getMonth() + 1).toString().padStart(2, '0') + '/' + today.getDate().toString().padStart(2, '0') + '/' + today.getFullYear().toString().slice(-2);
+            const filename = `BTB Inventory - ${mapName} - ${formattedDate}.pdf`;
 
             html2canvas(element, { 
                 scale: 2, // Capture at 2x resolution for better quality
