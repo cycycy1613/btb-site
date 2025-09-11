@@ -7,6 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -703,6 +704,40 @@
             margin-bottom: 15px;
             color: var(--gray);
         }
+
+        /* New Landing Page Styles */
+        #gallery-view {
+            padding-top: 5rem;
+            padding-bottom: 3rem;
+        }
+
+        .landing-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .landing-header .section-title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .landing-header .section-subtitle {
+            font-size: 1.5rem;
+            color: var(--secondary);
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+
+        .gallery-wrapper {
+            background-color: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: var(--shadow-hover);
+            min-height: 400px;
+        }
     </style>
 </head>
 <body>
@@ -722,10 +757,13 @@
 
     <main class="container">
         <div id="gallery-view">
-            <h1 class="section-title">Maps Collection</h1>
-            <p class="section-subtitle">BTB Realtime Availability Updates</p>
-
-            <div class="gallery" id="maps-container">
+            <div class="landing-header">
+                <h1 class="section-title">Maps Collection</h1>
+                <p class="section-subtitle">BTB Realtime Availability Updates</p>
+            </div>
+            <div class="gallery-wrapper">
+                <div class="gallery" id="maps-container">
+                </div>
             </div>
         </div>
 
@@ -762,6 +800,10 @@
                             <input type="checkbox" id="scroll-switch">
                             <span class="slider"></span>
                         </label>
+                        <button id="save-as-jpeg-btn" class="btn btn-primary hidden">
+                            <i class="fas fa-camera"></i>
+                            Save as JPEG
+                        </button>
                     </div>
                 </div>
 
@@ -836,6 +878,7 @@
         const tableContainer = document.getElementById('table-to-capture');
         const scrollSwitch = document.getElementById('scroll-switch');
         const mapContainer = document.querySelector('.map-container');
+        const saveAsJpegBtn = document.getElementById('save-as-jpeg-btn');
 
 
         // Global Variables
@@ -878,9 +921,39 @@
         scrollSwitch.addEventListener('change', (e) => {
             if (e.target.checked) {
                 tableContainer.classList.add('no-scroll');
+                saveAsJpegBtn.classList.remove('hidden');
             } else {
                 tableContainer.classList.remove('no-scroll');
+                saveAsJpegBtn.classList.add('hidden');
             }
+        });
+
+        saveAsJpegBtn.addEventListener('click', () => {
+            const element = document.getElementById('inventory-table-container');
+            const lastUpdatedText = lastUpdated.textContent.replace('Last updated: ', '');
+            const fileName = `BTB INVENTORY - ${lastUpdatedText.replace(/[\/:]/g, '-')}.jpeg`;
+
+            showLoading();
+
+            html2canvas(element, { 
+                scale: 2, // Capture at a higher resolution
+                useCORS: true,
+                logging: true
+            }).then(canvas => {
+                const imgData = canvas.toDataURL('image/jpeg', 1.0); // 1.0 for highest quality
+                const link = document.createElement('a');
+                link.download = fileName;
+                link.href = imgData;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                hideLoading();
+                showToast('Image saved successfully!');
+            }).catch(err => {
+                console.error('Error saving image:', err);
+                hideLoading();
+                showToast('Error saving image: ' + err.message, true);
+            });
         });
         
         // Map drag event listeners
