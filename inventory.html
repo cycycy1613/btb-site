@@ -8,6 +8,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         :root {
@@ -800,9 +801,9 @@
                             <input type="checkbox" id="scroll-switch">
                             <span class="slider"></span>
                         </label>
-                        <button id="save-as-jpeg-btn" class="btn btn-primary hidden">
-                            <i class="fas fa-camera"></i>
-                            Save as JPEG
+                        <button id="save-as-pdf" class="btn btn-success hidden">
+                            <i class="fas fa-file-pdf"></i>
+                            Save as PDF
                         </button>
                     </div>
                 </div>
@@ -878,13 +879,14 @@
         const tableContainer = document.getElementById('table-to-capture');
         const scrollSwitch = document.getElementById('scroll-switch');
         const mapContainer = document.querySelector('.map-container');
-        const saveAsJpegBtn = document.getElementById('save-as-jpeg-btn');
+        const saveAsPdfBtn = document.getElementById('save-as-pdf');
 
 
         // Global Variables
         let currentMapId = null;
         let currentZoom = 1;
         let maps = [];
+        let lastUpdatedTimestamp = '';
         
         let isDragging = false;
         let initialX;
@@ -921,41 +923,17 @@
         scrollSwitch.addEventListener('change', (e) => {
             if (e.target.checked) {
                 tableContainer.classList.add('no-scroll');
-                saveAsJpegBtn.classList.remove('hidden');
+                saveAsPdfBtn.classList.remove('hidden');
             } else {
                 tableContainer.classList.remove('no-scroll');
-                saveAsJpegBtn.classList.add('hidden');
+                saveAsPdfBtn.classList.add('hidden');
             }
         });
-
-        saveAsJpegBtn.addEventListener('click', () => {
-            const element = document.getElementById('inventory-table-container');
-            const lastUpdatedText = lastUpdated.textContent.replace('Last updated: ', '');
-            const fileName = `BTB INVENTORY - ${lastUpdatedText.replace(/[\/:]/g, '-')}.jpeg`;
-
-            showLoading();
-
-            html2canvas(element, { 
-                scale: 2, // Capture at a higher resolution
-                useCORS: true,
-                logging: true
-            }).then(canvas => {
-                const imgData = canvas.toDataURL('image/jpeg', 1.0); // 1.0 for highest quality
-                const link = document.createElement('a');
-                link.download = fileName;
-                link.href = imgData;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                hideLoading();
-                showToast('Image saved successfully!');
-            }).catch(err => {
-                console.error('Error saving image:', err);
-                hideLoading();
-                showToast('Error saving image: ' + err.message, true);
-            });
-        });
         
+        saveAsPdfBtn.addEventListener('click', async () => {
+            await saveAsPdf();
+        });
+
         // Map drag event listeners
         mapContainer.addEventListener('mousedown', dragStart);
         mapContainer.addEventListener('mouseup', dragEnd);
@@ -1026,6 +1004,47 @@
             }
         }
 
+        function saveAsPdf() {
+            showLoading();
+            const element = document.getElementById('inventory-table-container');
+            const mapTitleElement = document.getElementById('map-title');
+            const mapName = mapTitleElement.textContent.trim();
+            const filename = `BTB INVENTORY - ${mapName} - ${lastUpdatedTimestamp.replace(/[:\/,\s]/g, '-')}.pdf`;
+
+            html2canvas(element, { 
+                scale: 2, // Capture at 2x resolution for better quality
+                useCORS: true 
+            }).then(canvas => {
+                const { jsPDF } = window.jspdf;
+                const imgData = canvas.toDataURL('image/jpeg', 1.0); // Highest quality JPEG
+                const pdf = new jsPDF('p', 'mm', 'a4');
+                const imgWidth = 210; 
+                const pageHeight = 295;
+                const imgHeight = canvas.height * imgWidth / canvas.width;
+                let heightLeft = imgHeight;
+                let position = 0;
+
+                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+
+                while (heightLeft >= 0) {
+                    position = heightLeft - imgHeight;
+                    pdf.addPage();
+                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+                }
+                
+                pdf.save(filename);
+                hideLoading();
+                showToast('PDF successfully downloaded!');
+            }).catch(error => {
+                console.error('Error generating PDF:', error);
+                showToast('Error generating PDF: ' + error.message, true);
+                hideLoading();
+            });
+        }
+
+
         function showGallery() {
             galleryView.style.display = 'block';
             mapView.style.display = 'none';
@@ -1058,6 +1077,11 @@
                 xOffset = 0;
                 yOffset = 0;
                 updateImageTransform();
+                
+                // Hide PDF button and reset scroll switch
+                scrollSwitch.checked = false;
+                tableContainer.classList.remove('no-scroll');
+                saveAsPdfBtn.classList.add('hidden');
 
                 // Load inventory data
                 loadInventoryData(mapId);
@@ -1145,6 +1169,7 @@
                 </tr>
             `;
             lastUpdated.textContent = 'Last updated: Never';
+            lastUpdatedTimestamp = 'Never';
         }
 
         function loadInventoryData(mapId) {
@@ -1192,7 +1217,10 @@
                     // Update last updated time
                     const lastItem = items[items.length - 1];
                     if (lastItem.updatedAt) {
-                        lastUpdated.textContent = 'Last updated: ' + lastItem.updatedAt.toDate().toLocaleString();
+                        const date = lastItem.updatedAt.toDate();
+                        const formattedDate = date.toLocaleString();
+                        lastUpdated.textContent = 'Last updated: ' + formattedDate;
+                        lastUpdatedTimestamp = formattedDate;
                     }
                 } else {
                     addEmptyStateRow();
