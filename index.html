@@ -15,6 +15,9 @@
             --gray: #a0aec0;
             --success: #38a169;
             --danger: #e53e3e;
+            --dark-bg: #121212;
+            --dark-surface: #1e1e1e;
+            --dark-text: #e0e0e0;
         }
         
         * {
@@ -474,26 +477,75 @@
             animation: slideIn 0.3s ease;
         }
         
-        @keyframes slideIn {
-            from {
-                transform: translateX(100px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+        /* Login Modal */
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1020;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
         }
         
-        /* Loading Spinner */
-        .spinner {
-            border: 4px solid rgba(0, 0, 0, 0.1);
-            border-left: 4px solid var(--primary);
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 0 auto;
+        .login-modal.active {
+            opacity: 1;
+        }
+        
+        .login-content {
+            background: var(--dark-surface);
+            padding: 40px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+            transform: scale(0.9);
+            transition: transform 0.3s ease;
+        }
+        
+        .login-modal.active .login-content {
+            transform: scale(1);
+        }
+        
+        .login-content h3 {
+            color: var(--dark-text);
+            text-align: center;
+            margin-bottom: 25px;
+            font-size: 28px;
+        }
+        
+        .login-content .form-group label {
+            color: var(--gray);
+        }
+        
+        .login-content .form-group input {
+            background: var(--dark-bg);
+            border: 1px solid var(--gray);
+            color: var(--dark-text);
+        }
+        
+        .login-content .form-group input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(233, 185, 73, 0.2);
+            outline: none;
+        }
+        
+        .login-content .form-actions {
+            justify-content: center;
+        }
+        
+        .login-content .btn-primary {
+            background: var(--accent);
+            color: var(--dark-bg);
+        }
+        
+        .login-content .btn-primary:hover {
+            background: #d4a742;
         }
         
         /* Animations */
@@ -543,6 +595,17 @@
             to { 
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
             }
         }
         
@@ -681,7 +744,6 @@
     </style>
 </head>
 <body>
-    <!-- Header Section -->
     <header>
         <div class="container">
             <div class="header-content">
@@ -695,9 +757,7 @@
         </div>
     </header>
 
-    <!-- Main Content -->
     <div class="container">
-        <!-- Navigation Tabs -->
         <div class="tabs-container">
             <div class="tabs">
                 <a href="https://bayanihantownbatangas.info/files" class="tab">
@@ -719,16 +779,13 @@
             </div>
         </div>
 
-        <!-- Announcement Section -->
         <section class="announcement-section">
             <h2 class="section-title">Bulletin Board</h2>
             <div class="announcement-grid" id="announcementGrid">
-                <!-- Announcement items will be dynamically added here -->
-            </div>
+                </div>
         </section>
     </div>
 
-    <!-- Footer -->
     <footer>
         <div class="container">
             <div class="footer-content">
@@ -737,6 +794,7 @@
                     <a href="#">Privacy Policy</a>
                     <a href="#">Terms of Service</a>
                     <a href="#">Contact Us</a>
+                    <a href="#" id="loginLink" onclick="openLoginModal(event)">Login</a>
                 </div>
             </div>
             <div class="copyright">
@@ -745,7 +803,6 @@
         </div>
     </footer>
 
-    <!-- Full-screen Image Modal -->
     <div class="modal" id="imageModal">
         <div class="modal-content">
             <img id="modalImage" src="" alt="Announcement">
@@ -760,7 +817,6 @@
         </div>
     </div>
 
-    <!-- Upload Modal -->
     <div class="upload-modal" id="uploadModal">
         <div class="upload-content">
             <h3>Upload New Poster</h3>
@@ -779,14 +835,28 @@
         </div>
     </div>
 
-    <!-- Toast Notification -->
+    <div class="login-modal" id="loginModal">
+        <div class="login-content">
+            <h3>Admin Login</h3>
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password">
+            </div>
+            <div class="form-actions">
+                <button class="btn btn-primary" onclick="handleLogin()">Login</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
 
-    <!-- Firebase App (core Firebase SDK) -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <!-- Firebase Storage -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
-    <!-- Firebase Database -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
     <script>
@@ -804,6 +874,7 @@
 
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
         const storage = firebase.storage();
         const storageRef = storage.ref();
         const database = firebase.database();
@@ -840,6 +911,14 @@
             
             // Prevent body from scrolling when modal is open
             document.body.style.overflow = 'hidden';
+            
+            // Show or hide the upload button based on login status
+            const uploadBtn = document.querySelector('.modal-btn.upload');
+            if (auth.currentUser) {
+                uploadBtn.style.display = 'flex';
+            } else {
+                uploadBtn.style.display = 'none';
+            }
         }
 
         // Function to close modal
@@ -856,6 +935,10 @@
 
         // Function to open upload modal
         function openUploadModal() {
+            if (!auth.currentUser) {
+                showToast('You must be logged in to upload posters.', false);
+                return;
+            }
             const uploadModal = document.getElementById('uploadModal');
             uploadModal.style.display = 'flex';
             
@@ -880,6 +963,54 @@
             }, 300);
         }
 
+        // Function to open login modal
+        function openLoginModal(event) {
+            event.preventDefault();
+            const loginModal = document.getElementById('loginModal');
+            loginModal.style.display = 'flex';
+            
+            setTimeout(() => {
+                loginModal.classList.add('active');
+            }, 10);
+        }
+
+        // Function to close login modal
+        function closeLoginModal() {
+            const loginModal = document.getElementById('loginModal');
+            loginModal.classList.remove('active');
+            
+            setTimeout(() => {
+                loginModal.style.display = 'none';
+                // Clear the form
+                document.getElementById('loginEmail').value = '';
+                document.getElementById('loginPassword').value = '';
+            }, 300);
+        }
+
+        // Function to handle login
+        function handleLogin() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showToast('Please enter both email and password.', false);
+                return;
+            }
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Signed in
+                    showToast('Login successful!', true);
+                    closeLoginModal();
+                })
+                .catch((error) => {
+                    const errorCode = error.code;
+                    const errorMessage = error.message;
+                    console.error("Login error: ", errorCode, errorMessage);
+                    showToast(`Login failed: ${errorMessage}`, false);
+                });
+        }
+        
         // Function to show toast notification
         function showToast(message, isSuccess = true) {
             const toast = document.getElementById('toast');
@@ -933,6 +1064,7 @@
             const fileInput = document.getElementById('posterImage');
             const file = fileInput.files[0];
             
+            // Admin code check remains as a secondary layer of protection
             if (adminCode !== '001122') {
                 showToast('Invalid admin code!', false);
                 return;
@@ -1036,6 +1168,31 @@
                     }
                 });
         }
+        
+        // Listen for authentication state changes
+        auth.onAuthStateChanged(user => {
+            const loginLink = document.getElementById('loginLink');
+            if (user) {
+                // User is signed in
+                loginLink.textContent = 'Logout';
+                loginLink.onclick = handleLogout;
+                showToast('Welcome back!', true);
+            } else {
+                // User is signed out
+                loginLink.textContent = 'Login';
+                loginLink.onclick = openLoginModal;
+            }
+        });
+        
+        function handleLogout(event) {
+            event.preventDefault();
+            auth.signOut().then(() => {
+                showToast('Logged out successfully.', true);
+            }).catch((error) => {
+                console.error("Logout error:", error);
+                showToast('Logout failed.', false);
+            });
+        }
 
         // Initialize the page
         window.onload = function() {
@@ -1045,6 +1202,7 @@
             window.onclick = function(event) {
                 const imageModal = document.getElementById('imageModal');
                 const uploadModal = document.getElementById('uploadModal');
+                const loginModal = document.getElementById('loginModal');
                 
                 if (event.target === imageModal) {
                     closeModal();
@@ -1053,6 +1211,10 @@
                 if (event.target === uploadModal) {
                     closeUploadModal();
                 }
+                
+                if (event.target === loginModal) {
+                    closeLoginModal();
+                }
             };
             
             // Close modals with Escape key
@@ -1060,6 +1222,7 @@
                 if (event.key === 'Escape') {
                     closeModal();
                     closeUploadModal();
+                    closeLoginModal();
                 }
             });
         };
