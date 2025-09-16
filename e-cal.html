@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan E-Cal</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .header {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 10px 10px;
+        }
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+        .card-header {
+            background: linear-gradient(120deg, #eaf4ff 0%, #dbe8fd 100%);
+            font-weight: 600;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #0056b3 0%, #003a75 100%);
+        }
+        .result-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .result-table th {
+            background-color: #eaf4ff;
+        }
+        .highlight {
+            background-color: #f0f8ff;
+            font-weight: 600;
+        }
+        .section-title {
+            border-left: 4px solid #007bff;
+            padding-left: 10px;
+            margin: 20px 0;
+        }
+        .input-group-text {
+            background-color: #f8f9fa;
+        }
+        .calculation-formula {
+            background-color: #e9ecef;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-family: monospace;
+        }
+        .create-financing-section .mb-3 {
+            margin-bottom: 1.2rem !important;
+        }
+        .age-highlight {
+            color: #dc3545;
+            font-weight: 600;
+            background-color: #fff3f3;
+            padding: 3px 8px;
+            border-radius: 4px;
+        }
+        .financing-type {
+            color: #007bff;
+            font-weight: 500;
+        }
+        /* Custom styles for animations */
+        .btn-primary.animate {
+            animation: pulse 1s infinite;
+        }
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header text-center">
+        <h1>Loan E-Cal</h1>
+        <p class="lead">Calculate your loan options with ease</p>
+    </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Loan Application</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="name" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="name" placeholder="Enter your full name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="age" class="form-label">Age</label>
+                            <input type="number" class="form-control" id="age" placeholder="Enter your age">
+                        </div>
+                        <div class="mb-3">
+                            <label for="downpayment" class="form-label">Downpayment Amount (₱)</label>
+                            <input type="number" class="form-control" id="downpayment" placeholder="Enter downpayment amount">
+                        </div>
+                        <div class="mb-3">
+                            <label for="loanAmount" class="form-label">Loanable Amount (₱)</label>
+                            <input type="number" class="form-control" id="loanAmount" placeholder="Enter loan amount">
+                        </div>
+                        <div class="mb-3">
+                            <label for="financingOption" class="form-label">Financing Option</label>
+                            <select class="form-select" id="financingOption">
+                                <option value="" selected disabled>Select a financing option</option>
+                                </select>
+                        </div>
+                        <button class="btn btn-primary w-100 mt-3" id="calculateBtn">Calculate Loan</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card create-financing-section">
+                    <div class="card-header">
+                        <h5 class="mb-0">Create Financing Option</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="optionName" class="form-label">Option Name</label>
+                            <input type="text" class="form-control" id="optionName" placeholder="Enter option name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="maxLoanTerm" class="form-label">Max Loan Term (years)</label>
+                            <input type="number" class="form-control" id="maxLoanTerm" placeholder="Enter max loan term">
+                        </div>
+                        <div class="mb-3">
+                            <label for="margin" class="form-label">Margin (years)</label>
+                            <input type="number" class="form-control" id="margin" placeholder="Enter margin">
+                            <div class="form-text">Reduces max loan term based on borrower's age (maturity age is 70)</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="interestRate" class="form-label">Interest Rate (%)</label>
+                            <input type="number" class="form-control" id="interestRate" step="0.01" placeholder="Enter interest rate">
+                        </div>
+                        <div class="mb-3">
+                            <label for="mirf" class="form-label">Monthly Income Required Factor (MIRF)</label>
+                            <input type="number" class="form-control" id="mirf" step="0.01" placeholder="Enter MIRF">
+                            <div class="form-text">Typically between 0.25 to 0.40 (25% to 40% of monthly income)</div>
+                        </div>
+                        <button class="btn btn-primary w-100" id="saveFinancingOption">Save Financing Option</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h4 class="section-title">Loan Calculation Results</h4>
+        <div class="card">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered result-table">
+                        <thead>
+                            <tr>
+                                <th>Name (Age at Completion)</th>
+                                <th>Loanable Amount (₱)</th>
+                                <th>Financing Type</th>
+                                <th>Loan Term (years)</th>
+                                <th>Monthly Amortization (₱)</th>
+                                <th>Monthly Income Required (₱)</th>
+                            </tr>
+                        </thead>
+                        <tbody id="resultsBody">
+                            <tr>
+                                <td colspan="6" class="text-center">No data calculated yet</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="calculation-formula">
+                    <h6>Calculation Formula:</h6>
+                    <p>Monthly Payment = P × r × (1+r)^n / ((1+r)^n - 1)</p>
+                    <p>Where:<br>
+                    P = Principal loan amount<br>
+                    r = Monthly interest rate (annual rate ÷ 12)<br>
+                    n = Total number of payments (loan term in years × 12)</p>
+                    <p>Monthly Income Required = Monthly Payment ÷ MIRF</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="text-center mt-5 mb-3">
+        <p>Loan E-Cal by CM.</p>
+    </footer>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    <script>
+        const ADMIN_CODE = "001122"; // Admin code constant
+
+        // Format number to PHP currency format
+        function formatPHP(number) {
+            if (isNaN(number)) return "₱0.00";
+            
+            // Format with thousands separators and 2 decimal places
+            return "₱" + number.toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+        }
+
+        // Show a custom toast notification
+        function showToast(message, type = 'success') {
+            const colors = {
+                success: 'linear-gradient(135deg, #28a745, #1e7e34)',
+                error: 'linear-gradient(135deg, #dc3545, #c82333)',
+                info: 'linear-gradient(135deg, #17a2b8, #117a8b)'
+            };
+
+            Toastify({
+                text: message,
+                duration: 3000,
+                newWindow: true,
+                close: true,
+                gravity: "top",
+                position: "right",
+                stopOnFocus: true,
+                style: {
+                    background: colors[type],
+                },
+                offset: {
+                    x: 10,
+                    y: 50
+                }
+            }).showToast();
+        }
+
+        // Firebase configuration with provided credentials
+        const firebaseConfig = {
+            apiKey: "AIzaSyBOm4XyjvLoe2MR0_bWT_zHS4CkdYXt5M4",
+            authDomain: "btb-inventory.firebaseapp.com",
+            projectId: "btb-inventory",
+            storageBucket: "btb-inventory.firebasestorage.app",
+            messagingSenderId: "635532868561",
+            appId: "1:635532868561:web:b7bee31c83f6f4ceb63ef0",
+            measurementId: "G-C8DV3NBLCP"
+        };
+
+        // Initialize Firebase automatically
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                firebase.initializeApp(firebaseConfig);
+                console.log('Firebase connected successfully!');
+                showToast('Firebase connected successfully!', 'success');
+                loadFinancingOptions();
+            } catch (error) {
+                console.error('Error connecting to Firebase: ' + error.message);
+                showToast('Error connecting to Firebase. Using sample data.', 'error');
+                loadSampleData();
+            }
+        });
+
+        // Load financing options from Firestore
+        function loadFinancingOptions() {
+            const db = firebase.firestore();
+            const select = document.getElementById('financingOption');
+            
+            // Clear existing options except the first one
+            while (select.options.length > 1) {
+                select.remove(1);
+            }
+            
+            db.collection("financingOptions").get().then((querySnapshot) => {
+                querySnapshot.forEach((doc) => {
+                    const option = doc.data();
+                    const opt = document.createElement('option');
+                    opt.value = doc.id;
+                    opt.textContent = `${option.name} (${option.interestRate}%, ${option.maxLoanTerm} years)`;
+                    select.appendChild(opt);
+                });
+                
+                if (querySnapshot.empty) {
+                    const opt = document.createElement('option');
+                    opt.textContent = "No options found. Create one first.";
+                    opt.disabled = true;
+                    select.appendChild(opt);
+                }
+            }).catch((error) => {
+                console.error("Error loading financing options: ", error);
+                const opt = document.createElement('option');
+                opt.textContent = "Error loading options";
+                opt.disabled = true;
+                select.appendChild(opt);
+            });
+        }
+
+        // Save financing option to Firestore
+        document.getElementById('saveFinancingOption').addEventListener('click', function() {
+            // Admin code check
+            const adminCode = prompt("Please enter the admin code to save a new option:");
+            if (adminCode !== ADMIN_CODE) {
+                showToast('Invalid admin code.', 'error');
+                return;
+            }
+
+            // Check if Firebase is initialized
+            if (!firebase.apps.length) {
+                showToast('Firebase is not connected. Saving is not available.', 'error');
+                return;
+            }
+            
+            const name = document.getElementById('optionName').value;
+            const maxLoanTerm = document.getElementById('maxLoanTerm').value;
+            const margin = document.getElementById('margin').value;
+            const interestRate = document.getElementById('interestRate').value;
+            const mirf = document.getElementById('mirf').value;
+            
+            if (name && maxLoanTerm && margin && interestRate && mirf) {
+                const db = firebase.firestore();
+                
+                db.collection("financingOptions").add({
+                    name: name,
+                    maxLoanTerm: parseInt(maxLoanTerm),
+                    margin: parseInt(margin),
+                    interestRate: parseFloat(interestRate),
+                    mirf: parseFloat(mirf)
+                })
+                .then((docRef) => {
+                    showToast('Financing option saved successfully!', 'success');
+                    // Clear the form
+                    document.getElementById('optionName').value = '';
+                    document.getElementById('maxLoanTerm').value = '';
+                    document.getElementById('margin').value = '';
+                    document.getElementById('interestRate').value = '';
+                    document.getElementById('mirf').value = '';
+                    
+                    // Reload the options in the dropdown
+                    loadFinancingOptions();
+                })
+                .catch((error) => {
+                    showToast('Error saving financing option: ' + error.message, 'error');
+                });
+            } else {
+                showToast('Please fill all fields for the financing option', 'error');
+            }
+        });
+
+        // Calculate loan details
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            // Get form values
+            const name = document.getElementById('name').value;
+            const age = parseInt(document.getElementById('age').value);
+            const downpayment = document.getElementById('downpayment').value;
+            const loanAmount = document.getElementById('loanAmount').value;
+            const financingOptionId = document.getElementById('financingOption').value;
+            
+            if (!name || !age || !downpayment || !loanAmount || !financingOptionId) {
+                showToast('Please fill all fields in the loan application section', 'info');
+                return;
+            }
+            
+            // Get financing option details
+            if (firebase.apps.length) {
+                const db = firebase.firestore();
+                db.collection("financingOptions").doc(financingOptionId).get()
+                .then((doc) => {
+                    if (doc.exists) {
+                        const option = doc.data();
+                        calculateLoan(name, age, loanAmount, downpayment, option);
+                    } else {
+                        showToast('Selected financing option not found', 'error');
+                    }
+                })
+                .catch((error) => {
+                    showToast('Error getting financing option: ' + error.message, 'error');
+                });
+            } else {
+                // Use sample data if Firebase is not available
+                const selectedOption = document.getElementById('financingOption');
+                const selectedText = selectedOption.options[selectedOption.selectedIndex].text;
+                
+                // Find the selected sample option
+                const sampleOptions = [
+                    {id: 'sample1', name: 'Standard Home Loan', maxLoanTerm: 30, margin: 3, interestRate: 3.5, mirf: 0.3},
+                    {id: 'sample2', name: 'Auto Financing', maxLoanTerm: 5, margin: 0, interestRate: 4.2, mirf: 0.25},
+                    {id: 'sample3', name: 'Personal Loan', maxLoanTerm: 7, margin: 2, interestRate: 7.8, mirf: 0.35}
+                ];
+                
+                const option = sampleOptions.find(opt => 
+                    selectedText.includes(opt.name)
+                );
+                
+                if (option) {
+                    calculateLoan(name, age, loanAmount, downpayment, option);
+                } else {
+                    showToast('Please select a financing option', 'info');
+                }
+            }
+        });
+
+        // Perform loan calculation for multiple terms
+        function calculateLoan(name, age, loanAmount, downpayment, option) {
+            const principal = parseFloat(loanAmount) - parseFloat(downpayment);
+            const annualInterestRate = parseFloat(option.interestRate) / 100;
+            const monthlyInterestRate = annualInterestRate / 12;
+            const mirf = parseFloat(option.mirf);
+            
+            // Calculate available loan terms based on age, max loan term, and margin
+            const maturityAge = 70;
+            const maxAllowedTerm = maturityAge - age - (option.margin || 0);
+            const maxOptionTerm = parseInt(option.maxLoanTerm);
+            
+            // Determine the actual maximum term (minimum of allowed term and option term)
+            const actualMaxTerm = Math.min(maxAllowedTerm, maxOptionTerm);
+            
+            // Define standard terms to display
+            const standardTerms = [30, 25, 20, 15, 10, 5];
+            
+            // Filter to get only terms that are <= actualMaxTerm
+            let availableTerms = standardTerms.filter(term => term <= actualMaxTerm);
+            
+            // If no standard terms are available, show the maximum available term
+            if (availableTerms.length === 0 && actualMaxTerm > 0) {
+                availableTerms.push(actualMaxTerm);
+            }
+            
+            // Also include the actual maximum term if it's not already in the list
+            if (actualMaxTerm > 0 && !availableTerms.includes(actualMaxTerm)) {
+                availableTerms.push(actualMaxTerm);
+                availableTerms.sort((a, b) => b - a); // Sort descending
+            }
+            
+            // Generate table rows for each available term
+            let tableContent = '';
+            
+            if (availableTerms.length > 0) {
+                availableTerms.forEach(term => {
+                    const payments = term * 12;
+                    
+                    // Calculate monthly payment using formula: P * r * (1+r)^n / ((1+r)^n - 1)
+                    const x = Math.pow(1 + monthlyInterestRate, payments);
+                    const monthlyPayment = (principal * monthlyInterestRate * x) / (x - 1);
+                    
+                    // Calculate monthly income required
+                    const monthlyIncomeRequired = monthlyPayment / mirf;
+                    
+                    // Calculate age at loan completion
+                    const ageAtCompletion = age + term;
+                    
+                    tableContent += `
+                        <tr>
+                            <td>${name} <span class="age-highlight">(${ageAtCompletion} yrs)</span></td>
+                            <td>${formatPHP(principal)}</td>
+                            <td><span class="financing-type">${option.name}</span> <span class="age-highlight">${option.interestRate}%</span></td>
+                            <td>${term}</td>
+                            <td class="highlight">${formatPHP(monthlyPayment)}</td>
+                            <td class="highlight">${formatPHP(monthlyIncomeRequired)}</td>
+                        </tr>
+                    `;
+                });
+                showToast('Loan calculations generated successfully!', 'success');
+            } else {
+                tableContent = `
+                    <tr>
+                        <td colspan="6" class="text-center">No available loan terms based on your age and selected financing option</td>
+                    </tr>
+                `;
+                showToast('No available loan terms for this application.', 'info');
+            }
+            
+            // Update results table
+            const resultsBody = document.getElementById('resultsBody');
+            resultsBody.innerHTML = tableContent;
+        }
+
+        // Sample data for demonstration (if Firebase is not configured)
+        function loadSampleData() {
+            const select = document.getElementById('financingOption');
+            
+            // Add sample options
+            const sampleOptions = [
+                {id: 'sample1', name: 'Standard Home Loan', maxLoanTerm: 30, margin: 3, interestRate: 3.5, mirf: 0.3},
+                {id: 'sample2', name: 'Auto Financing', maxLoanTerm: 5, margin: 0, interestRate: 4.2, mirf: 0.25},
+                {id: 'sample3', name: 'Personal Loan', maxLoanTerm: 7, margin: 2, interestRate: 7.8, mirf: 0.35}
+            ];
+            
+            sampleOptions.forEach(option => {
+                const opt = document.createElement('option');
+                opt.value = option.id;
+                opt.textContent = `${option.name} (${option.interestRate}%, ${option.maxLoanTerm} years)`;
+                select.appendChild(opt);
+            });
+        }
+    </script>
+</body>
+</html>
