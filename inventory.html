@@ -1029,8 +1029,8 @@
         
                 const { jsPDF } = window.jspdf;
                 const pdf = new jsPDF('p', 'in', 'a4');
-                const imgWidth = 8.5 - 1; // A4 width (8.5 inches) minus 0.5-inch margins on both sides
-                const pageHeight = 11 - 1; // A4 height (11 inches) minus 0.5-inch margins on top and bottom
+                const imgWidth = 8.5 - 2; // A4 width (8.5 inches) minus 1-inch margins on both sides
+                const pageHeight = 11 - 2; // A4 height (11 inches) minus 1-inch margins on top and bottom
                 
                 const canvasImageWidth = canvas.width;
                 const canvasImageHeight = canvas.height;
