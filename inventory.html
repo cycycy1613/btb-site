@@ -1004,49 +1004,68 @@
                 updateImageTransform();
             }
         }
-
-        function saveAsPdf() {
+        
+        async function saveAsPdf() {
             showLoading();
+            
+            // Hide elements before capture
+            const saveButton = document.getElementById('save-as-pdf');
+            const scrollSwitchContainer = saveButton.previousElementSibling.closest('.table-actions');
+            saveButton.style.display = 'none';
+            scrollSwitchContainer.style.display = 'none';
+
             const element = document.getElementById('inventory-table-container');
             const mapTitleElement = document.getElementById('map-title');
             const mapName = mapTitleElement.textContent.trim();
             const today = new Date();
             const formattedDate = (today.getMonth() + 1).toString().padStart(2, '0') + '/' + today.getDate().toString().padStart(2, '0') + '/' + today.getFullYear().toString().slice(-2);
             const filename = `BTB Inventory - ${mapName} - ${formattedDate}.pdf`;
-
-            html2canvas(element, { 
-                scale: 2, // Capture at 2x resolution for better quality
-                useCORS: true 
-            }).then(canvas => {
+        
+            try {
+                const canvas = await html2canvas(element, { 
+                    scale: 2,
+                    useCORS: true 
+                });
+        
                 const { jsPDF } = window.jspdf;
-                const imgData = canvas.toDataURL('image/jpeg', 1.0); // Highest quality JPEG
-                const pdf = new jsPDF('p', 'mm', 'a4');
-                const imgWidth = 210; 
-                const pageHeight = 295;
-                const imgHeight = canvas.height * imgWidth / canvas.width;
-                let heightLeft = imgHeight;
+                const pdf = new jsPDF('p', 'in', 'a4');
+                const imgWidth = 8.5 - 2; // A4 width (8.5 inches) minus 1-inch margins on both sides
+                const pageHeight = 11 - 2; // A4 height (11 inches) minus 1-inch margins on top and bottom
+                
+                const canvasImageWidth = canvas.width;
+                const canvasImageHeight = canvas.height;
+        
+                const scaleFactor = imgWidth / canvasImageWidth;
+                const finalImageHeight = canvasImageHeight * scaleFactor;
+        
                 let position = 0;
-
-                pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                let heightLeft = finalImageHeight;
+        
+                const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        
+                pdf.addImage(imgData, 'JPEG', 1, 1, imgWidth, finalImageHeight);
                 heightLeft -= pageHeight;
-
-                while (heightLeft >= 0) {
-                    position = heightLeft - imgHeight;
+        
+                while (heightLeft > 0) {
+                    position = -pageHeight + heightLeft;
                     pdf.addPage();
-                    pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+                    pdf.addImage(imgData, 'JPEG', 1, 1 + position, imgWidth, finalImageHeight);
                     heightLeft -= pageHeight;
                 }
-                
+        
                 pdf.save(filename);
-                hideLoading();
                 showToast('PDF successfully downloaded!');
-            }).catch(error => {
+            } catch (error) {
                 console.error('Error generating PDF:', error);
                 showToast('Error generating PDF: ' + error.message, true);
+            } finally {
+                // Show elements again after capture
+                saveButton.style.display = 'inline-flex';
+                scrollSwitchContainer.style.display = 'flex';
                 hideLoading();
-            });
+            }
         }
-
+        
 
         function showGallery() {
             galleryView.style.display = 'block';
