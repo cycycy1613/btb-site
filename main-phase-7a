@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bayanihan Town Batangas - Phase 7A</title>
+    <meta name="description" content="Details and specifications for Phase 7A of Bayanihan Town Batangas, featuring the Sierra - 2 Storey unit model.">
+    <meta name="keywords" content="Bayanihan Town Batangas, Bayanihan Town Phase 7A, San Pascual Batangas, Affordable housing, Sierra unit, 8990 Holdings, low-cost housing Batangas">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
+    <style>
+        /* Base Styles & Variables */
+        :root {
+            --navy-blue: #0A2C5E;
+            --light-brown: #D4C6AC;
+            --light-green: #E6F2E6;
+            --gray: #6C757D;
+            --white: #FFFFFF;
+            --dark-gray: #343A40;
+            --light-gray: #F8F9FA;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            line-height: 1.6;
+            color: var(--dark-gray);
+            background-color: var(--white);
+        }
+        
+        h1, h2, h3, h4 {
+            color: var(--navy-blue);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .section {
+            padding: 80px 0;
+        }
+        
+        .section-title {
+            text-align: center;
+            margin-bottom: 50px;
+            position: relative;
+        }
+        
+        .section-title:after {
+            content: '';
+            display: block;
+            width: 80px;
+            height: 4px;
+            background: var(--light-brown);
+            margin: 15px auto 0;
+        }
+        
+        /* Header & Navigation */
+        header {
+            background-color: var(--navy-blue);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 0;
+        }
+        
+        .logo {
+            color: var(--white);
+            font-size: 24px;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+        }
+        
+        .logo i {
+            margin-right: 10px;
+            color: var(--light-brown);
+        }
+        
+        /* New Styles for Phase 7A page */
+        .page-content {
+            padding-top: 120px;
+            padding-bottom: 40px;
+        }
+        
+        .full-width-image {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            display: block;
+            margin-bottom: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .details-list {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        .details-list li {
+            background: var(--light-green);
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .details-list li:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .details-list li .icon {
+            font-size: 2rem;
+            color: var(--navy-blue);
+            margin-bottom: 15px;
+        }
+        
+        .details-list li strong {
+            color: var(--navy-blue);
+            font-size: 1.2rem;
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        /* Animation */
+        .fade-in {
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+        
+        .fade-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        /* Footer */
+        footer {
+            background-color: var(--navy-blue);
+            color: var(--white);
+            padding: 40px 0 20px;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .footer-logo {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--white);
+        }
+        
+        .footer-info {
+            margin-bottom: 20px;
+            max-width: 600px;
+        }
+        
+        .social-icons {
+            margin-bottom: 20px;
+        }
+        
+        .social-icons a {
+            color: var(--white);
+            font-size: 20px;
+            margin: 0 10px;
+            transition: color 0.3s ease;
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            line-height: 40px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .social-icons a:hover {
+            color: var(--light-brown);
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .copyright {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            width: 100%;
+            font-size: 14px;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .full-width-image {
+                height: 300px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .full-width-image {
+                height: 200px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="bayanihantownbatangas.html" class="logo"><i class="fas fa-home"></i> Bayanihan Town</a>
+            </nav>
+        </div>
+    </header>
+
+    <main class="page-content">
+        <div class="container">
+            <h1 class="section-title fade-in">Bayanihan Town Batangas - Phase 7A</h1>
+            
+            <img src="https://cmpanganiban.com/wp-content/uploads/2025/09/White-Soft-Brown-Professional-Elegant-Marketing-Strategy-Presentation-169-2.png" alt="Phase 7A Image 1" class="full-width-image fade-in">
+            <img src="https://cmpanganiban.com/wp-content/uploads/2025/09/photo_2025-09-22_14-07-47.jpg" alt="Phase 7A Image 2" class="full-width-image fade-in">
+            
+            <div class="section project-details fade-in">
+                <h2 class="section-title">Phase 7A Details</h2>
+                <ul class="details-list">
+                    <li class="fade-in">
+                        <i class="fas fa-house-chimney icon"></i>
+                        <strong>Total Units:</strong> 125 Units -
+                        <p>(106 Inner units, 13 Corner units, 6 End units.)</p>
+                    </li>
+                    <li class="fade-in">
+                        <i class="fas fa-cubes icon"></i>
+                        <strong>Blocks:</strong> 4 Blocks -
+                        <p>Block 18 (facing north), Block 19 (facing south), Block 20 & 21 (facing sunrise and west).</p>
+                    </li>
+                    <li class="fade-in">
+                        <i class="fas fa-ruler-combined icon"></i>
+                        <strong>Total Floor Area:</strong>
+                        <p>Inner units: 44 Sqm</p>
+                        <p>Corner & End units: 48 to 91 Sqm</p>
+                    </li>
+                    <li class="fade-in">
+                        <i class="fas fa-ruler icon"></i>
+                        <strong>Livable Floor Area:</strong>
+                        <p>All unit types: 38.5 Sqm</p>
+                    </li>
+                    <li class="fade-in">
+                        <i class="fas fa-home-user icon"></i>
+                        <strong>Unit Model:</strong> Sierra
+                        <p>A 2-storey housing unit designed for families.</p>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-logo">Bayanihan Town Batangas</div>
+                <div class="footer-info">
+                    <p>Barangay Concordia, San Pascual - Alitagtag, Batangas City</p>
+                </div>
+                <div class="social-icons">
+                    <a href="https://www.facebook.com/bayanihantownbatangas"><i class="fab fa-facebook-f"></i></a>
+                    <a href="https://www.youtube.com/@CMPanganiban"><i class="fab fa-youtube"></i></a>
+                </div>
+                <div class="copyright">
+                    <p>Copyright © 2025</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            function checkFade() {
+                fadeElements.forEach(element => {
+                    const elementTop = element.getBoundingClientRect().top;
+                    const elementBottom = element.getBoundingClientRect().bottom;
+                    const isVisible = (elementTop < window.innerHeight - 100) && (elementBottom > 0);
+                    
+                    if (isVisible) {
+                        element.classList.add('visible');
+                    }
+                });
+            }
+            
+            window.addEventListener('scroll', checkFade);
+            window.addEventListener('load', checkFade);
+            checkFade(); // Initial check on load
+        });
+    </script>
+</body>
+</html>
