@@ -220,6 +220,13 @@
             margin-left: auto;
             margin-right: auto;
         }
+
+        .hero-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
         
         /* Map Section */
         .map-section {
@@ -851,7 +858,10 @@
             <div class="hero-content">
                 <h1>Bayanihan Town Batangas</h1>
                 <p>The largest development in San Pascual spanning 65 hectares with 9,350 units embodying the Filipino community-building values at a very affordable price.</p>
-                <a href="https://m.me/bayanihantownbatangas" class="btn">Inquire Now</a>
+                <div class="hero-buttons">
+                    <a href="https://m.me/bayanihantownbatangas" class="btn">Inquire Now</a>
+                    <button id="openModalBtn" class="btn btn-outline">Sellers Portal</button>
+                </div>
             </div>
         </div>
     </section>
@@ -1007,6 +1017,21 @@
             </div>
         </div>
     </footer>
+
+    <div id="sellersModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close">&times;</span>
+            <h3>Sellers Portal</h3>
+            <p>Please enter the access code:</p>
+            <p style="color: var(--gray); font-style: italic;">Hint: _ _ _ _ Holdings Inc.</p>
+            <input type="text" id="accessCode" placeholder="Enter code here" maxlength="4">
+            <div class="modal-buttons">
+                <button id="submitCodeBtn" class="btn">Submit</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="toast" class="toast">Invalid Code</div>
     
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
@@ -1025,6 +1050,57 @@
                 dropdown.classList.remove('show-dropdown');
             }
         });
+
+        // Modal and Code Logic
+        const openModalBtn = document.getElementById('openModalBtn');
+        const sellersModal = document.getElementById('sellersModal');
+        const closeModalBtn = document.querySelector('#sellersModal .modal-close');
+        const submitCodeBtn = document.getElementById('submitCodeBtn');
+        const accessCodeInput = document.getElementById('accessCode');
+        const toast = document.getElementById('toast');
+        const correctCode = '8990';
+
+        openModalBtn.addEventListener('click', () => {
+            sellersModal.style.display = 'flex';
+            accessCodeInput.value = ''; // Clear input on open
+            accessCodeInput.focus();
+        });
+
+        closeModalBtn.addEventListener('click', () => {
+            sellersModal.style.display = 'none';
+        });
+
+        sellersModal.addEventListener('click', (e) => {
+            if (e.target === sellersModal) {
+                sellersModal.style.display = 'none';
+            }
+        });
+
+        submitCodeBtn.addEventListener('click', checkCode);
+        accessCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkCode();
+            }
+        });
+
+        function checkCode() {
+            const enteredCode = accessCodeInput.value.trim();
+            if (enteredCode === correctCode) {
+                window.location.href = 'https://bayanihantownbatangas.info/members';
+            } else {
+                showToast('Invalid Code');
+                accessCodeInput.value = '';
+                accessCodeInput.focus();
+            }
+        }
+
+        function showToast(message) {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
         
         // Initialize Map
         function initMap() {
