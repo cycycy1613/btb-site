@@ -642,6 +642,120 @@
                 height: 40px;
             }
         }
+
+        /* Modal & Toast Styles */
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 2000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+            align-items: center;
+            justify-content: center;
+            animation: fadeInModal 0.3s ease-out;
+        }
+
+        .modal-content {
+            background-color: var(--white);
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            position: relative;
+            transform: scale(0.95);
+            animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .modal-content h3 {
+            margin-top: 0;
+            color: var(--navy-blue);
+        }
+
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin: 20px 0;
+            border: 1px solid var(--light-brown);
+            border-radius: 4px;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+
+        .modal-buttons .btn {
+            flex-grow: 1;
+            width: auto;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--gray);
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .modal-close:hover {
+            color: var(--dark-gray);
+        }
+
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: var(--navy-blue);
+            color: var(--white);
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 3000;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            opacity: 0;
+            transition: visibility 0s, opacity 0.5s linear;
+        }
+
+        .toast.show {
+            visibility: visible;
+            opacity: 1;
+            animation: fadeinToast 0.5s, fadeoutToast 0.5s 2.5s;
+        }
+
+        @keyframes fadeInModal {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes popUp {
+            from { transform: scale(0.95); }
+            to { transform: scale(1); }
+        }
+
+        @keyframes fadeinToast {
+            from { bottom: 0; opacity: 0; }
+            to { bottom: 30px; opacity: 1; }
+        }
+
+        @keyframes fadeoutToast {
+            from { bottom: 30px; opacity: 1; }
+            to { bottom: 0; opacity: 0; }
+        }
     </style>
 </head>
 <body>
@@ -662,7 +776,7 @@
                 <h1>Bayanihan Town Batangas</h1>
                 <p>The largest development in San Pascual spanning 65 hectares with 9,350 units embodying the Filipino community-building values at a very affordable price.</p>
                 <a href="https://m.me/bayanihantownbatangas" class="btn">Inquire Now</a>
-                <a href="https://bayanihantownbatangas.info/members" class="btn">Members Portal</a>
+                <a href="#" id="membersPortalBtn" class="btn">Members Portal</a>
             </div>
         </div>
     </section>
@@ -818,16 +932,85 @@
             </div>
         </div>
     </footer>
+    
+    <div id="membersModal" class="modal">
+      <div class="modal-content">
+        <span class="modal-close">&times;</span>
+        <h3>Members Portal</h3>
+        <p>Please enter the members code to proceed.</p>
+        <input type="password" id="memberCodeInput" placeholder="Enter code here" maxlength="4">
+        <div class="modal-buttons">
+            <button id="submitCodeBtn" class="btn">Submit</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="toast" class="toast">Invalid code</div>
 
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
+        // Modal and Toast logic
+        const modal = document.getElementById("membersModal");
+        const btn = document.getElementById("membersPortalBtn");
+        const closeBtn = document.querySelector(".modal-close");
+        const submitBtn = document.getElementById("submitCodeBtn");
+        const codeInput = document.getElementById("memberCodeInput");
+        const toast = document.getElementById("toast");
+
+        const correctCode = "8990";
+        const portalLink = "https://bayanihantownbatangas.info/members";
+
+        // Show the modal
+        btn.addEventListener("click", () => {
+            modal.style.display = "flex";
+            codeInput.focus();
+        });
+
+        // Close the modal
+        closeBtn.addEventListener("click", () => {
+            modal.style.display = "none";
+        });
+        
+        // Close modal if user clicks outside of it
+        window.addEventListener("click", (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+
+        // Handle code submission
+        function handleCodeSubmission() {
+            if (codeInput.value === correctCode) {
+                window.location.href = portalLink;
+            } else {
+                showToast();
+            }
+            codeInput.value = ""; // Clear input field
+        }
+
+        submitBtn.addEventListener("click", handleCodeSubmission);
+        
+        // Allow pressing Enter key to submit
+        codeInput.addEventListener("keypress", (event) => {
+            if (event.key === "Enter") {
+                handleCodeSubmission();
+            }
+        });
+
+        // Show toast notification
+        function showToast() {
+            toast.className = "toast show";
+            setTimeout(() => {
+                toast.className = toast.className.replace("show", "");
+            }, 3000); // Hide after 3 seconds
+        }
+
         // Initialize Map
         function initMap() {
-            // New coordinates for the center of Batangas province, to be used for the reset view
             const batangasCenter = [13.8, 121.05];
             const batangasZoom = 10;
             
-            const location = [13.844756, 121.020964]; // Approximate coordinates for San Pascual, Batangas
+            const location = [13.844756, 121.020964];
             const map = L.map('map', { 
                 scrollWheelZoom: false,
                 touchZoom: false,
@@ -839,13 +1022,11 @@
                 maxZoom: 19
             }).addTo(map);
 
-            // Set max bounds to limit zoom out
             const southWest = L.latLng(13.4, 120.6);
             const northEast = L.latLng(14.3, 121.4);
             const bounds = L.latLngBounds(southWest, northEast);
             map.setMaxBounds(bounds);
 
-            // Add the "Drag Toggle" control
             L.Control.DragToggle = L.Control.extend({
                 onAdd: function(map) {
                     const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-drag-toggle');
@@ -875,7 +1056,6 @@
             }
             L.control.dragToggle({ position: 'topright' }).addTo(map);
 
-            // Add the "Reset View" control
             L.Control.ResetView = L.Control.extend({
                 onAdd: function(map) {
                     const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-reset-view');
@@ -914,7 +1094,6 @@
             function updateCarousel() {
                 carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
                 
-                // Update indicators
                 indicators.forEach((indicator, index) => {
                     if (index === currentIndex) {
                         indicator.classList.add('active');
@@ -934,7 +1113,6 @@
                 updateCarousel();
             });
             
-            // Add click events to indicators
             indicators.forEach((indicator, index) => {
                 indicator.addEventListener('click', () => {
                     currentIndex = index;
@@ -942,7 +1120,6 @@
                 });
             });
             
-            // Auto slide every 5 seconds
             setInterval(() => {
                 currentIndex = (currentIndex + 1) % items.length;
                 updateCarousel();
@@ -965,7 +1142,7 @@
             
             window.addEventListener('scroll', checkFade);
             window.addEventListener('load', checkFade);
-            checkFade(); // Initial check
+            checkFade();
         };
     </script>
 </body>
