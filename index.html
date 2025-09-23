@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Bayanihan Town Batangas - Affordable Housing Community in San Pascual - Alitagtag Batangas</title>
     <meta name="description" content="The largest development in San Pascual - Alitagtag, Batangas spanning 65 hectares with 9,350 units embodying the Filipino community-building values at a very affordable price. Bayanihan Town Batangas.">
-    <meta name="keywords" content="Bayanihan Town Batangas, Bayanihan Town, Murang bahay sa San Pascual Batangas, Affordable housing in San Pascual Batangas, Affordable housing in Alitagtag Batangas, Rent to own in Batangas, Rent to own Bayanihan Town Batangas, Murang bahay sa Batangas, CM Panganiban, 8990 Holdings Inc., Cheapest housing in Batangas, Bayanihan Town Batangas Pag-IBIG financing, Bayanihan Town Batangas bank financing, Low-cost housing in Batangas, Affordable condo in Batangas, Rent to own house San Pascual Batangas, Rent to own house Alitagtag Batangas, Batangas housing project, Pag-IBIG housing Batangas, Affordable subdivision in Batangas, Murang pabahay Batangas, House and lot in Batangas, Rent to own house Batangas, San Pascual Batangas housing, Alitagtag Batangas housing, 8990 Holdings Batangas projects, Affordable townhouse in Batangas, Rent to own townhouse Batangas, Subdivision in San Pascual Batangas, Subdivision in Alitagtag...">
+    <meta name="keywords" content="Bayanihan Town Batangas, Bayanihan Town, Murang bahay sa San Pascual Batangas, Affordable housing in San Pascual Batangas, Affordable housing in Alitagtag Batangas, Rent to own in Batangas, Rent to own Bayanihan Town Batangas, Murang pabahay sa Batangas, CM Panganiban, 8990 Holdings Inc., Cheapest housing in Batangas, Bayanihan Town Batangas Pag-IBIG financing, Bayanihan Town Batangas bank financing, Low-cost housing in Batangas, Affordable condo in Batangas, Rent to own house San Pascual Batangas, Rent to own house Alitagtag Batangas, Batangas housing project, Pag-IBIG housing Batangas, Affordable subdivision in Batangas, Murang pabahay Batangas, House and lot in Batangas, Rent to own house Batangas, San Pascual Batangas housing, Alitagtag Batangas housing, 8990 Holdings Batangas projects, Affordable townhouse in Batangas, Rent to own townhouse Batangas, Subdivision in San Pascual Batangas, Subdivision in Alitagtag...">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
     <style>
@@ -69,7 +69,7 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
-
+        
         .btn-outline {
             background-color: transparent;
             border: 2px solid var(--light-brown);
@@ -131,6 +131,60 @@
         .logo i {
             margin-right: 10px;
             color: var(--light-brown);
+        }
+        
+        /* New Styles for search icon and dropdown */
+        .header-right {
+            display: flex;
+            align-items: center;
+        }
+        
+        .search-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .search-icon-btn {
+            background: none;
+            border: none;
+            color: var(--white);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 10px;
+            transition: color 0.3s ease;
+        }
+        
+        .search-icon-btn:hover {
+            color: var(--light-brown);
+        }
+        
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--white);
+            min-width: 160px;
+            box-shadow: 0 8px 16px 0px rgba(0,0,0,0.2);
+            z-index: 1;
+            right: 0;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .dropdown-content a {
+            color: var(--navy-blue);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            transition: background-color 0.3s;
+        }
+        
+        .dropdown-content a:hover {
+            background-color: var(--light-green);
+        }
+        
+        .show-dropdown {
+            display: block;
         }
         
         /* Hero Section */
@@ -407,13 +461,13 @@
         .pages-section {
             background-color: var(--light-gray);
         }
-
+        
         .pages-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 30px;
         }
-
+        
         .page-card {
             background-color: var(--white);
             border-radius: 8px;
@@ -421,33 +475,33 @@
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
             transition: transform 0.3s ease, box-shadow 0.3s ease;
         }
-
+        
         .page-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
         }
-
+        
         .page-card-image {
             width: 100%;
             height: 200px;
             object-fit: cover;
         }
-
+        
         .page-card-content {
             padding: 25px;
         }
-
+        
         .page-card-content h3 {
             margin-top: 0;
             font-size: 22px;
         }
-
+        
         .page-card-content p {
             font-size: 15px;
             color: var(--gray);
             margin-bottom: 20px;
         }
-
+        
         /* Footer */
         footer {
             background-color: var(--navy-blue);
@@ -520,7 +574,7 @@
             opacity: 1;
             transform: translateY(0);
         }
-
+        
         /* Custom Leaflet Controls */
         .leaflet-control-zoom.leaflet-bar.leaflet-control a {
             font: bold 18px 'Lucida Console', Monaco, monospace;
@@ -542,11 +596,11 @@
             border-top: none;
             border-radius: 0 0 4px 4px;
         }
-
+        
         .leaflet-control-reset-view:hover {
             background-color: #f4f4f4;
         }
-
+        
         .leaflet-control-reset-view svg {
             vertical-align: middle;
             fill: var(--navy-blue);
@@ -570,7 +624,7 @@
         .leaflet-control-drag-toggle:hover {
             background-color: #f4f4f4;
         }
-
+        
         .leaflet-control-drag-toggle i {
             color: var(--navy-blue);
             font-size: 20px;
@@ -581,7 +635,7 @@
             text-align: center;
             margin-top: 20px;
         }
-
+        
         /* Responsive Design */
         @media (max-width: 992px) {
             .model-container {
@@ -655,7 +709,7 @@
                 height: 40px;
             }
         }
-
+        
         /* Modal & Toast Styles */
         .modal {
             display: none; /* Hidden by default */
@@ -671,7 +725,7 @@
             justify-content: center;
             animation: fadeInModal 0.3s ease-out;
         }
-
+        
         .modal-content {
             background-color: var(--white);
             padding: 30px;
@@ -684,12 +738,12 @@
             transform: scale(0.95);
             animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
-
+        
         .modal-content h3 {
             margin-top: 0;
             color: var(--navy-blue);
         }
-
+        
         .modal-content input {
             width: 100%;
             padding: 12px;
@@ -700,18 +754,18 @@
             text-align: center;
             letter-spacing: 2px;
         }
-
+        
         .modal-buttons {
             display: flex;
             justify-content: center;
             gap: 15px;
         }
-
+        
         .modal-buttons .btn {
             flex-grow: 1;
             width: auto;
         }
-
+        
         .modal-close {
             position: absolute;
             top: 10px;
@@ -722,11 +776,11 @@
             cursor: pointer;
             transition: color 0.3s;
         }
-
+        
         .modal-close:hover {
             color: var(--dark-gray);
         }
-
+        
         .toast {
             visibility: hidden;
             min-width: 250px;
@@ -743,28 +797,28 @@
             opacity: 0;
             transition: visibility 0s, opacity 0.5s linear;
         }
-
+        
         .toast.show {
             visibility: visible;
             opacity: 1;
             animation: fadeinToast 0.5s, fadeoutToast 0.5s 2.5s;
         }
-
+        
         @keyframes fadeInModal {
             from { opacity: 0; }
             to { opacity: 1; }
         }
-
+        
         @keyframes popUp {
             from { transform: scale(0.95); }
             to { transform: scale(1); }
         }
-
+        
         @keyframes fadeinToast {
             from { bottom: 0; opacity: 0; }
             to { bottom: 30px; opacity: 1; }
         }
-
+        
         @keyframes fadeoutToast {
             from { bottom: 30px; opacity: 1; }
             to { bottom: 0; opacity: 0; }
@@ -774,26 +828,34 @@
 <body>
     <div id="fb-root"></div>
     <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0" nonce="4B8aF4Xm"></script>
-
+    
     <header>
         <div class="container">
             <nav class="navbar">
                 <a href="#" class="logo"><i class="fas fa-home"></i> Bayanihan Town</a>
+                <div class="header-right">
+                    <div class="search-dropdown">
+                        <button class="search-icon-btn"><i class="fas fa-search"></i></button>
+                        <div class="dropdown-content">
+                            <a href="https://bayanihantownbatangas.info/phase-7a">Phase 7A</a>
+                            <a href="#">Phase 7B</a>
+                        </div>
+                    </div>
+                </div>
             </nav>
         </div>
     </header>
-
+    
     <section class="hero">
         <div class="container">
             <div class="hero-content">
                 <h1>Bayanihan Town Batangas</h1>
                 <p>The largest development in San Pascual spanning 65 hectares with 9,350 units embodying the Filipino community-building values at a very affordable price.</p>
                 <a href="https://m.me/bayanihantownbatangas" class="btn">Inquire Now</a>
-                <a href="#" id="membersPortalBtn" class="btn btn-outline">Members Portal</a>
             </div>
         </div>
     </section>
-
+    
     <section class="section map-section">
         <div class="container">
             <h2 class="section-title">Project Location</h2>
@@ -803,7 +865,7 @@
             </div>
         </div>
     </section>
-
+    
     <section class="section project-details">
         <div class="container">
             <h2 class="section-title">Project Details</h2>
@@ -826,7 +888,7 @@
             </div>
         </div>
     </section>
-
+    
     <section class="section house-model" id="models">
         <div class="container">
             <h2 class="section-title">Sierra - Single Family Housing Unit</h2>
@@ -858,7 +920,7 @@
             </div>
         </div>
     </section>
-
+    
     <section class="section carousel-section">
         <div class="container">
             <h2 class="section-title">Sierra Unit Photos</h2>
@@ -897,22 +959,22 @@
             </div>
         </div>
     </section>
-
+    
     <section class="section video-section">
         <div class="container">
             <h2 class="section-title">About Us</h2>
             <div class="video-container">
-                <iframe width="100%" height="480" 
-                    src="https://www.youtube.com/embed/VO-uTooEpmQ?si=6-4GZ2WsI3E5Xn7x" 
-                    title="Sierra Unit Video" 
-                    frameborder="0" 
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                <iframe width="100%" height="480"
+                    src="https://www.youtube.com/embed/VO-uTooEpmQ?si=6-4GZ2WsI3E5Xn7x"
+                    title="Sierra Unit Video"
+                    frameborder="0"
+                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                     allowfullscreen>
                 </iframe>
             </div>
         </div>
     </section>
-
+    
     <section class="section pages-section">
         <div class="container">
             <h2 class="section-title">Explore Our Pages</h2>
@@ -924,11 +986,11 @@
                         <p>Purchasing property—whether a condominium or a house-and-lot—is a major commitment.</p>
                         <a href="https://bayanihantownbatangas.info/requirements" class="btn">Learn More</a>
                     </div>
-                </div>               
+                </div>
             </div>
         </div>
     </section>
-
+    
     <footer>
         <div class="container">
             <div class="footer-content">
@@ -946,107 +1008,53 @@
         </div>
     </footer>
     
-    <div id="membersModal" class="modal">
-      <div class="modal-content">
-        <span class="modal-close">×</span>
-        <h3>Members Portal</h3>
-        <p>Please enter the members code to proceed.</p>
-        <input type="password" id="memberCodeInput" placeholder="Enter code here" maxlength="4">
-        <div class="modal-buttons">
-            <button id="submitCodeBtn" class="btn">Submit</button>
-        </div>
-      </div>
-    </div>
-
-    <div id="toast" class="toast">Invalid code</div>
-
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        // Modal and Toast logic
-        const modal = document.getElementById("membersModal");
-        const btn = document.getElementById("membersPortalBtn");
-        const closeBtn = document.querySelector(".modal-close");
-        const submitBtn = document.getElementById("submitCodeBtn");
-        const codeInput = document.getElementById("memberCodeInput");
-        const toast = document.getElementById("toast");
-
-        const correctCode = "8990";
-        const portalLink = "https://bayanihantownbatangas.info/members";
-
-        // Show the modal
-        btn.addEventListener("click", () => {
-            modal.style.display = "flex";
-            codeInput.focus();
-        });
-
-        // Close the modal
-        closeBtn.addEventListener("click", () => {
-            modal.style.display = "none";
+        // Search dropdown logic
+        const searchBtn = document.querySelector('.search-icon-btn');
+        const dropdown = document.querySelector('.dropdown-content');
+        
+        searchBtn.addEventListener('click', (event) => {
+            event.stopPropagation(); // Prevents the document click event from firing immediately
+            dropdown.classList.toggle('show-dropdown');
         });
         
-        // Close modal if user clicks outside of it
-        window.addEventListener("click", (event) => {
-            if (event.target === modal) {
-                modal.style.display = "none";
+        // Close the dropdown if the user clicks outside of it
+        window.addEventListener('click', (event) => {
+            if (!event.target.closest('.search-dropdown')) {
+                dropdown.classList.remove('show-dropdown');
             }
         });
-
-        // Handle code submission
-        function handleCodeSubmission() {
-            if (codeInput.value === correctCode) {
-                window.location.href = portalLink;
-            } else {
-                showToast();
-            }
-            codeInput.value = ""; // Clear input field
-        }
-
-        submitBtn.addEventListener("click", handleCodeSubmission);
         
-        // Allow pressing Enter key to submit
-        codeInput.addEventListener("keypress", (event) => {
-            if (event.key === "Enter") {
-                handleCodeSubmission();
-            }
-        });
-
-        // Show toast notification
-        function showToast() {
-            toast.className = "toast show";
-            setTimeout(() => {
-                toast.className = toast.className.replace("show", "");
-            }, 3000); // Hide after 3 seconds
-        }
-
         // Initialize Map
         function initMap() {
             const batangasCenter = [13.8, 121.05];
             const batangasZoom = 10;
             
             const location = [13.844756, 121.020964];
-            const map = L.map('map', { 
+            const map = L.map('map', {
                 scrollWheelZoom: false,
                 touchZoom: false,
-                dragging: false 
+                dragging: false
             }).setView(location, 13);
             
             L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                 attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
                 maxZoom: 19
             }).addTo(map);
-
+            
             const southWest = L.latLng(13.4, 120.6);
             const northEast = L.latLng(14.3, 121.4);
             const bounds = L.latLngBounds(southWest, northEast);
             map.setMaxBounds(bounds);
-
+            
             L.Control.DragToggle = L.Control.extend({
                 onAdd: function(map) {
                     const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-drag-toggle');
                     const button = L.DomUtil.create('button', '', container);
                     button.innerHTML = `<i class="fa-solid fa-hand"></i>`;
                     button.title = "Toggle Dragging";
-
+                    
                     L.DomEvent.on(button, 'click', () => {
                         if (map.dragging.enabled()) {
                             map.dragging.disable();
@@ -1063,12 +1071,12 @@
                 },
                 onRemove: function(map) {}
             });
-
+            
             L.control.dragToggle = function(opts) {
                 return new L.Control.DragToggle(opts);
             }
             L.control.dragToggle({ position: 'topright' }).addTo(map);
-
+            
             L.Control.ResetView = L.Control.extend({
                 onAdd: function(map) {
                     const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-reset-view');
@@ -1080,13 +1088,13 @@
                 },
                 onRemove: function(map) {}
             });
-
+            
             L.control.resetView = function(opts) {
                 return new L.Control.ResetView(opts);
             }
             
             L.control.resetView({ position: 'topright' }).addTo(map);
-
+            
             L.marker(location).addTo(map)
                 .bindPopup('<strong>Bayanihan Town Batangas</strong><br>Barangay Concordia, San Pascual - Alitagtag, Batangas City')
                 .openPopup();
