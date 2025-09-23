@@ -69,6 +69,19 @@
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--light-brown);
+            color: var(--light-brown);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--light-brown);
+            color: var(--navy-blue);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
         
         .section {
             padding: 80px 0;
@@ -776,7 +789,7 @@
                 <h1>Bayanihan Town Batangas</h1>
                 <p>The largest development in San Pascual spanning 65 hectares with 9,350 units embodying the Filipino community-building values at a very affordable price.</p>
                 <a href="https://m.me/bayanihantownbatangas" class="btn">Inquire Now</a>
-                <a href="#" id="membersPortalBtn" class="btn">Members Portal</a>
+                <a href="#" id="membersPortalBtn" class="btn btn-outline">Members Portal</a>
             </div>
         </div>
     </section>
@@ -935,7 +948,7 @@
     
     <div id="membersModal" class="modal">
       <div class="modal-content">
-        <span class="modal-close">&times;</span>
+        <span class="modal-close">×</span>
         <h3>Members Portal</h3>
         <p>Please enter the members code to proceed.</p>
         <input type="password" id="memberCodeInput" placeholder="Enter code here" maxlength="4">
