@@ -1048,7 +1048,7 @@
                     <input type="text" id="unit-phase" class="form-control" disabled>
                 </div>
                 <div class="form-group">
-                    <label for="unit-bik">Block</label>
+                    <label for="unit-block">Block</label>
                     <input type="text" id="unit-block" class="form-control" required>
                 </div>
                 <div class="form-group">
@@ -1359,7 +1359,7 @@
             const unitData = {
                 id: unitIdHidden.value,
                 phase: unitPhase.value,
-                bik: unitBlock.value,
+                block: unitBlock.value,
                 lot: unitLot.value,
                 lotArea: unitLotArea.value,
                 floorArea: unitFloorArea.value,
@@ -1497,7 +1497,7 @@
 
             if (unit) {
                 unitIdHidden.value = unit.id;
-                unitBik.value = unit.bik || '';
+                unitBlock.value = unit.block || '';
                 unitLot.value = unit.lot || '';
                 unitLotArea.value = unit.lotArea || '';
                 unitFloorArea.value = unit.floorArea || '';
@@ -1948,13 +1948,13 @@
 
                 // Sort by block and lot numbers
                 items.sort((a, b) => {
-                    const bikA = a.bik ? a.bik.toString().padStart(5, '0') : '';
-                    const bikB = b.bik ? b.bik.toString().padStart(5, '0') : '';
+                    const blockA = a.block ? a.block.toString().padStart(5, '0') : '';
+                    const blockB = b.block ? b.block.toString().padStart(5, '0') : '';
                     const lotA = a.lot ? a.lot.toString().padStart(5, '0') : '';
                     const lotB = b.lot ? b.lot.toString().padStart(5, '0') : '';
 
-                    if (bikA !== bikB) {
-                        return bikA.localeCompare(bikB);
+                    if (blockA !== blockB) {
+                        return blockA.localeCompare(blockB);
                     }
                     return lotA.localeCompare(lotB);
                 });
