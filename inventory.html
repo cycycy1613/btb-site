@@ -2011,18 +2011,34 @@
         }
 
         /**
+        // ... (omitted previous code)
+
+        /**
          * Generates and downloads the inventory table as a PDF.
          */
         async function saveAsPdf() {
             showLoading();
             try {
                 // Initialize jsPDF
+                // *** MODIFICATION: Changed 'l' (landscape) to 'p' (portrait) ***
                 const { jsPDF } = window.jspdf;
-                const doc = new jsPDF('l', 'pt'); // 'l' for landscape mode
+                const doc = new jsPDF('p', 'pt'); // 'p' for portrait mode
                 
+                // Get Last Updated text
+                const lastUpdateText = lastUpdated.textContent;
+
                 // Add title
-                doc.setFontSize(18);
-                doc.text(currentMapName + " Inventory Report", 40, 40);
+                // *** MODIFICATION: Updated Title format and positioning for Portrait ***
+                doc.setFontSize(16);
+                doc.setFont(undefined, 'bold');
+                doc.text(`Bayanihan Town Batangas - ${currentMapName} Inventory`, 40, 40);
+                
+                // Add last updated info
+                doc.setFontSize(10);
+                doc.setFont(undefined, 'normal');
+                doc.setTextColor(150);
+                doc.text(lastUpdateText, 40, 55);
+                // *** END MODIFICATION ***
 
                 // Prepare table data
                 const tableId = 'inventory-table';
@@ -2051,39 +2067,51 @@
                 doc.autoTable({
                     head: [headers],
                     body: data,
-                    startY: 60,
-                    theme: 'striped',
-                    styles: { fontSize: 10, cellPadding: 5 },
+                    startY: 70, // Start table lower to account for new title/subtitle
+                    // *** theme: 'grid' is already set and ensures visible table lines. ***
+                    theme: 'grid', 
+                    // *** END MODIFICATION ***
+                    styles: { fontSize: 9, cellPadding: 5 },
                     headStyles: { fillColor: [44, 62, 80], textColor: 255, fontStyle: 'bold' },
-                    margin: { top: 50, left: 30, right: 30, bottom: 30 },
+                    margin: { top: 60, left: 30, right: 30, bottom: 30 },
                     didParseCell: (data) => {
-                        // Center text for columns like 'No.', 'Block', 'Lot'
+                        // Center text for numerical columns
                         if (['No.', 'Block', 'Lot'].includes(data.column.header)) {
                              data.cell.styles.halign = 'center';
                         }
                     },
                     columnStyles: {
-                         0: { halign: 'center', cellWidth: 30 }, // No.
-                         2: { halign: 'center', cellWidth: 50 }, // Block
-                         3: { halign: 'center', cellWidth: 50 }, // Lot
+                         0: { halign: 'center' }, // No.
+                         2: { halign: 'center' }, // Block
+                         3: { halign: 'center' }, // Lot
                     }
                 });
                 
-                // Add last updated info
-                const finalY = doc.lastAutoTable.finalY + 20;
-                doc.setFontSize(10);
-                doc.setTextColor(150);
-                doc.text(lastUpdated.textContent, 40, finalY);
+                // --- START MODIFICATION FOR FILENAME ---
+
+                // 1. Get today's date and format it as YYYY-MM-DD
+                const today = new Date();
+                const yyyy = today.getFullYear();
+                const mm = String(today.getMonth() + 1).padStart(2, '0'); // Months start at 0
+                const dd = String(today.getDate()).padStart(2, '0');
+                const formattedDate = `${yyyy}-${mm}-${dd}`;
+                
+                // 2. Construct the exact text requested: "BTB: (mapname) Inventory - (date today)"
+                const rawFilenameText = `BTB: ${currentMapName} Inventory - ${formattedDate}`;
+                
+                // 3. Convert the text to a safe filename: remove colons and replace spaces with underscores.
+                const filename = rawFilenameText.replace(/:/g, '').trim().replace(/\s+/g, '_') + '.pdf';
 
                 // Save the PDF
-                const filename = `${currentMapName.replace(/\s/g, '_')}_Inventory_Report.pdf`;
                 doc.save(filename);
                 
-                showToast('PDF downloaded using AutoTable!');
+                // --- END MODIFICATION ---
+
+                showToast('PDF downloaded successfully!');
 
             } catch (error) {
                 console.error('Error generating PDF:', error);
-                showToast('Error generating PDF: Invalid arguments passed to jsPDF.text. Please check the browser console for details.', true);
+                showToast('Error generating PDF: ' + error.message, true);
             } finally {
                 hideLoading();
             }
