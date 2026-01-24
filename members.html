@@ -237,21 +237,40 @@
         .btn-primary { background: var(--primary); color: white; }
         .btn-secondary { background: var(--gray); color: white; }
 
+        /* FOOTER UPDATES */
         footer {
             background: var(--primary);
             color: white;
             padding: 30px 0;
             margin-top: auto;
-            text-align: center;
         }
+        
         .footer-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            flex-wrap: wrap;
+            width: 100%;
         }
 
-        .footer-links a { color: white; margin-left: 20px; text-decoration: none; }
+        .footer-logo {
+            font-weight: 400;
+            font-size: 1.1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 20px;
+        }
+
+        .footer-links a { 
+            color: white; 
+            text-decoration: none; 
+            font-size: 0.9rem;
+        }
+
+        .footer-links a:hover {
+            text-decoration: underline;
+        }
 
         .toast {
             position: fixed; bottom: 20px; right: 20px;
@@ -265,22 +284,22 @@
         /* MOBILE ADJUSTMENTS */
         @media (max-width: 600px) {
             .tabs { 
-                grid-template-columns: 1fr; /* Single column for list view */
+                grid-template-columns: 1fr;
                 gap: 10px;
             }
 
             .tab {
-                flex-direction: row; /* Horizontal layout */
-                justify-content: flex-start; /* Align content to the left */
+                flex-direction: row;
+                justify-content: flex-start;
                 padding: 15px 20px;
-                min-height: 60px; /* Reduced height for list items */
+                min-height: 60px;
             }
 
             .tab i {
                 margin-bottom: 0;
-                margin-right: 20px; /* Space between icon and text */
+                margin-right: 20px;
                 font-size: 22px;
-                width: 30px; /* Fixed width for icon alignment */
+                width: 30px;
                 text-align: center;
             }
 
@@ -289,19 +308,15 @@
                 text-align: left;
             }
 
-            .footer-links {
-                display: flex;
+            .footer-content {
                 flex-direction: column;
-                gap: 10px;
-                margin-bottom: 15px;
+                gap: 15px;
+                text-align: center;
             }
 
-            .footer-links a {
-                margin: 0;
-            }
-            
-            footer {
-                padding: 40px 20px;
+            .footer-links {
+                flex-direction: row;
+                justify-content: center;
             }
         }
     </style>
@@ -375,11 +390,14 @@
 
     <footer>
         <div class="container">
-            <div class="footer-logo">Bayanihan Town Batangas</div>
-            <div class="footer-links">
-                <a href="https://www.dgrdi.digital/" target="_blank" rel="noopener noreferrer">More Projects</a>
-                <a href="#" id="loginLink" onclick="openLoginModal(event)">Login</a>
+            <div class="footer-content">
+                <div class="footer-logo">Bayanihan Town Batangas</div>
+                <div class="footer-links">
+                    <a href="https://www.dgrdi.digital/" target="_blank" rel="noopener noreferrer">More Projects</a>
+                    <a href="#" id="loginLink" onclick="openLoginModal(event)">Login</a>
+                </div>
             </div>
+        </div>
     </footer>
 
     <div class="modal" id="imageModal">
