@@ -253,24 +253,28 @@
             color: white; display: none; z-index: 2000;
         }
 
-        /* --- MOBILE OPTIMIZATIONS --- */
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* MOBILE ADJUSTMENTS */
         @media (max-width: 600px) {
-            .tabs {
-                grid-template-columns: 1fr; /* Display as list */
+            .tabs { 
+                grid-template-columns: 1fr; /* Single column for list view */
+                gap: 10px;
             }
 
             .tab {
-                flex-direction: row; /* Icon left, text right */
-                height: 60px; /* Slimmer height for list view */
-                justify-content: flex-start;
-                padding: 0 20px;
+                flex-direction: row; /* Horizontal layout */
+                justify-content: flex-start; /* Align content to the left */
+                padding: 15px 20px;
+                min-height: 60px; /* Reduced height for list items */
             }
 
             .tab i {
                 margin-bottom: 0;
-                margin-right: 20px;
-                font-size: 20px;
-                width: 25px;
+                margin-right: 20px; /* Space between icon and text */
+                font-size: 22px;
+                width: 30px; /* Fixed width for icon alignment */
                 text-align: center;
             }
 
@@ -279,28 +283,20 @@
                 text-align: left;
             }
 
-            .footer-content {
-                flex-direction: column;
-                text-align: center;
-                gap: 15px;
-            }
-
             .footer-links {
                 display: flex;
                 flex-direction: column;
                 gap: 10px;
+                margin-bottom: 15px;
             }
 
             .footer-links a {
-                margin-left: 0;
+                margin: 0;
             }
-        }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-
-        @media (max-width: 600px) {
-            .tabs { grid-template-columns: repeat(2, 1fr); }
+            
+            footer {
+                padding: 40px 20px;
+            }
         }
     </style>
 </head>
@@ -454,7 +450,6 @@
 
         let currentImageIndex = null;
         let announcementItems = [];
-        let dataLoaded = false;
 
         function showToast(message, isSuccess = true) {
             const toast = document.getElementById('toast');
@@ -495,7 +490,7 @@
         }
 
         function openLoginModal(e) {
-            e.preventDefault();
+            if (e) e.preventDefault();
             const lModal = document.getElementById('loginModal');
             lModal.style.display = 'flex';
             setTimeout(() => lModal.classList.add('active'), 10);
