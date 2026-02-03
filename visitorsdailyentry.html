@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Visitor's Entry</title>
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
     <style>
@@ -242,7 +241,6 @@
         </div>
         
         <form id="visitorForm">
-            <!-- Purpose Selection -->
             <div class="form-group">
                 <label class="required">Purpose of Visit</label>
                 <select id="purpose" required>
@@ -252,11 +250,10 @@
                 </select>
             </div>
             
-            <!-- Reservation Form -->
             <div id="reservationForm" class="form-section hidden">
                 <div class="form-group">
                     <label class="required">Principal Name</label>
-                    <input type="text" id="principalNameRes" placeholder="Enter principal name" required>
+                    <input type="text" id="principalNameRes" placeholder="Enter principal name">
                 </div>
                 <div class="form-group">
                     <label>Co-Borrower's 1</label>
@@ -276,11 +273,10 @@
                 </div>
                 <div class="form-group">
                     <label class="required">Contact Number</label>
-                    <input type="tel" id="contactNumberRes" placeholder="Enter contact number" required>
+                    <input type="tel" id="contactNumberRes" placeholder="Enter contact number">
                 </div>
             </div>
             
-            <!-- Others Form -->
             <div id="othersForm" class="form-section hidden">
                 <div class="form-group">
                     <label class="required">Type of Inquiry</label>
@@ -337,7 +333,9 @@
         };
 
         // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
         const database = firebase.database();
 
         // DOM Elements
@@ -359,7 +357,7 @@
         // Initialize date and time
         function initializeDateTime() {
             const now = new Date();
-            todayDate = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+            todayDate = now.toISOString().split('T')[0]; // YYYY-MM-DD
             const formattedDate = now.toLocaleDateString('en-US', {
                 weekday: 'long',
                 year: 'numeric',
@@ -369,66 +367,51 @@
             currentDateDisplay.textContent = formattedDate;
         }
 
-        // Get today's visitor count
-        async function getTodayVisitorCount() {
-            try {
-                const snapshot = await database.ref(`visitors/${todayDate}`).once('value');
+        // Get today's visitor count with Real-time listener
+        function getTodayVisitorCount() {
+            const visitorRef = database.ref(`visitors/${todayDate}`);
+            visitorRef.on('value', (snapshot) => {
                 if (snapshot.exists()) {
-                    const visitors = snapshot.val();
-                    todayVisitorCount = Object.keys(visitors).length;
+                    todayVisitorCount = Object.keys(snapshot.val()).length;
                 } else {
                     todayVisitorCount = 0;
                 }
                 updateVisitorCounter();
-            } catch (error) {
+            }, (error) => {
                 console.error('Error getting visitor count:', error);
-                visitorCounter.textContent = 'Error loading count';
-            }
+                visitorCounter.textContent = 'Connection Error';
+            });
         }
 
-        // Update visitor counter display
         function updateVisitorCounter() {
             visitorCounter.textContent = `Today's Visitor #${todayVisitorCount + 1}`;
         }
 
-        // Show form based on purpose selection
         purposeSelect.addEventListener('change', function() {
             const purpose = this.value;
-            
-            // Hide both forms first
             reservationForm.classList.add('hidden');
             othersForm.classList.add('hidden');
             
-            // Show selected form
             if (purpose === 'reservation') {
                 reservationForm.classList.remove('hidden');
             } else if (purpose === 'others') {
                 othersForm.classList.remove('hidden');
             }
-            
-            // Clear form fields when switching
-            clearFormFields();
         });
 
-        // Clear all form fields
         function clearFormFields() {
             document.querySelectorAll('#visitorForm input, #visitorForm textarea').forEach(input => {
-                if (input.id !== 'purpose') {
-                    input.value = '';
-                }
+                input.value = '';
             });
         }
 
-        // Reset entire form
         function resetForm() {
             visitorForm.reset();
             reservationForm.classList.add('hidden');
             othersForm.classList.add('hidden');
             statusMessage.classList.add('hidden');
-            statusMessage.textContent = '';
         }
 
-        // Show status message
         function showStatus(message, type) {
             statusMessage.textContent = message;
             statusMessage.className = `status-message ${type}`;
@@ -436,10 +419,9 @@
             
             setTimeout(() => {
                 statusMessage.classList.add('hidden');
-            }, 5000);
+            }, 6000);
         }
 
-        // Show loading state
         function showLoading(show) {
             if (show) {
                 submitText.classList.add('hidden');
@@ -452,49 +434,24 @@
             }
         }
 
-        // Generate visitor number
-        function generateVisitorNumber() {
-            todayVisitorCount++;
-            updateVisitorCounter();
-            return todayVisitorCount;
-        }
-
-        // Get current timestamp
-        function getCurrentTimestamp() {
-            const now = new Date();
-            return {
-                date: todayDate,
-                time: now.toLocaleTimeString('en-US', { hour12: true }),
-                timestamp: now.getTime()
-            };
-        }
-
-        // Validate form data
         function validateFormData(formData) {
-            const errors = [];
-            
-            if (!formData.purpose) {
-                errors.push('Please select purpose of visit');
-            }
+            if (!formData.purpose) return 'Please select purpose of visit';
             
             if (formData.purpose === 'reservation') {
-                if (!formData.principalNameRes) errors.push('Principal name is required');
-                if (!formData.contactNumberRes) errors.push('Contact number is required');
+                if (!formData.principalNameRes.trim()) return 'Principal name is required';
+                if (!formData.contactNumberRes.trim()) return 'Contact number is required';
             } else if (formData.purpose === 'others') {
-                if (!formData.inquiryType) errors.push('Please select inquiry type');
-                if (!formData.principalNameOthers) errors.push('Principal name is required');
-                if (!formData.representative) errors.push('Representative is required');
-                if (!formData.contactNumberOthers) errors.push('Contact number is required');
+                if (!formData.inquiryType) return 'Please select inquiry type';
+                if (!formData.principalNameOthers.trim()) return 'Principal name is required';
+                if (!formData.representative.trim()) return 'Representative is required';
+                if (!formData.contactNumberOthers.trim()) return 'Contact number is required';
             }
-            
-            return errors;
+            return null;
         }
 
-        // Handle form submission
         visitorForm.addEventListener('submit', async function(e) {
             e.preventDefault();
             
-            // Collect form data
             const formData = {
                 purpose: purposeSelect.value,
                 principalNameRes: document.getElementById('principalNameRes').value,
@@ -510,30 +467,26 @@
                 description: document.getElementById('description').value
             };
 
-            // Validate form
-            const validationErrors = validateFormData(formData);
-            if (validationErrors.length > 0) {
-                showStatus(validationErrors.join(', '), 'error');
+            const error = validateFormData(formData);
+            if (error) {
+                showStatus(error, 'error');
                 return;
             }
 
-            // Show loading
             showLoading(true);
 
             try {
-                // Generate visitor data
-                const visitorNumber = generateVisitorNumber();
-                const timestamp = getCurrentTimestamp();
+                const now = new Date();
+                const visitorNum = todayVisitorCount + 1;
                 
-                // Prepare data for Firebase
                 const visitorData = {
-                    visitorNumber: visitorNumber,
+                    visitorNumber: visitorNum,
                     purpose: formData.purpose,
-                    timestamp: timestamp,
-                    entryTime: new Date().toISOString()
+                    entryTime: now.toISOString(),
+                    displayTime: now.toLocaleTimeString('en-US', { hour12: true }),
+                    date: todayDate
                 };
 
-                // Add purpose-specific data
                 if (formData.purpose === 'reservation') {
                     visitorData.principalName = formData.principalNameRes;
                     visitorData.coBorrower1 = formData.coBorrower1;
@@ -542,7 +495,7 @@
                     visitorData.realtySeller = formData.realtySeller;
                     visitorData.contactNumber = formData.contactNumberRes;
                     visitorData.type = 'Reservation';
-                } else if (formData.purpose === 'others') {
+                } else {
                     visitorData.inquiryType = formData.inquiryType;
                     visitorData.principalName = formData.principalNameOthers;
                     visitorData.representative = formData.representative;
@@ -551,40 +504,32 @@
                     visitorData.type = 'Others';
                 }
 
-                // Save to Firebase
-                const visitorRef = database.ref(`visitors/${todayDate}/visitor${visitorNumber}`);
-                await visitorRef.set(visitorData);
+                // Using .push() is safer for concurrent entries
+                await database.ref(`visitors/${todayDate}`).push(visitorData);
 
-                // Show success message
-                showStatus(`Visitor #${visitorNumber} entry saved successfully!`, 'success');
-                
-                // Reset form but keep purpose
+                showStatus(`Visitor #${visitorNum} entry saved successfully!`, 'success');
                 clearFormFields();
+                
+                // Keep the current purpose visible but clear values
                 if (formData.purpose === 'reservation') {
                     reservationForm.classList.remove('hidden');
-                } else if (formData.purpose === 'others') {
+                } else {
                     othersForm.classList.remove('hidden');
                 }
 
-            } catch (error) {
-                console.error('Error saving data:', error);
-                showStatus('Error saving data. Please try again.', 'error');
-                // Rollback visitor count on error
-                todayVisitorCount--;
-                updateVisitorCounter();
+            } catch (err) {
+                console.error('Firebase Save Error:', err);
+                showStatus('Network error. Check your database rules or connection.', 'error');
             } finally {
-                // Hide loading
                 showLoading(false);
             }
         });
 
-        // Initialize the application
         function init() {
             initializeDateTime();
             getTodayVisitorCount();
         }
 
-        // Start the application
         init();
     </script>
 </body>
