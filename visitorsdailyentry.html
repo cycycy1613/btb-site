@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Visitor's Entry</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 800px;
+            padding: 40px;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .header h1 {
+            color: #333;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header .date-display {
+            color: #666;
+            font-size: 16px;
+            background: #f8f9fa;
+            padding: 8px 15px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 5px;
+        }
+        
+        .visitor-counter {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 20px;
+            font-weight: bold;
+            box-shadow: 0 5px 15px rgba(0, 242, 254, 0.3);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #444;
+            font-weight: 600;
+            font-size: 14px;
+        }
+        
+        select, input, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        select:focus, input:focus, textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        input[readonly] {
+            background-color: #f8f9fa;
+            color: #666;
+        }
+        
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 10px;
+            border-left: 4px solid #667eea;
+            animation: fadeIn 0.5s ease-out;
+        }
+        
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateX(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .submit-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .submit-btn:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .reset-btn {
+            background: #f8f9fa;
+            color: #666;
+            border: 2px solid #e0e0e0;
+        }
+        
+        .reset-btn:hover {
+            background: #e9ecef;
+        }
+        
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .required::after {
+            content: " *";
+            color: #dc3545;
+        }
+        
+        .spinner-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Daily Visitor's Entry</h1>
+            <div class="date-display" id="currentDate"></div>
+        </div>
+        
+        <div class="visitor-counter" id="visitorCounter">
+            Loading visitor count...
+        </div>
+        
+        <form id="visitorForm">
+            <!-- Purpose Selection -->
+            <div class="form-group">
+                <label class="required">Purpose of Visit</label>
+                <select id="purpose" required>
+                    <option value="">-- Select Purpose --</option>
+                    <option value="reservation">Reservation</option>
+                    <option value="others">Others</option>
+                </select>
+            </div>
+            
+            <!-- Reservation Form -->
+            <div id="reservationForm" class="form-section hidden">
+                <div class="form-group">
+                    <label class="required">Principal Name</label>
+                    <input type="text" id="principalNameRes" placeholder="Enter principal name" required>
+                </div>
+                <div class="form-group">
+                    <label>Co-Borrower's 1</label>
+                    <input type="text" id="coBorrower1" placeholder="Enter co-borrower 1 name">
+                </div>
+                <div class="form-group">
+                    <label>Co-Borrower's 2</label>
+                    <input type="text" id="coBorrower2" placeholder="Enter co-borrower 2 name">
+                </div>
+                <div class="form-group">
+                    <label>Attorney In Fact</label>
+                    <input type="text" id="attorneyInFact" placeholder="Enter attorney in fact name">
+                </div>
+                <div class="form-group">
+                    <label>Realty or Seller's Name</label>
+                    <input type="text" id="realtySeller" placeholder="Enter realty or seller's name">
+                </div>
+                <div class="form-group">
+                    <label class="required">Contact Number</label>
+                    <input type="tel" id="contactNumberRes" placeholder="Enter contact number" required>
+                </div>
+            </div>
+            
+            <!-- Others Form -->
+            <div id="othersForm" class="form-section hidden">
+                <div class="form-group">
+                    <label class="required">Type of Inquiry</label>
+                    <select id="inquiryType">
+                        <option value="">-- Select Type --</option>
+                        <option value="compliance">Compliance</option>
+                        <option value="follow_ups">Follow ups</option>
+                        <option value="concerns">Concerns</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="required">Principal Name</label>
+                    <input type="text" id="principalNameOthers" placeholder="Enter principal name">
+                </div>
+                <div class="form-group">
+                    <label class="required">Representative</label>
+                    <input type="text" id="representative" placeholder="Enter representative name">
+                </div>
+                <div class="form-group">
+                    <label class="required">Contact Number</label>
+                    <input type="tel" id="contactNumberOthers" placeholder="Enter contact number">
+                </div>
+                <div class="form-group">
+                    <label>Description (Optional)</label>
+                    <textarea id="description" rows="3" placeholder="Enter any additional details"></textarea>
+                </div>
+            </div>
+            
+            <div class="status-message" id="statusMessage"></div>
+            
+            <div class="button-group">
+                <button type="button" class="reset-btn" onclick="resetForm()">Reset Form</button>
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span id="submitText">Submit Entry</span>
+                    <span id="submitSpinner" class="spinner-container hidden">
+                        <div class="spinner"></div>
+                        <span>Saving...</span>
+                    </span>
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyAno9NDbUgrgBi7NrC4krNXQg4dMXzN-7g",
+            authDomain: "udhb-site.firebaseapp.com",
+            databaseURL: "https://udhb-site-default-rtdb.firebaseio.com",
+            projectId: "udhb-site",
+            storageBucket: "udhb-site.firebasestorage.app",
+            messagingSenderId: "214765051025",
+            appId: "1:214765051025:web:5e72b00e570919bf3c7330"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // DOM Elements
+        const purposeSelect = document.getElementById('purpose');
+        const reservationForm = document.getElementById('reservationForm');
+        const othersForm = document.getElementById('othersForm');
+        const visitorCounter = document.getElementById('visitorCounter');
+        const currentDateDisplay = document.getElementById('currentDate');
+        const visitorForm = document.getElementById('visitorForm');
+        const statusMessage = document.getElementById('statusMessage');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const submitSpinner = document.getElementById('submitSpinner');
+
+        // Global variables
+        let todayVisitorCount = 0;
+        let todayDate = '';
+
+        // Initialize date and time
+        function initializeDateTime() {
+            const now = new Date();
+            todayDate = now.toISOString().split('T')[0]; // YYYY-MM-DD format
+            const formattedDate = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            currentDateDisplay.textContent = formattedDate;
+        }
+
+        // Get today's visitor count
+        async function getTodayVisitorCount() {
+            try {
+                const snapshot = await database.ref(`visitors/${todayDate}`).once('value');
+                if (snapshot.exists()) {
+                    const visitors = snapshot.val();
+                    todayVisitorCount = Object.keys(visitors).length;
+                } else {
+                    todayVisitorCount = 0;
+                }
+                updateVisitorCounter();
+            } catch (error) {
+                console.error('Error getting visitor count:', error);
+                visitorCounter.textContent = 'Error loading count';
+            }
+        }
+
+        // Update visitor counter display
+        function updateVisitorCounter() {
+            visitorCounter.textContent = `Today's Visitor #${todayVisitorCount + 1}`;
+        }
+
+        // Show form based on purpose selection
+        purposeSelect.addEventListener('change', function() {
+            const purpose = this.value;
+            
+            // Hide both forms first
+            reservationForm.classList.add('hidden');
+            othersForm.classList.add('hidden');
+            
+            // Show selected form
+            if (purpose === 'reservation') {
+                reservationForm.classList.remove('hidden');
+            } else if (purpose === 'others') {
+                othersForm.classList.remove('hidden');
+            }
+            
+            // Clear form fields when switching
+            clearFormFields();
+        });
+
+        // Clear all form fields
+        function clearFormFields() {
+            document.querySelectorAll('#visitorForm input, #visitorForm textarea').forEach(input => {
+                if (input.id !== 'purpose') {
+                    input.value = '';
+                }
+            });
+        }
+
+        // Reset entire form
+        function resetForm() {
+            visitorForm.reset();
+            reservationForm.classList.add('hidden');
+            othersForm.classList.add('hidden');
+            statusMessage.classList.add('hidden');
+            statusMessage.textContent = '';
+        }
+
+        // Show status message
+        function showStatus(message, type) {
+            statusMessage.textContent = message;
+            statusMessage.className = `status-message ${type}`;
+            statusMessage.classList.remove('hidden');
+            
+            setTimeout(() => {
+                statusMessage.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Show loading state
+        function showLoading(show) {
+            if (show) {
+                submitText.classList.add('hidden');
+                submitSpinner.classList.remove('hidden');
+                submitBtn.disabled = true;
+            } else {
+                submitText.classList.remove('hidden');
+                submitSpinner.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Generate visitor number
+        function generateVisitorNumber() {
+            todayVisitorCount++;
+            updateVisitorCounter();
+            return todayVisitorCount;
+        }
+
+        // Get current timestamp
+        function getCurrentTimestamp() {
+            const now = new Date();
+            return {
+                date: todayDate,
+                time: now.toLocaleTimeString('en-US', { hour12: true }),
+                timestamp: now.getTime()
+            };
+        }
+
+        // Validate form data
+        function validateFormData(formData) {
+            const errors = [];
+            
+            if (!formData.purpose) {
+                errors.push('Please select purpose of visit');
+            }
+            
+            if (formData.purpose === 'reservation') {
+                if (!formData.principalNameRes) errors.push('Principal name is required');
+                if (!formData.contactNumberRes) errors.push('Contact number is required');
+            } else if (formData.purpose === 'others') {
+                if (!formData.inquiryType) errors.push('Please select inquiry type');
+                if (!formData.principalNameOthers) errors.push('Principal name is required');
+                if (!formData.representative) errors.push('Representative is required');
+                if (!formData.contactNumberOthers) errors.push('Contact number is required');
+            }
+            
+            return errors;
+        }
+
+        // Handle form submission
+        visitorForm.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const formData = {
+                purpose: purposeSelect.value,
+                principalNameRes: document.getElementById('principalNameRes').value,
+                coBorrower1: document.getElementById('coBorrower1').value,
+                coBorrower2: document.getElementById('coBorrower2').value,
+                attorneyInFact: document.getElementById('attorneyInFact').value,
+                realtySeller: document.getElementById('realtySeller').value,
+                contactNumberRes: document.getElementById('contactNumberRes').value,
+                inquiryType: document.getElementById('inquiryType').value,
+                principalNameOthers: document.getElementById('principalNameOthers').value,
+                representative: document.getElementById('representative').value,
+                contactNumberOthers: document.getElementById('contactNumberOthers').value,
+                description: document.getElementById('description').value
+            };
+
+            // Validate form
+            const validationErrors = validateFormData(formData);
+            if (validationErrors.length > 0) {
+                showStatus(validationErrors.join(', '), 'error');
+                return;
+            }
+
+            // Show loading
+            showLoading(true);
+
+            try {
+                // Generate visitor data
+                const visitorNumber = generateVisitorNumber();
+                const timestamp = getCurrentTimestamp();
+                
+                // Prepare data for Firebase
+                const visitorData = {
+                    visitorNumber: visitorNumber,
+                    purpose: formData.purpose,
+                    timestamp: timestamp,
+                    entryTime: new Date().toISOString()
+                };
+
+                // Add purpose-specific data
+                if (formData.purpose === 'reservation') {
+                    visitorData.principalName = formData.principalNameRes;
+                    visitorData.coBorrower1 = formData.coBorrower1;
+                    visitorData.coBorrower2 = formData.coBorrower2;
+                    visitorData.attorneyInFact = formData.attorneyInFact;
+                    visitorData.realtySeller = formData.realtySeller;
+                    visitorData.contactNumber = formData.contactNumberRes;
+                    visitorData.type = 'Reservation';
+                } else if (formData.purpose === 'others') {
+                    visitorData.inquiryType = formData.inquiryType;
+                    visitorData.principalName = formData.principalNameOthers;
+                    visitorData.representative = formData.representative;
+                    visitorData.contactNumber = formData.contactNumberOthers;
+                    visitorData.description = formData.description || '';
+                    visitorData.type = 'Others';
+                }
+
+                // Save to Firebase
+                const visitorRef = database.ref(`visitors/${todayDate}/visitor${visitorNumber}`);
+                await visitorRef.set(visitorData);
+
+                // Show success message
+                showStatus(`Visitor #${visitorNumber} entry saved successfully!`, 'success');
+                
+                // Reset form but keep purpose
+                clearFormFields();
+                if (formData.purpose === 'reservation') {
+                    reservationForm.classList.remove('hidden');
+                } else if (formData.purpose === 'others') {
+                    othersForm.classList.remove('hidden');
+                }
+
+            } catch (error) {
+                console.error('Error saving data:', error);
+                showStatus('Error saving data. Please try again.', 'error');
+                // Rollback visitor count on error
+                todayVisitorCount--;
+                updateVisitorCounter();
+            } finally {
+                // Hide loading
+                showLoading(false);
+            }
+        });
+
+        // Initialize the application
+        function init() {
+            initializeDateTime();
+            getTodayVisitorCount();
+        }
+
+        // Start the application
+        init();
+    </script>
+</body>
+</html>
