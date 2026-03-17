@@ -2,22 +2,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Bayanihan Town Batangas - Affordable Housing Community in San Pascual - Alitagtag Batangas</title>
     <meta name="description" content="The largest development in San Pascual - Alitagtag, Batangas spanning 65 hectares with 9,350 units embodying the Filipino community-building values at a very affordable price. Bayanihan Town Batangas.">
     <meta name="keywords" content="Bayanihan Town Batangas, Bayanihan Town, Murang bahay sa San Pascual Batangas, Affordable housing in San Pascual Batangas, Affordable housing in Alitagtag Batangas, Rent to own in Batangas, Rent to own Bayanihan Town Batangas, Murang pabahay sa Batangas, CM Panganiban, 8990 Holdings Inc., Cheapest housing in Batangas, Bayanihan Town Batangas Pag-IBIG financing, Bayanihan Town Batangas bank financing, Low-cost housing in Batangas, Affordable condo in Batangas, Rent to own house San Pascual Batangas, Rent to own house Alitagtag Batangas, Batangas housing project, Pag-IBIG housing Batangas, Affordable subdivision in Batangas, Murang pabahay Batangas, House and lot in Batangas, Rent to own house Batangas, San Pascual Batangas housing, Alitagtag Batangas housing, 8990 Holdings Batangas projects, Affordable townhouse in Batangas, Rent to own townhouse Batangas, Subdivision in San Pascual Batangas, Subdivision in Alitagtag...">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css">
     <style>
-        /* Base Styles & Variables */
+        /* Base Styles & Variables - Updated based on image color palette */
         :root {
-            --navy-blue: #0A2C5E;
-            --light-brown: #D4C6AC;
-            --light-green: #E6F2E6;
+            --navy-blue: #0D1B3E;             /* Darkest blue from image */
+            --royal-blue: #2979FF;            /* Middle blue from image */
+            --accent-teal: #26D099;           /* Vibrant teal/green from image */
+            --soft-blue: #F0F4FF;             /* Very light tint for backgrounds */
             --gray: #6C757D;
             --white: #FFFFFF;
-            --dark-gray: #343A40;
-            --light-gray: #F8F9FA;
+            --dark-gray: #1A2238;            
+            --light-gray: #F1F3F4;
+            --card-shadow: 0 15px 35px -10px rgba(13, 27, 62, 0.15);
+            --transition-smooth: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
         }
         
         * {
@@ -29,223 +32,189 @@
         
         html {
             scroll-behavior: smooth;
+            font-size: 16px;
         }
         
         body {
             line-height: 1.6;
             color: var(--dark-gray);
             background-color: var(--white);
+            overflow-x: hidden;
         }
         
         h1, h2, h3, h4 {
             color: var(--navy-blue);
             margin-bottom: 1rem;
             font-weight: 600;
+            letter-spacing: -0.02em;
         }
         
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 0 24px;
         }
         
         .btn {
             display: inline-block;
-            background: var(--light-brown);
-            color: var(--navy-blue);
-            padding: 12px 24px;
+            background: var(--accent-teal);
+            color: var(--white);
+            padding: 14px 32px;
             border: none;
-            border-radius: 4px;
+            border-radius: 50px;
             cursor: pointer;
             text-decoration: none;
-            font-size: 16px;
-            font-weight: 500;
-            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition-smooth);
+            box-shadow: 0 8px 20px -8px rgba(38, 208, 153, 0.4);
+            letter-spacing: 0.3px;
         }
         
         .btn:hover {
-            background: #08367c;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background: #1eb988;
+            transform: translateY(-4px);
+            box-shadow: 0 15px 30px -8px rgba(38, 208, 153, 0.5);
         }
         
         .btn-outline {
             background-color: transparent;
-            border: 2px solid var(--light-brown);
-            color: var(--light-brown);
+            border: 2px solid var(--accent-teal);
+            color: var(--white);
+            box-shadow: none;
         }
         
         .btn-outline:hover {
-            background-color: var(--light-brown);
-            color: var(--navy-blue);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background-color: var(--accent-teal);
+            color: var(--white);
+            border-color: var(--accent-teal);
         }
         
         .section {
-            padding: 80px 0;
+            padding: 100px 0;
+            position: relative;
         }
         
         .section-title {
             text-align: center;
-            margin-bottom: 50px;
+            margin-bottom: 60px;
             position: relative;
+            font-size: 2.5rem;
         }
         
         .section-title:after {
             content: '';
             display: block;
-            width: 80px;
-            height: 4px;
-            background: var(--light-brown);
-            margin: 15px auto 0;
+            width: 100px;
+            height: 5px;
+            background: var(--royal-blue);
+            margin: 20px auto 0;
+            border-radius: 10px;
         }
         
-        /* Header & Navigation */
         header {
             background-color: var(--navy-blue);
             position: fixed;
             width: 100%;
             top: 0;
             z-index: 1000;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
         
         .navbar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 20px 0;
+            padding: 18px 0;
         }
         
         .logo {
             color: var(--white);
-            font-size: 24px;
+            font-size: clamp(1.4rem, 4vw, 1.9rem);
             font-weight: 700;
             text-decoration: none;
             display: flex;
             align-items: center;
+            gap: 10px;
         }
         
         .logo i {
-            margin-right: 10px;
-            color: var(--light-brown);
+            color: var(--accent-teal);
+            font-size: 1.8rem;
         }
         
-        /* New Styles for search icon and dropdown */
-        .header-right {
-            display: flex;
-            align-items: center;
-        }
-        
-        .search-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .search-icon-btn {
-            background: none;
-            border: none;
-            color: var(--white);
-            font-size: 20px;
-            cursor: pointer;
-            padding: 10px;
-            transition: color 0.3s ease;
-        }
-        
-        .search-icon-btn:hover {
-            color: var(--light-brown);
-        }
-        
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: var(--white);
-            min-width: 160px;
-            box-shadow: 0 8px 16px 0px rgba(0,0,0,0.2);
-            z-index: 1;
-            right: 0;
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 10px;
-        }
-        
-        .dropdown-content a {
-            color: var(--navy-blue);
-            padding: 12px 16px;
-            text-decoration: none;
-            display: block;
-            transition: background-color 0.3s;
-        }
-        
-        .dropdown-content a:hover {
-            background-color: var(--light-green);
-        }
-        
-        .show-dropdown {
-            display: block;
-        }
-        
-        /* Hero Section */
         .hero {
-            background: linear-gradient(rgba(10, 44, 0, 0), rgba(10, 44, 94, 50)), url('https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2025-09-21_20-46-20.jpg');
+            background: linear-gradient(145deg, rgba(13, 27, 62, 0.9) 0%, rgba(13, 27, 62, 0.6) 100%), url('https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2025-09-21_20-46-20.jpg');
             background-size: cover;
-            background-position: center;
-            height: 100vh;
+            background-position: center 30%;
+            height: min(100vh, 900px);
             display: flex;
             align-items: center;
             color: var(--white);
             text-align: center;
-            padding-top: 80px;
+            padding-top: 90px;
+            position: relative;
+            animation: zoomBackground 25s infinite alternate ease-in-out;
+        }
+        
+        @keyframes zoomBackground {
+            0% { background-size: 100%; }
+            100% { background-size: 110%; }
         }
         
         .hero-content {
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
-            animation: fadeIn 1.5s ease;
+            animation: fadeUpIn 1.2s ease forwards;
+        }
+        
+        @keyframes fadeUpIn {
+            0% { opacity: 0; transform: translateY(40px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
         
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: clamp(2rem, 8vw, 4.2rem);
             margin-bottom: 20px;
             color: var(--white);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-shadow: 0 5px 15px rgba(0,0,0,0.3);
+            line-height: 1.2;
         }
         
         .hero p {
-            font-size: 1.2rem;
-            margin-bottom: 30px;
-            max-width: 600px;
+            font-size: clamp(1rem, 3vw, 1.3rem);
+            margin-bottom: 40px;
+            max-width: 700px;
             margin-left: auto;
             margin-right: auto;
+            opacity: 0.95;
         }
 
         .hero-buttons {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            gap: 20px;
             flex-wrap: wrap;
         }
         
-        /* Map Section */
         .map-section {
-            background-color: var(--light-green);
+            background-color: var(--soft-blue);
         }
         
         #map {
-            height: 500px;
+            height: 550px;
             width: 100%;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 24px;
+            box-shadow: var(--card-shadow);
+            border: 5px solid white;
         }
         
         .map-btn-container {
             text-align: center;
-            margin-top: 30px;
+            margin-top: 40px;
         }
         
-        /* Project Details */
         .project-details {
             background-color: var(--white);
         }
@@ -253,119 +222,162 @@
         .details-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            gap: 35px;
         }
         
         .detail-card {
             background: var(--white);
-            border-radius: 8px;
-            padding: 30px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease;
+            border-radius: 30px;
+            padding: 40px 25px;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition-smooth);
             text-align: center;
+            border: 1px solid rgba(41, 121, 255, 0.1);
+            position: relative;
+            z-index: 1;
+            overflow: hidden;
+        }
+        
+        .detail-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: var(--accent-teal);
+            transform: scaleX(0);
+            transition: transform 0.4s ease;
+            z-index: -1;
+        }
+        
+        .detail-card:hover::before {
+            transform: scaleX(1);
         }
         
         .detail-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            transform: translateY(-15px);
+            box-shadow: 0 30px 45px -15px rgba(13, 27, 62, 0.2);
         }
         
         .detail-card i {
-            font-size: 2.5rem;
+            font-size: 2.8rem;
             color: var(--navy-blue);
-            margin-bottom: 20px;
-            background: var(--light-green);
-            width: 70px;
-            height: 70px;
-            line-height: 70px;
+            margin-bottom: 25px;
+            background: var(--soft-blue);
+            width: 90px;
+            height: 90px;
+            line-height: 90px;
             border-radius: 50%;
             text-align: center;
+            transition: var(--transition-smooth);
         }
         
-        /* House Model */
+        .detail-card:hover i {
+            background: var(--accent-teal);
+            color: var(--white);
+            transform: rotateY(360deg);
+        }
+        
         .house-model {
-            background-color: var(--light-green);
+            background-color: var(--soft-blue);
         }
         
         .model-container {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 60px;
             align-items: center;
         }
         
         .model-images {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 25px;
         }
         
         .model-image {
-            border-radius: 8px;
+            border-radius: 30px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 25px 40px -15px rgba(0,0,0,0.3);
+            transition: var(--transition-smooth);
+            height: 100%;
+        }
+        
+        .model-image:first-child {
+            grid-column: span 2; 
         }
         
         .model-image img {
             width: 100%;
-            height: 250px;
+            height: 350px;      
             object-fit: cover;
             display: block;
-            transition: transform 0.5s ease;
+            transition: transform 1.2s ease;
         }
         
-        .model-image img:hover {
-            transform: scale(1.05);
+        .model-image:hover img {
+            transform: scale(1.08);
         }
         
         .model-details {
-            padding: 20px;
+            padding: 40px;
+            background: white;
+            border-radius: 40px;
+            box-shadow: var(--card-shadow);
         }
         
         .description {
-            margin-bottom: 30px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid var(--light-brown);
+            margin-bottom: 35px;
+            padding-bottom: 25px;
+            border-bottom: 3px solid var(--royal-blue);
+            font-size: 1.1rem;
         }
         
         .specs-list {
             list-style: none;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
         }
         
         .specs-list li {
             margin-bottom: 15px;
             display: flex;
             align-items: flex-start;
+            gap: 12px;
+            font-size: 1rem;
         }
         
         .specs-list i {
-            color: var(--navy-blue);
-            margin-right: 10px;
-            margin-top: 5px;
+            color: var(--royal-blue);
+            font-size: 1.3rem;
+            background: var(--soft-blue);
+            padding: 8px;
+            border-radius: 50%;
         }
         
-        /* Image Carousel */
         .carousel-section {
             background-color: var(--white);
         }
         
         .carousel-container {
-            max-width: 100%;
+            max-width: 1300px;
             margin: 0 auto;
             position: relative;
             overflow: hidden;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-radius: 40px;
+            box-shadow: var(--card-shadow);
         }
         
         .carousel {
             display: flex;
-            transition: transform 0.5s ease;
+            transition: transform 0.8s cubic-bezier(0.25, 0.1, 0.15, 1);
         }
         
         .carousel-item {
             min-width: 100%;
-            height: 800px;
+            height: clamp(400px, 60vh, 700px);
         }
         
         .carousel-item img {
@@ -378,142 +390,223 @@
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
-            background: rgba(10, 44, 94, 0.7);
-            color: var(--white);
+            background: rgba(13, 27, 62, 0.8);
+            color: white;
             border: none;
-            width: 50px;
-            height: 50px;
+            width: 60px;
+            height: 60px;
             border-radius: 50%;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: background 0.3s ease;
+            transition: all 0.3s ease;
             z-index: 10;
+            backdrop-filter: blur(4px);
+            border: 2px solid rgba(255,255,255,0.3);
         }
         
         .carousel-control:hover {
-            background: var(--navy-blue);
+            background: var(--royal-blue);
+            transform: translateY(-50%) scale(1.1);
         }
         
-        .carousel-control.prev {
-            left: 20px;
-        }
-        
-        .carousel-control.next {
-            right: 20px;
-        }
+        .carousel-control.prev { left: 25px; }
+        .carousel-control.next { right: 25px; }
         
         .carousel-indicators {
             position: absolute;
-            bottom: 20px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
             display: flex;
-            gap: 10px;
+            gap: 15px;
             z-index: 10;
         }
         
         .carousel-indicator {
-            width: 12px;
-            height: 12px;
+            width: 14px;
+            height: 14px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.5);
-            border: none;
+            background: rgba(255,255,255,0.5);
+            border: 2px solid transparent;
             cursor: pointer;
+            transition: all 0.3s;
         }
         
         .carousel-indicator.active {
-            background: var(--white);
+            background: var(--accent-teal);
+            transform: scale(1.3);
+            border-color: white;
         }
         
-        /* Video Section */
         .video-section {
-            background-color: var(--light-green);
+            background-color: var(--soft-blue);
             text-align: center;
         }
         
         .video-container {
-            max-width: 800px;
+            max-width: 1000px;
             margin: 0 auto;
-            background: var(--dark-gray);
-            border-radius: 8px;
+            border-radius: 40px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-            height: 450px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--white);
-            position: relative;
+            box-shadow: 0 30px 50px -15px rgba(0,0,0,0.3);
+            aspect-ratio: 16 / 9;
         }
         
-        .video-placeholder {
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-            background: linear-gradient(135deg, var(--navy-blue), var(--dark-gray));
-        }
-        
-        .video-placeholder i {
-            font-size: 60px;
-            margin-bottom: 20px;
-            color: var(--light-brown);
-        }
-        
-        /* Pages Section */
         .pages-section {
-            background-color: var(--light-gray);
+            background: linear-gradient(135deg, #f8faff 0%, #eef3ff 100%);
         }
         
         .pages-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 30px;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 40px;
+            margin-top: 30px;
         }
         
         .page-card {
             background-color: var(--white);
-            border-radius: 8px;
+            border-radius: 40px;
             overflow: hidden;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition-smooth);
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            border: 1px solid rgba(41, 121, 255, 0.1);
+            transform: translateY(0);
         }
         
         .page-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+            transform: translateY(-20px) scale(1.02);
+            box-shadow: 0 40px 60px -15px rgba(13, 27, 62, 0.25);
         }
         
         .page-card-image {
             width: 100%;
-            height: 200px;
+            height: 260px;
             object-fit: cover;
+            transition: transform 1s ease;
+        }
+        
+        .page-card:hover .page-card-image {
+            transform: scale(1.05);
         }
         
         .page-card-content {
-            padding: 25px;
+            padding: 35px 30px 40px;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background: white;
+            position: relative;
         }
         
         .page-card-content h3 {
-            margin-top: 0;
-            font-size: 22px;
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            line-height: 1.3;
         }
         
         .page-card-content p {
-            font-size: 15px;
+            font-size: 1.1rem;
             color: var(--gray);
-            margin-bottom: 20px;
+            margin-bottom: 30px;
+            flex-grow: 1;
         }
         
-        /* Footer */
+        .page-card-content .btn {
+            align-self: flex-start;
+            padding: 12px 35px;
+            border-radius: 60px;
+            background: var(--navy-blue);
+            color: white;
+            box-shadow: 0 5px 15px rgba(13, 27, 62, 0.2);
+        }
+        
+        .page-card-content .btn:hover {
+            background: var(--royal-blue);
+            color: white;
+        }
+
+        /* Project Sales Assistant Styles */
+        .contact-section {
+            background-color: var(--white);
+        }
+
+        .contact-card {
+            max-width: 800px;
+            margin: 0 auto;
+            background: var(--soft-blue);
+            border-radius: 40px;
+            padding: 50px;
+            display: flex;
+            align-items: center;
+            gap: 40px;
+            box-shadow: var(--card-shadow);
+            border: 1px solid rgba(41, 121, 255, 0.1);
+        }
+
+        .contact-info {
+            flex-grow: 1;
+        }
+
+        .contact-info h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+            color: var(--navy-blue);
+        }
+
+        .contact-info .title {
+            color: var(--royal-blue);
+            font-weight: 600;
+            margin-bottom: 25px;
+            display: block;
+            font-size: 1.1rem;
+        }
+
+        .contact-details {
+            list-style: none;
+        }
+
+        .contact-details li {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 15px;
+            font-size: 1.05rem;
+        }
+
+        .contact-details i {
+            color: var(--navy-blue);
+            background: white;
+            width: 35px;
+            height: 35px;
+            line-height: 35px;
+            text-align: center;
+            border-radius: 10px;
+            font-size: 1rem;
+            flex-shrink: 0;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .contact-card {
+                flex-direction: column;
+                padding: 30px;
+                text-align: center;
+            }
+            .contact-details li {
+                justify-content: center;
+                text-align: left;
+            }
+        }
+        
         footer {
             background-color: var(--navy-blue);
             color: var(--white);
-            padding: 40px 0 20px;
+            padding: 60px 0 30px;
             text-align: center;
         }
         
@@ -524,57 +617,55 @@
         }
         
         .footer-logo {
-            font-size: 28px;
+            font-size: 2rem;
             font-weight: 700;
             margin-bottom: 20px;
             color: var(--white);
         }
         
         .footer-info {
-            margin-bottom: 20px;
-            max-width: 600px;
+            margin-bottom: 25px;
+            max-width: 500px;
+            font-size: 1.2rem;
+            opacity: 0.9;
         }
         
         .social-icons {
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
         
         .social-icons a {
             color: var(--white);
-            font-size: 20px;
-            margin: 0 10px;
-            transition: color 0.3s ease;
+            font-size: 1.5rem;
+            margin: 0 12px;
+            transition: var(--transition-smooth);
             display: inline-block;
-            width: 40px;
-            height: 40px;
-            line-height: 40px;
+            width: 55px;
+            height: 55px;
+            line-height: 55px;
             border-radius: 50%;
             background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(4px);
         }
         
         .social-icons a:hover {
-            color: var(--light-brown);
-            background: rgba(255, 255, 255, 0.2);
+            color: var(--navy-blue);
+            background: var(--accent-teal);
+            transform: translateY(-5px) rotate(8deg);
         }
         
         .copyright {
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 2px solid rgba(255,255,255,0.1);
             width: 100%;
-            font-size: 14px;
-        }
-        
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
+            font-size: 1rem;
         }
         
         .fade-in {
             opacity: 0;
-            transform: translateY(20px);
-            transition: opacity 0.8s ease, transform 0.8s ease;
+            transform: translateY(30px);
+            transition: opacity 0.9s cubic-bezier(0.2, 0.9, 0.1, 1), transform 0.9s cubic-bezier(0.2, 0.9, 0.1, 1);
         }
         
         .fade-in.visible {
@@ -582,273 +673,45 @@
             transform: translateY(0);
         }
         
-        /* Custom Leaflet Controls */
-        .leaflet-control-zoom.leaflet-bar.leaflet-control a {
-            font: bold 18px 'Lucida Console', Monaco, monospace;
+        .details-grid .detail-card:nth-child(1) { transition-delay: 0.1s; }
+        .details-grid .detail-card:nth-child(2) { transition-delay: 0.2s; }
+        .details-grid .detail-card:nth-child(3) { transition-delay: 0.3s; }
+        
+        .leaflet-control-drag-toggle, .leaflet-control-reset-view { background: white; border-radius: 8px !important; margin-top: 5px; }
+        .leaflet-control-drag-toggle.active { background: var(--accent-teal); color: white; }
+        
+        .toast {
+            visibility: hidden; min-width: 250px; background: var(--navy-blue); color: white; text-align: center;
+            border-radius: 50px; padding: 16px; position: fixed; z-index: 3000; left: 50%; bottom: 30px;
+            transform: translateX(-50%); opacity: 0; transition: visibility 0s, opacity 0.5s linear;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        .toast.show { visibility: visible; opacity: 1; animation: fadeinToast 0.5s, fadeoutToast 0.5s 2.5s; }
+        @keyframes fadeinToast { from { bottom: 0; opacity: 0; } to { bottom: 30px; opacity: 1; } }
+        @keyframes fadeoutToast { from { bottom: 30px; opacity: 1; } to { bottom: 0; opacity: 0; } }
+        
+        @media (max-width: 1100px) {
+            .model-container { grid-template-columns: 1fr; gap: 40px; }
+            .model-images { max-width: 800px; margin: 0 auto; }
         }
         
-        .leaflet-control-zoom.leaflet-bar.leaflet-control {
-            margin-right: 40px;
-            width: 36px;
-        }
-        
-        .leaflet-control-reset-view {
-            background-color: #fff;
-            width: 36px;
-            height: 36px;
-            line-height: 36px;
-            text-align: center;
-            cursor: pointer;
-            border: 2px solid rgba(0,0,0,0.2);
-            border-top: none;
-            border-radius: 0 0 4px 4px;
-        }
-        
-        .leaflet-control-reset-view:hover {
-            background-color: #f4f4f4;
-        }
-        
-        .leaflet-control-reset-view svg {
-            vertical-align: middle;
-            fill: var(--navy-blue);
-        }
-        
-        .leaflet-control-drag-toggle {
-            background-color: #fff;
-            width: 36px;
-            height: 36px;
-            line-height: 36px;
-            text-align: center;
-            cursor: pointer;
-            border: 2px solid rgba(0,0,0,0.2);
-            border-bottom: none;
-            border-radius: 4px 4px 0 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .leaflet-control-drag-toggle:hover {
-            background-color: #f4f4f4;
-        }
-        
-        .leaflet-control-drag-toggle i {
-            color: var(--navy-blue);
-            font-size: 20px;
-        }
-        
-        /* Page link block */
-        .page-link-block {
-            text-align: center;
-            margin-top: 20px;
-        }
-        
-        /* Responsive Design */
-        @media (max-width: 992px) {
-            .model-container {
-                grid-template-columns: 1fr;
-                gap: 30px;
-            }
-            
-            .hero h1 {
-                font-size: 2.8rem;
-            }
-            
-            .carousel-item {
-                height: 400px;
-            }
+        @media (max-width: 900px) {
+            .pages-grid { grid-template-columns: 1fr; max-width: 650px; margin: 0 auto; }
         }
         
         @media (max-width: 768px) {
-            .hero h1 {
-                font-size: 2.2rem;
-            }
-            
-            .hero p {
-                font-size: 1rem;
-            }
-            
-            #map {
-                height: 400px;
-            }
-            
-            .model-images {
-                grid-template-columns: 1fr;
-            }
-            
-            .carousel-item {
-                height: 350px;
-            }
-            
-            .video-container {
-                height: 350px;
-            }
+            .hero h1 { font-size: 2.5rem; }
+            .section-title { font-size: 2rem; }
         }
-        
-        @media (max-width: 576px) {
-            .section {
-                padding: 60px 0;
-            }
-            
-            .hero h1 {
-                font-size: 1.8rem;
-            }
-            
-            .btn {
-                padding: 10px 20px;
-                font-size: 14px;
-            }
-            
-            .detail-card {
-                padding: 20px;
-            }
-            
-            .carousel-item {
-                height: 300px;
-            }
-            
-            .video-container {
-                height: 250px;
-            }
-            
-            .carousel-control {
-                width: 40px;
-                height: 40px;
-            }
-        }
-        
-        /* Modal & Toast Styles */
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 2000; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
-            align-items: center;
-            justify-content: center;
-            animation: fadeInModal 0.3s ease-out;
-        }
-        
-        .modal-content {
-            background-color: var(--white);
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-            width: 90%;
-            max-width: 400px;
-            text-align: center;
-            position: relative;
-            transform: scale(0.95);
-            animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-        
-        .modal-content h3 {
-            margin-top: 0;
-            color: var(--navy-blue);
-        }
-        
-        .modal-content input {
-            width: 100%;
-            padding: 12px;
-            margin: 20px 0;
-            border: 1px solid var(--light-brown);
-            border-radius: 4px;
-            font-size: 16px;
-            text-align: center;
-            letter-spacing: 2px;
-        }
-        
-        .modal-buttons {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-        }
-        
-        .modal-buttons .btn {
-            flex-grow: 1;
-            width: auto;
-        }
-        
-        .modal-close {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 28px;
-            font-weight: bold;
-            color: var(--gray);
-            cursor: pointer;
-            transition: color 0.3s;
-        }
-        
-        .modal-close:hover {
-            color: var(--dark-gray);
-        }
-        
-        .toast {
-            visibility: hidden;
-            min-width: 250px;
-            background-color: var(--navy-blue);
-            color: var(--white);
-            text-align: center;
-            border-radius: 4px;
-            padding: 16px;
-            position: fixed;
-            z-index: 3000;
-            left: 50%;
-            bottom: 30px;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: visibility 0s, opacity 0.5s linear;
-        }
-        
-        .toast.show {
-            visibility: visible;
-            opacity: 1;
-            animation: fadeinToast 0.5s, fadeoutToast 0.5s 2.5s;
-        }
-        
-        @keyframes fadeInModal {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes popUp {
-            from { transform: scale(0.95); }
-            to { transform: scale(1); }
-        }
-        
-        @keyframes fadeinToast {
-            from { bottom: 0; opacity: 0; }
-            to { bottom: 30px; opacity: 1; }
-        }
-        
-        @keyframes fadeoutToast {
-            from { bottom: 30px; opacity: 1; }
-            to { bottom: 0; opacity: 0; }
-        }
+
+        .modal, #sellersModal, #openModalBtn { display: none; }
     </style>
 </head>
 <body>
-    <div id="fb-root"></div>
-    <script async defer crossorigin="anonymous" src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v18.0" nonce="4B8aF4Xm"></script>
-    
     <header>
         <div class="container">
             <nav class="navbar">
-                <a href="#" class="logo"><i class="fas fa-home"></i> Bayanihan Town</a>
-                <div class="header-right">
-                    <div class="search-dropdown">
-                        <button class="search-icon-btn"><i class="fas fa-search"></i></button>
-                        <div class="dropdown-content">
-                            <a href="https://bayanihantownbatangas.info/phase-7a">Phase 7A</a>
-                            <a href="#">Phase 7B</a>
-                        </div>
-                    </div>
-                </div>
+                <a href="#" class="logo"><i class="fas fa-home"></i> BTB </a>
             </nav>
         </div>
     </header>
@@ -860,7 +723,6 @@
                 <p>The largest development in San Pascual spanning 65 hectares with 9,350 units embodying the Filipino community-building values at a very affordable price.</p>
                 <div class="hero-buttons">
                     <a href="https://www.facebook.com/bayanihantownbatangas" class="btn">Inquire Now</a>
-                    <button id="openModalBtn" class="btn btn-outline">Sellers Portal</button>
                 </div>
             </div>
         </div>
@@ -871,7 +733,7 @@
             <h2 class="section-title">Project Location</h2>
             <div id="map"></div>
             <div class="map-btn-container">
-                <a href="://maps.app.goo.gl/adEJDviZBuwQcbZu9" target="_blank" class="btn">View on Google Map</a>
+                <a href="https://maps.app.goo.gl/adEJDviZBuwQcbZu9" target="_blank" class="btn">View on Google Map</a>
             </div>
         </div>
     </section>
@@ -936,35 +798,19 @@
             <h2 class="section-title">Sierra Unit Photos</h2>
             <div class="carousel-container">
                 <div class="carousel">
-                    <div class="carousel-item">
-                        <img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-27-40.jpg" alt="bayanihan town batangas">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-51.jpg" alt="bayanihan town batangas">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-54.jpg" alt="bayanihan town batangas">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-57.jpg" alt="bayanihan town batangas">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-57-2.jpg" alt="bayanihan town batangas">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-55.jpg" alt="bayanihan town batangas">
-                    </div>
-                    <div class="carousel-item">
-                        <img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-58.jpg" alt="bayanihan town batangas">
-                    </div>
+                    <div class="carousel-item"><img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-27-40.jpg" alt="bayanihan town batangas"></div>
+                    <div class="carousel-item"><img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-51.jpg" alt="bayanihan town batangas"></div>
+                    <div class="carousel-item"><img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-54.jpg" alt="bayanihan town batangas"></div>
+                    <div class="carousel-item"><img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-57.jpg" alt="bayanihan town batangas"></div>
+                    <div class="carousel-item"><img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-57-2.jpg" alt="bayanihan town batangas"></div>
+                    <div class="carousel-item"><img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-55.jpg" alt="bayanihan town batangas"></div>
+                    <div class="carousel-item"><img src="https://dgcyron.wordpress.com/wp-content/uploads/2026/02/photo_2026-02-01_20-24-58.jpg" alt="bayanihan town batangas"></div>
                 </div>
                 <button class="carousel-control prev"><i class="fas fa-chevron-left"></i></button>
                 <button class="carousel-control next"><i class="fas fa-chevron-right"></i></button>
                 <div class="carousel-indicators">
                     <button class="carousel-indicator active"></button>
-                    <button class="carousel-indicator"></button>
-                    <button class="carousel-indicator"></button>
-                    <button class="carousel-indicator"></button>
+                    <button class="carousel-indicator"></button><button class="carousel-indicator"></button><button class="carousel-indicator"></button><button class="carousel-indicator"></button><button class="carousel-indicator"></button><button class="carousel-indicator"></button>
                 </div>
             </div>
         </div>
@@ -974,13 +820,7 @@
         <div class="container">
             <h2 class="section-title">About Us</h2>
             <div class="video-container">
-                <iframe width="100%" height="480"
-                    src="https://www.youtube.com/embed/VO-uTooEpmQ?si=6-4GZ2WsI3E5Xn7x"
-                    title="Sierra Unit Video"
-                    frameborder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    allowfullscreen>
-                </iframe>
+                <iframe width="100%" height="100%" src="https://www.youtube.com/embed/VO-uTooEpmQ?si=6-4GZ2WsI3E5Xn7x" title="Sierra Unit Video" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
             </div>
         </div>
     </section>
@@ -1009,6 +849,24 @@
             </div>
         </div>
     </section>
+
+    <section class="section contact-section">
+        <div class="container">
+            <h2 class="section-title">Project Sales Assistant</h2>
+            <div class="contact-card fade-in">
+                <div class="contact-info">
+                    <h3>Cyron Panganiban</h3>
+                    <span class="title">Deca Gold Realty and Development Inc.</span>
+                    <ul class="contact-details">
+                        <li><i class="fas fa-phone-alt"></i> <span>0991-382-7663</span></li>
+                        <li><i class="fas fa-envelope"></i> <span>cyron.panganiban@decagold.com</span></li>
+                        <li><i class="fas fa-building"></i> <span>3F Bayanihan Town Batangas - Office, Nuciti Central Mall, Batangas City</span></li>
+                    </ul>
+                    <a href="https://www.facebook.com/bayanihantownbatangas" class="btn" style="margin-top: 20px;">Contact via Facebook</a>
+                </div>
+            </div>
+        </div>
+    </section>
     
     <footer>
         <div class="container">
@@ -1027,169 +885,61 @@
         </div>
     </footer>
 
-    <div id="sellersModal" class="modal">
-        <div class="modal-content">
-            <span class="modal-close">&times;</span>
-            <h3>Sellers Portal</h3>
-            <p>Please enter the access code:</p>
-            <p style="color: var(--gray); font-style: italic;">Hint: _ _ _ _ Holdings Inc.</p>
-            <input type="text" id="accessCode" placeholder="Enter code here" maxlength="4">
-            <div class="modal-buttons">
-                <button id="submitCodeBtn" class="btn">Submit</button>
-            </div>
-        </div>
-    </div>
-    
     <div id="toast" class="toast">Invalid Code</div>
     
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        // Search dropdown logic
-        const searchBtn = document.querySelector('.search-icon-btn');
-        const dropdown = document.querySelector('.dropdown-content');
-        
-        searchBtn.addEventListener('click', (event) => {
-            event.stopPropagation(); // Prevents the document click event from firing immediately
-            dropdown.classList.toggle('show-dropdown');
-        });
-        
-        // Close the dropdown if the user clicks outside of it
-        window.addEventListener('click', (event) => {
-            if (!event.target.closest('.search-dropdown')) {
-                dropdown.classList.remove('show-dropdown');
-            }
-        });
-
-        // Modal and Code Logic
-        const openModalBtn = document.getElementById('openModalBtn');
-        const sellersModal = document.getElementById('sellersModal');
-        const closeModalBtn = document.querySelector('#sellersModal .modal-close');
-        const submitCodeBtn = document.getElementById('submitCodeBtn');
-        const accessCodeInput = document.getElementById('accessCode');
-        const toast = document.getElementById('toast');
-        const correctCode = '8990';
-
-        openModalBtn.addEventListener('click', () => {
-            sellersModal.style.display = 'flex';
-            accessCodeInput.value = ''; // Clear input on open
-            accessCodeInput.focus();
-        });
-
-        closeModalBtn.addEventListener('click', () => {
-            sellersModal.style.display = 'none';
-        });
-
-        sellersModal.addEventListener('click', (e) => {
-            if (e.target === sellersModal) {
-                sellersModal.style.display = 'none';
-            }
-        });
-
-        submitCodeBtn.addEventListener('click', checkCode);
-        accessCodeInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                checkCode();
-            }
-        });
-
-        function checkCode() {
-            const enteredCode = accessCodeInput.value.trim();
-            if (enteredCode === correctCode) {
-                window.location.href = 'https://bayanihantownbatangas.info/members';
-            } else {
-                showToast('Invalid Code');
-                accessCodeInput.value = '';
-                accessCodeInput.focus();
-            }
-        }
-
-        function showToast(message) {
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-        
-        // Initialize Map
         function initMap() {
             const batangasCenter = [13.8, 121.05];
             const batangasZoom = 10;
-            
             const location = [13.844756, 121.020964];
-            const map = L.map('map', {
-                scrollWheelZoom: false,
-                touchZoom: false,
-                dragging: false
-            }).setView(location, 13);
+            const map = L.map('map', { scrollWheelZoom: false, touchZoom: false, dragging: false }).setView(location, 13);
             
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-                maxZoom: 19
-            }).addTo(map);
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
             
             const southWest = L.latLng(13.4, 120.6);
             const northEast = L.latLng(14.3, 121.4);
-            const bounds = L.latLngBounds(southWest, northEast);
-            map.setMaxBounds(bounds);
+            map.setMaxBounds(L.latLngBounds(southWest, northEast));
             
             L.Control.DragToggle = L.Control.extend({
                 onAdd: function(map) {
                     const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-drag-toggle');
                     const button = L.DomUtil.create('button', '', container);
                     button.innerHTML = `<i class="fa-solid fa-hand"></i>`;
-                    button.title = "Toggle Dragging";
-                    
                     L.DomEvent.on(button, 'click', () => {
                         if (map.dragging.enabled()) {
                             map.dragging.disable();
                             button.innerHTML = `<i class="fa-solid fa-hand"></i>`;
-                            L.DomUtil.removeClass(button, 'active');
+                            button.parentElement.classList.remove('active');
                         } else {
                             map.dragging.enable();
                             button.innerHTML = `<i class="fa-solid fa-hand-fist"></i>`;
-                            L.DomUtil.addClass(button, 'active');
+                            button.parentElement.classList.add('active');
                         }
                     });
-                    
                     return container;
-                },
-                onRemove: function(map) {}
+                }
             });
-            
-            L.control.dragToggle = function(opts) {
-                return new L.Control.DragToggle(opts);
-            }
+            L.control.dragToggle = (opts) => new L.Control.DragToggle(opts);
             L.control.dragToggle({ position: 'topright' }).addTo(map);
             
             L.Control.ResetView = L.Control.extend({
                 onAdd: function(map) {
                     const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-reset-view');
-                    container.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" style="width: 20px; height: 20px;"><path d="M488 200H472c-15.6 0-30.7 7.7-39.8 20.8L315.6 408c-2 2.8-4.1 5.4-6.3 7.8c-.8 .8-1.5 1.5-2.3 2.2L272 458.7V352h80c17.7 0 32-14.3 32-32s-14.3-32-32-32H288V224H272 208c-17.7 0-32 14.3-32 32s14.3 32 32 32h80v64H272c-1.8 0-3.6 .3-5.3 .8c-2.4 .7-4.7 1.8-6.9 3.2L128 352c-17.7 0-32 14.3-32 32v64H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H96 480c53 0 96-43 96-96s-43-96-96-96zM32 384c0-8.8 7.2-16 16-16H80c8.8 0 16 7.2 16 16v64c0 8.8-7.2 16-16 16H48c-8.8 0-16-7.2-16-16V384zM240 64h96c17.7 0 32 14.3 32 32V160H208V96c0-17.7 14.3-32 32-32zm40 128V160c0-4.4-3.6-8-8-8H208c-4.4 0-8 3.6-8 8v32c0 4.4 3.6 8 8 8h64c4.4 0 8-3.6 8-8zm-88 0c4.4 0 8-3.6 8-8V96c0-4.4-3.6-8-8-8H240c-4.4 0-8 3.6-8 8v88c0 4.4 3.6 8 8 8zM472 232c-.9-1.2-1.9-2.3-3.1-3.3c-1.4-1.2-3-2.3-4.7-3.1L355.6 150.8c-9.1-13.1-24.2-20.8-39.8-20.8H208c-4.4 0-8 3.6-8 8V160h16c17.7 0 32-14.3 32-32s-14.3-32-32-32H128c-17.7 0-32 14.3-32 32v48H32c-17.7 0-32 14.3-32 32v64H96V240c0-17.7 14.3-32 32-32h80v64h48V200h48v64h48V200c0-4.4-3.6-8-8-8H448c-4.4 0-8 3.6-8 8v32h16c17.7 0 32-14.3 32-32s-14.3-32-32-32H440c-1.8 0-3.6 .3-5.3 .8c-2.4 .7-4.7 1.8-6.9 3.2L320 256c-17.7 0-32 14.3-32 32v64h64c17.7 0 32-14.3 32-32V256h16c17.7 0 32-14.3 32-32s-14.3-32-32-32z"/></svg>`;
-                    L.DomEvent.on(container, 'click', () => {
-                        map.setView(batangasCenter, batangasZoom);
-                    });
+                    container.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" style="width:20px;height:20px;padding:2px;"><path fill="#0D1B3E" d="M488 200H472c-15.6 0-30.7 7.7-39.8 20.8L315.6 408c-2 2.8-4.1 5.4-6.3 7.8-.8 .8-1.5 1.5-2.3 2.2L272 458.7V352h80c17.7 0 32-14.3 32-32s-14.3-32-32-32H288V224H272 208c-17.7 0-32 14.3-32 32s14.3 32 32 32h80v64H272c-1.8 0-3.6 .3-5.3 .8c-2.4 .7-4.7 1.8-6.9 3.2L128 352c-17.7 0-32 14.3-32 32v64H32c-17.7 0-32 14.3-32 32s14.3 32 32 32H96 480c53 0 96-43 96-96s-43-96-96-96z"/></svg>`;
+                    L.DomEvent.on(container, 'click', () => { map.setView(batangasCenter, batangasZoom); });
                     return container;
-                },
-                onRemove: function(map) {}
+                }
             });
-            
-            L.control.resetView = function(opts) {
-                return new L.Control.ResetView(opts);
-            }
-            
+            L.control.resetView = (opts) => new L.Control.ResetView(opts);
             L.control.resetView({ position: 'topright' }).addTo(map);
             
-            L.marker(location).addTo(map)
-                .bindPopup('<strong>Bayanihan Town Batangas</strong><br>Barangay Concordia, San Pascual - Alitagtag, Batangas City')
-                .openPopup();
+            L.marker(location).addTo(map).bindPopup('<strong>Bayanihan Town Batangas</strong>').openPopup();
         }
         
-        // Initialize map when page loads
         window.onload = function() {
             initMap();
             
-            // Image Carousel
             const carousel = document.querySelector('.carousel');
             const items = document.querySelectorAll('.carousel-item');
             const prevBtn = document.querySelector('.carousel-control.prev');
@@ -1199,55 +949,26 @@
             
             function updateCarousel() {
                 carousel.style.transform = `translateX(-${currentIndex * 100}%)`;
-                
                 indicators.forEach((indicator, index) => {
-                    if (index === currentIndex) {
-                        indicator.classList.add('active');
-                    } else {
-                        indicator.classList.remove('active');
-                    }
+                    indicator.classList.toggle('active', index === currentIndex);
                 });
             }
             
-            nextBtn.addEventListener('click', () => {
-                currentIndex = (currentIndex + 1) % items.length;
-                updateCarousel();
-            });
-            
-            prevBtn.addEventListener('click', () => {
-                currentIndex = (currentIndex - 1 + items.length) % items.length;
-                updateCarousel();
-            });
-            
+            nextBtn.addEventListener('click', () => { currentIndex = (currentIndex + 1) % items.length; updateCarousel(); });
+            prevBtn.addEventListener('click', () => { currentIndex = (currentIndex - 1 + items.length) % items.length; updateCarousel(); });
             indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', () => {
-                    currentIndex = index;
-                    updateCarousel();
-                });
+                indicator.addEventListener('click', () => { currentIndex = index; updateCarousel(); });
             });
+            setInterval(() => { currentIndex = (currentIndex + 1) % items.length; updateCarousel(); }, 5000);
             
-            setInterval(() => {
-                currentIndex = (currentIndex + 1) % items.length;
-                updateCarousel();
-            }, 5000);
-            
-            // Fade-in animation on scroll
             const fadeElements = document.querySelectorAll('.fade-in');
-            
             function checkFade() {
-                fadeElements.forEach(element => {
-                    const elementTop = element.getBoundingClientRect().top;
-                    const elementBottom = element.getBoundingClientRect().bottom;
-                    const isVisible = (elementTop < window.innerHeight - 100) && (elementBottom > 0);
-                    
-                    if (isVisible) {
-                        element.classList.add('visible');
-                    }
+                fadeElements.forEach(el => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top < window.innerHeight - 80 && rect.bottom > 0) el.classList.add('visible');
                 });
             }
-            
             window.addEventListener('scroll', checkFade);
-            window.addEventListener('load', checkFade);
             checkFade();
         };
     </script>
